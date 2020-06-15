@@ -36,6 +36,13 @@ class ServiceProvider extends BaseServiceProvider
         $this->app->singleton(TransactionUtils::class, function ($app) {
             return new DataTransactionUtils($app);
         });
+        $this->app->bind(\Drewlabs\Contracts\Data\IModelFilter::class, function ($app) {
+            return new \Drewlabs\Packages\Database\Extensions\CustomQueryCriteria();
+        });
+
+        $this->app->bind(\Drewlabs\Contracts\Data\DataRepository\Services\IModelAttributesParser::class, function ($app) {
+            return new \Drewlabs\Core\Data\Services\ModelAttributesParser($app[IHasher::class]);
+        });
         // Register Nosql providers bindings
         $this->noSqlBindings();
     }
