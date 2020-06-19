@@ -41,7 +41,7 @@ class ServiceProvider extends BaseServiceProvider
         });
 
         $this->app->bind(\Drewlabs\Contracts\Data\DataRepository\Services\IModelAttributesParser::class, function ($app) {
-            return new \Drewlabs\Core\Data\Services\ModelAttributesParser($app[IHasher::class]);
+            return new \Drewlabs\Core\Data\Services\ModelAttributesParser($app[\Drewlabs\Contracts\Hasher\IHasher::class]);
         });
         // Register Nosql providers bindings
         $this->noSqlBindings();
