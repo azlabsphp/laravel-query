@@ -31,7 +31,11 @@ trait IlluminateBaseModel
                     $column = $exploded[1];
                     if (method_exists($this, $relation) && !is_null($column)) {
                         $filters['whereHas'][] = array($relation, function ($query) use ($value, $column) {
-                            $operator = is_numeric($value) ? '=' : 'like';
+                            if (is_array($value)) {
+                                $query->whereIn($column, $value);
+                                return;
+                            }
+                            $operator = is_numeric($value) || is_bool($value) ? '=' : 'like';
                             $value = is_numeric($value) ? $value : '%' . $value . '%';
                             $query->where($column, $operator, $value);
                         });
