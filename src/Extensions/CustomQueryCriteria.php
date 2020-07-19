@@ -5,8 +5,11 @@ namespace Drewlabs\Packages\Database\Extensions;
 use Drewlabs\Contracts\Data\IModelFilter;
 use Drewlabs\Contracts\Data\IModelable;
 use Drewlabs\Contracts\Data\DataRepository\Repositories\IModelRepository;
+use Drewlabs\Packages\Database\Contracts\IJoinQueryParser;
+use Drewlabs\Packages\Database\FilterQueryParamsParser;
 use Illuminate\Database\Eloquent\Model as Eloquent;
 use Illuminate\Database\Eloquent\Builder;
+use Drewlabs\Packages\Database\JoinQueryParamsParser;
 
 class CustomQueryCriteria implements IModelFilter
 {
@@ -23,6 +26,11 @@ class CustomQueryCriteria implements IModelFilter
      */
     protected $model;
 
+    /**
+     * @var IJoinQueryParser
+     */
+    private $joinQueryParser;
+
     private $query_methods = [
         'where',
         'whereHas',
@@ -36,20 +44,26 @@ class CustomQueryCriteria implements IModelFilter
         'orderBy',
         'groupBy',
         'skip',
-        'take'
+        'take',
+
+        // Supporting joins queries
+        'join',
+        'rightJoin',
+        'leftJoin'
     ];
 
-    public function __construct(array $filter_list = null)
+    public function __construct(array $filter_list = null, IJoinQueryParser $joinQueryParser = null)
     {
         if (isset($filter_list)) {
             $this->setQueryFilters($filter_list);
         }
+        $this->joinQueryParser = is_null($joinQueryParser) ? new JoinQueryParamsParser() : $joinQueryParser;
     }
 
     /**
      * @inheritDoc
      */
-    public function apply($model, IModelRepository $repository)
+    public function apply($model, IModelRepository $repository = null)
     {
         $_model = clone $model;
         foreach (array_keys($this->query_criteria) as $v) {
@@ -72,11 +86,12 @@ class CustomQueryCriteria implements IModelFilter
     private function applyWhereQuery($model, $criteria)
     {
         if (array_key_exists('where', $criteria) && !\is_null($criteria['where'])) {
-            $isArrayList = \array_filter($criteria['where'], 'is_array') === $criteria['where'];
+            $result = (new FilterQueryParamsParser())->parse($criteria['where']);
+            $isArrayList = \array_filter($result, 'is_array') === $result;
             if ($isArrayList) {
-                $model = $model->where($criteria['where']);
+                $model = $model->where(...$result);
             } else {
-                $model = $model->where(...$criteria['where']);
+                $model = $model->where(...$result);
             }
         }
         return $model;
@@ -207,7 +222,8 @@ class CustomQueryCriteria implements IModelFilter
     private function applyOrWhereQuery($model, $criteria)
     {
         if (array_key_exists('orWhere', $criteria) && !\is_null($criteria['orWhere'])) {
-            $isArrayList = \array_filter($criteria['orWhere'], 'is_array') === $criteria['orWhere'];
+            $result = (new FilterQueryParamsParser())->parse($criteria['where']);
+            $isArrayList = \array_filter($result, 'is_array') === $result;
             if ($isArrayList) {
                 $model = $model->orWhere($criteria['orWhere']);
             } else {
@@ -286,8 +302,62 @@ class CustomQueryCriteria implements IModelFilter
     }
 
     /**
+     * apply a join query on the model query to the model
+     *
+     * @param Eloquent|IModelable|Builder $model
+     * @param array|callback $criteria
+     * @return Eloquent|IModelable|Builder
+     */
+    private function applyJoinQuery($model, $criteria)
+    {
+        return $this->sqlApplyJoinQueries($model, $criteria);
+    }
+
+    /**
+     * apply a right join query on the model
+     *
+     * @param Eloquent|IModelable|Builder $model
+     * @param array|callback $criteria
+     * @return Eloquent|IModelable|Builder
+     */
+    private function applyRightJoinQuery($model, $criteria)
+    {
+        return $this->sqlApplyJoinQueries($model, $criteria, 'rightJoin');
+    }
+
+    /**
+     * apply a left join query on the model
+     *
+     * @param Eloquent|IModelable|Builder $model
+     * @param array|callback $criteria
+     * @return Eloquent|IModelable|Builder
+     */
+    private function applyLeftJoinQuery($model, $criteria)
+    {
+        return $this->sqlApplyJoinQueries($model, $criteria, 'leftJoin');
+    }
+
+    private function sqlApplyJoinQueries($model, $criteria, $method = 'join')
+    {
+        if (array_key_exists($method, $criteria) && !\is_null($criteria[$method])) {
+            $result = $this->joinQueryParser->parse($criteria[$method]);
+            $isArrayList = \array_filter($result, 'is_array') === $result;
+            if ($isArrayList) {
+                foreach ($result as $value) {
+                    # code...
+                    $model = $model->{$method}(...$value);
+                }
+            } else {
+                $model = $model->{$method}(...$result);
+            }
+        }
+        return $model;
+    }
+
+    /**
      * apply an skip query to the model
      *
+     * @deprecated 1.0.2
      * @param Eloquent|IModelable|Builder $model
      * @param array $criteria
      * @return Eloquent|IModelable|Builder
@@ -303,6 +373,7 @@ class CustomQueryCriteria implements IModelFilter
     /**
      * apply an skip query to the model
      *
+     * @deprecated 1.0.2
      * @param Eloquent|IModelable|Builder $model
      * @param array $criteria
      * @return Eloquent|IModelable|Builder

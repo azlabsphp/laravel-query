@@ -11,10 +11,18 @@
     "require": {
         "php": "^7.2"
     },
+    "require-dev": {
+        "phpunit/phpunit": "^8.0"
+    },
     "autoload": {
         "psr-4": {
-            "Drewlabs\\Packages\\Database\\": "./"
+            "Drewlabs\\Packages\\Database\\": "./src",
+            "Drewlabs\\Contracts\\": "../../packages/Contracts/src",
+            "Drewlabs\\Core\\": "../../packages/Core/src",
+            "Drewlabs\\Utils\\": "../../packages/Utils/src"
         },
-        "files": []
+        "files": [
+            "../Utils/helpers.php"
+        ]
     }
 }
