@@ -87,6 +87,8 @@ class CustomQueryCriteria implements IModelFilter
     {
         if (array_key_exists('where', $criteria) && !\is_null($criteria['where'])) {
             $result = (new FilterQueryParamsParser())->parse($criteria['where']);
+
+            dd($result);
             $isArrayList = \array_filter($result, 'is_array') === $result;
             if ($isArrayList) {
                 $model = $model->where(...$result);

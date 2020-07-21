@@ -23,7 +23,7 @@ class FilterQueryParamsParser implements IQueryParser
             return isset($item);
         };
         $isValidParams = \array_filter($params, $issetFn) === $params;
-        if (!$isValidParams) {
+        if (!isset($params[0])) {
             throw new \InvalidArgumentException('Some of the provided parameters are not defined');
         }
         // Insure that where not working with associative arrays

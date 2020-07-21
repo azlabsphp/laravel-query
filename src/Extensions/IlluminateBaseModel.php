@@ -188,6 +188,15 @@ abstract class IlluminateBaseModel extends Eloquent implements IModelable, IPars
     /**
      * @inheritDoc
      */
+    public function setPrimaryKey($value)
+    {
+        $this->{$this->primaryKey} = $value;
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function getModelStateMap()
     {
         return $this->model_states ?? [];
