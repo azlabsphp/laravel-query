@@ -89,7 +89,7 @@ class CustomQueryCriteria implements IModelFilter
             $result = (new FilterQueryParamsParser())->parse($criteria['where']);
             $isArrayList = \array_filter($result, 'is_array') === $result;
             if ($isArrayList) {
-                $model = $model->where(...$result);
+                $model = $model->where($result);
             } else {
                 $model = $model->where(...$result);
             }
