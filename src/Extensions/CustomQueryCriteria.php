@@ -224,7 +224,7 @@ class CustomQueryCriteria implements IModelFilter
     private function applyOrWhereQuery($model, $criteria)
     {
         if (array_key_exists('orWhere', $criteria) && !\is_null($criteria['orWhere'])) {
-            $result = (new FilterQueryParamsParser())->parse($criteria['where']);
+            $result = (new FilterQueryParamsParser())->parse($criteria['orWhere']);
             $isArrayList = \array_filter($result, 'is_array') === $result;
             if ($isArrayList) {
                 $model = $model->orWhere($criteria['orWhere']);
