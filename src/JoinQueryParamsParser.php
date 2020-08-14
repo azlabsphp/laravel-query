@@ -1,0 +1,47 @@
+<?php
+
+namespace Drewlabs\Packages\Database;
+
+use Drewlabs\Packages\Database\Contracts\IJoinQueryParser;
+
+class JoinQueryParamsParser implements IJoinQueryParser
+{
+    /**
+     * {@inheritDoc}
+     */
+    public function parse(array $params)
+    {
+        $isArrayList = \array_filter($params, 'is_array') === $params;
+        return $isArrayList ? array_values(array_map(function ($item) {
+            return $this->parseListElement($item);
+        }, $params)) : $this->parseListElement($params);
+    }
+
+    private function parseListElement(array $params)
+    {
+        $isValidParams = \array_filter($params, function ($item) {
+            return isset($item);
+        }) === $params;
+        if (!$isValidParams) {
+            throw new \InvalidArgumentException('Some of the provided parameters are not defined');
+        }
+        // Insure that where not working with associative arrays
+        $params = array_values($params);
+        // Case the operator part if missing
+        if (count($params) === 3) {
+            $params[0] = (is_string($params[0]) && !class_exists($params[0])) ? $params[0] : (string)(new QueryParamsObject(
+                is_array($params[0]) ? $params[0] : ['model' => $params[0]]
+            ));
+            $params[1] = is_string($params[1]) ? $params[1] : (string)(new QueryParamsObject($params[1]));
+            $params[2] = is_string($params[2]) ? $params[2] : (string)(new QueryParamsObject($params[2]));
+            array_splice($params, 2, 1, ['=', $params[2]]);
+        } else {
+            $params[0] = (is_string($params[0]) && !class_exists($params[0])) ? $params[0] : (new QueryParamsObject(
+                is_array($params[0]) ? $params[0] : ['model' => $params[0]]
+            ));
+            $params[1] = is_string($params[1]) ? $params[1] : (string)(new QueryParamsObject($params[1]));
+            $params[3] = is_string($params[3]) ? $params[3] : (string)(new QueryParamsObject($params[3]));
+        }
+        return $params;
+    }
+}
