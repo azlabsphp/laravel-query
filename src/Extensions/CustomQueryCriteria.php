@@ -49,7 +49,7 @@ class CustomQueryCriteria implements IModelFilter
     /**
      * @inheritDoc
      */
-    public function apply($model, IModelRepository $repository)
+    public function apply($model, IModelRepository $repository = null)
     {
         $_model = clone $model;
         foreach (array_keys($this->query_criteria) as $v) {
