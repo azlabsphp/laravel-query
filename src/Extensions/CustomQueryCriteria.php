@@ -106,7 +106,7 @@ class CustomQueryCriteria implements IModelFilter
      * @param array $criteria
      * @return Eloquent|IModelable|Builder
      */
-    private function applywhereHasQuery($model, $criteria)
+    private function applyWhereHasQuery($model, $criteria)
     {
         if (array_key_exists('whereHas', $criteria) && !\is_null($criteria['whereHas'])) {
             $isArrayList = \array_filter($criteria['whereHas'], 'is_array') === $criteria['whereHas'];
