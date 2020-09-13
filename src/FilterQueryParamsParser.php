@@ -19,12 +19,12 @@ class FilterQueryParamsParser implements IQueryParser
 
     private function parseListElement(array $params)
     {
-        $issetFn = function ($item) {
-            return isset($item);
-        };
-        $isValidParams = \array_filter($params, $issetFn) === $params;
-        if (!$isValidParams) {
-            throw new \InvalidArgumentException('Some of the provided parameters are not defined');
+        $allEntiresAreNull = \array_filter($params, function ($item) {
+            return is_null($item) || !isset($item);
+        }) === $params;
+        if ($allEntiresAreNull) {
+            // dd($params);
+            throw new \InvalidArgumentException('Provided query parameters are not defined');
         }
         // Insure that where not working with associative arrays
         $params = array_values($params);

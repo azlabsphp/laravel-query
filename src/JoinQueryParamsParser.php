@@ -19,11 +19,12 @@ class JoinQueryParamsParser implements IJoinQueryParser
 
     private function parseListElement(array $params)
     {
-        $isValidParams = \array_filter($params, function ($item) {
-            return isset($item);
+        $allEntiresAreNull = \array_filter($params, function ($item) {
+            return is_null($item) || !isset($item);
         }) === $params;
-        if (!$isValidParams) {
-            throw new \InvalidArgumentException('Some of the provided parameters are not defined');
+        if ($allEntiresAreNull) {
+            // dd($params);
+            throw new \InvalidArgumentException('Provided query parameters are not defined');
         }
         // Insure that where not working with associative arrays
         $params = array_values($params);
