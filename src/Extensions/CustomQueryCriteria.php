@@ -45,6 +45,8 @@ class CustomQueryCriteria implements IModelFilter
         'groupBy',
         'skip',
         'take',
+        // Added where between query
+        'whereBetween',
 
         // Supporting joins queries
         'join',
@@ -104,7 +106,7 @@ class CustomQueryCriteria implements IModelFilter
      * @param array $criteria
      * @return Eloquent|IModelable|Builder
      */
-    private function applywhereHasQuery($model, $criteria)
+    private function applyWhereHasQuery($model, $criteria)
     {
         if (array_key_exists('whereHas', $criteria) && !\is_null($criteria['whereHas'])) {
             $isArrayList = \array_filter($criteria['whereHas'], 'is_array') === $criteria['whereHas'];
@@ -222,7 +224,7 @@ class CustomQueryCriteria implements IModelFilter
     private function applyOrWhereQuery($model, $criteria)
     {
         if (array_key_exists('orWhere', $criteria) && !\is_null($criteria['orWhere'])) {
-            $result = (new FilterQueryParamsParser())->parse($criteria['where']);
+            $result = (new FilterQueryParamsParser())->parse($criteria['orWhere']);
             $isArrayList = \array_filter($result, 'is_array') === $result;
             if ($isArrayList) {
                 $model = $model->orWhere($criteria['orWhere']);
@@ -244,6 +246,21 @@ class CustomQueryCriteria implements IModelFilter
     {
         if (array_key_exists('whereIn', $criteria) && !\is_null($criteria['whereIn'])) {
             $model = $model->whereIn($criteria['whereIn'][0], $criteria['whereIn'][1]);
+        }
+        return $model;
+    }
+
+    /**
+     * apply a whereBetween query to the model
+     *
+     * @param Eloquent|IModelable|Builder $model
+     * @param array $criteria
+     * @return Eloquent|IModelable|Builder
+     */
+    private function applyWhereBetweenQuery($model, array $criteria)
+    {
+        if (array_key_exists('whereBetween', $criteria) && !\is_null($criteria['whereBetween'])) {
+            $model = $model->whereBetween($criteria['whereBetween'][0], $criteria['whereBetween'][1]);
         }
         return $model;
     }
