@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2ebfd6088d3e32325f7be5a2eda0430c",
+    "content-hash": "6df3507ea282dd7df1d5191545ba4770",
     "packages": [
         {
             "name": "doctrine/inflector",
@@ -142,17 +142,17 @@
             "source": {
                 "type": "git",
                 "url": "git@github.com:azandrew-sidoine/drewlabs-php-core.git",
-                "reference": "c3a6bcd1b6fc06ca1ad7738f919f533c39c8bc6d"
+                "reference": "1f8ac66b0083ddbd32b29b4f3c773f41e5ac6408"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/azandrew-sidoine/drewlabs-php-core/zipball/c3a6bcd1b6fc06ca1ad7738f919f533c39c8bc6d",
-                "reference": "c3a6bcd1b6fc06ca1ad7738f919f533c39c8bc6d",
+                "url": "https://api.github.com/repos/azandrew-sidoine/drewlabs-php-core/zipball/1f8ac66b0083ddbd32b29b4f3c773f41e5ac6408",
+                "reference": "1f8ac66b0083ddbd32b29b4f3c773f41e5ac6408",
                 "shasum": ""
             },
             "require": {
                 "drewlabs/contracts": "dev-master",
-                "drewlabs/utils": "v1.x-dev",
+                "drewlabs/utils": "v1.1.x-dev",
                 "firebase/php-jwt": "^5.0",
                 "php": ">=7.0",
                 "symfony/http-foundation": "^5.1.5",
@@ -178,11 +178,11 @@
                 "source": "https://github.com/azandrew-sidoine/drewlabs-php-core/tree/v1.1",
                 "issues": "https://github.com/azandrew-sidoine/drewlabs-php-core/issues"
             },
-            "time": "2020-09-30T10:24:13+00:00"
+            "time": "2020-09-30T10:37:46+00:00"
         },
         {
             "name": "drewlabs/utils",
-            "version": "v1.x-dev",
+            "version": "v1.1.x-dev",
             "source": {
                 "type": "git",
                 "url": "git@github.com:azandrew-sidoine/drewlabs-php-utils.git",
