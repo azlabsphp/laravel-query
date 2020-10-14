@@ -31,28 +31,6 @@ class CustomQueryCriteria implements IModelFilter
      */
     private $joinQueryParser;
 
-    // private $query_methods = [
-    //     'where',
-    //     'whereHas',
-    //     'whereDoesntHave',
-    //     'whereDate',
-    //     'has',
-    //     'doesntHave',
-    //     'orWhere',
-    //     'whereIn',
-    //     'whereNotIn',
-    //     'orderBy',
-    //     'groupBy',
-    //     'skip',
-    //     'take',
-    //     // Added where between query
-    //     'whereBetween',
-    //     // Supporting joins queries
-    //     'join',
-    //     'rightJoin',
-    //     'leftJoin'
-    // ];
-
     public function __construct(array $filter_list = null, IJoinQueryParser $joinQueryParser = null)
     {
         if (isset($filter_list)) {
@@ -67,11 +45,12 @@ class CustomQueryCriteria implements IModelFilter
     public function apply($model, IModelRepository $repository = null)
     {
         $_model = clone $model;
-        foreach (array_keys($this->query_criteria) as $v) {
+        $criteria = $this->query_criteria;
+        foreach (array_keys($criteria) as $v) {
             # code...
             $method = 'apply' . ucfirst($v) . 'Query';
             if (method_exists($this, $method)) {
-                $_model = \call_user_func_array(array($this, $method), array($_model, $this->query_criteria));
+                $_model = \call_user_func_array(array($this, $method), array($_model, $criteria));
             }
         }
         return $_model;
