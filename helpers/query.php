@@ -41,6 +41,22 @@ if (!function_exists('drewlabs_databse_parse_client_request_query_params')) {
                 }
             }
         }
+        // order this query method in the order of where -> whereHas -> orWhere
+        // Write a better algorithm for soring
+        uksort($filters, function ($prev, $curr) {
+            if ($prev === 'where') {
+                return -1;
+            }
+            if (($prev === 'whereHas') && ($curr === 'where')) {
+                return 1;
+            }
+            if (($prev === 'whereHas') && ($curr === 'orWhere')) {
+                return -1;
+            }
+            if ($prev === 'orWhere') {
+                return 1;
+            }
+        });
         return $filters;
     }
 }
@@ -60,18 +76,24 @@ if (!function_exists('drewlabs_databse_parse_client_request_query_input')) {
         $filters = $in ?? [];
         if ($request->has('_query') && \drewlabs_core_array_is_arrayable($request->get('_query')) && \drewlabs_core_array_is_assoc($request->get('_query'))) {
             $query = $request->get('_query');
-            foreach ($query as $key => $value) {
+            if (!\drewlabs_core_array_is_arrayable($query)) {
+                return $filters;
+            }
+            $queryMethods = \drewlabs_database_supported_query_methods();
+            foreach ($queryMethods as $method) {
                 # code...
-                $parsed_value = \drewlabs_database_parse_query_method_params($key, $value);
+                if (!\array_key_exists($method, $query)) {
+                    continue;
+                }
+                $parsed_value = \drewlabs_database_parse_query_method_params($method, $query[$method]);
                 if (empty($parsed_value)) {
                     continue;
                 }
                 if (!\drewlabs_core_array_is_arrayable($parsed_value)) {
-                    $filters[$key] = $parsed_value;
+                    $filters[$method] = $parsed_value;
                     continue;
                 }
-                $filters[$key] = array_merge(isset($filters[$key]) ? $filters[$key] : [], $parsed_value);
-                // $filters = array_merge($filters, \drewlabs_database_parse_request_query($key, $value));
+                $filters[$method] = array_merge(isset($filters[$method]) ? $filters[$method] : [], $parsed_value);
             }
         }
         return $filters;
@@ -207,7 +229,7 @@ if (!function_exists('drewlabs_database_build_inner_query')) {
     {
         return function ($q) use ($query) {
             \drewlabs_database_validate_query_object($query);
-            $supportedQueryMethods = \drewlabs_core_supported_query_methods();
+            $supportedQueryMethods = \drewlabs_database_supported_query_methods();
             if (!\in_array($query['method'], $supportedQueryMethods)) {
                 throw new \InvalidArgumentException(sprintf('Query method %s not found, ', $query['method']));
             }
@@ -241,8 +263,9 @@ if (!function_exists('drewlabs_core_supported_query_methods')) {
      *
      * @return array
      */
-    function drewlabs_core_supported_query_methods()
+    function drewlabs_database_supported_query_methods()
     {
+        // Returns the supported query method in most valuable to the the less valuable order
         return [
             'where',
             'whereHas',
@@ -250,15 +273,15 @@ if (!function_exists('drewlabs_core_supported_query_methods')) {
             'whereDate',
             'has',
             'doesntHave',
-            'orWhere',
             'whereIn',
             'whereNotIn',
+            // Added where between query
+            'whereBetween',
+            'orWhere',
             'orderBy',
             'groupBy',
             'skip',
             'take',
-            // Added where between query
-            'whereBetween',
             // Supporting joins queries
             'join',
             'rightJoin',
