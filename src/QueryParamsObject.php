@@ -44,7 +44,7 @@ class QueryParamsObject extends AbstractEntityObject
     {
         $model = is_string($this->attributes['model']) ? (function_exists('app') ?
             app($this->attributes['model'])->getTable() : (new $this->attributes['model'])->getTable()) : $this->attributes['model']->getTable();
-        return trim(\Drewlabs\Utils\Str::concat('.', ...array_values(array_merge([$model], isset($this->attributes['column']) ? [$this->attributes['column']] : []))));
+        return trim(\drewlabs_core_strings_concat('.', ...array_values(array_merge([$model], isset($this->attributes['column']) ? [$this->attributes['column']] : []))));
     }
 
     /**

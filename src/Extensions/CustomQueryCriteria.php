@@ -31,28 +31,27 @@ class CustomQueryCriteria implements IModelFilter
      */
     private $joinQueryParser;
 
-    private $query_methods = [
-        'where',
-        'whereHas',
-        'whereDoesntHave',
-        'whereDate',
-        'has',
-        'doesntHave',
-        'orWhere',
-        'whereIn',
-        'whereNotIn',
-        'orderBy',
-        'groupBy',
-        'skip',
-        'take',
-        // Added where between query
-        'whereBetween',
-
-        // Supporting joins queries
-        'join',
-        'rightJoin',
-        'leftJoin'
-    ];
+    // private $query_methods = [
+    //     'where',
+    //     'whereHas',
+    //     'whereDoesntHave',
+    //     'whereDate',
+    //     'has',
+    //     'doesntHave',
+    //     'orWhere',
+    //     'whereIn',
+    //     'whereNotIn',
+    //     'orderBy',
+    //     'groupBy',
+    //     'skip',
+    //     'take',
+    //     // Added where between query
+    //     'whereBetween',
+    //     // Supporting joins queries
+    //     'join',
+    //     'rightJoin',
+    //     'leftJoin'
+    // ];
 
     public function __construct(array $filter_list = null, IJoinQueryParser $joinQueryParser = null)
     {
@@ -88,6 +87,10 @@ class CustomQueryCriteria implements IModelFilter
     private function applyWhereQuery($model, $criteria)
     {
         if (array_key_exists('where', $criteria) && !\is_null($criteria['where'])) {
+            if ($criteria['where'] instanceof \Closure) {
+                $model = $model->where($criteria['where']);
+                return $model;
+            }
             $result = (new FilterQueryParamsParser())->parse($criteria['where']);
             $isArrayList = \array_filter($result, 'is_array') === $result;
             if ($isArrayList) {
@@ -224,6 +227,10 @@ class CustomQueryCriteria implements IModelFilter
     private function applyOrWhereQuery($model, $criteria)
     {
         if (array_key_exists('orWhere', $criteria) && !\is_null($criteria['orWhere'])) {
+            if ($criteria['orWhere'] instanceof \Closure) {
+                $model = $model->where($criteria['orWhere']);
+                return $model;
+            }
             $result = (new FilterQueryParamsParser())->parse($criteria['orWhere']);
             $isArrayList = \array_filter($result, 'is_array') === $result;
             if ($isArrayList) {
@@ -274,7 +281,7 @@ class CustomQueryCriteria implements IModelFilter
      */
     private function applyWhereNotInQuery($model, array $criteria)
     {
-        if (array_key_exists('whereNotIn', $criteria) && !\is_null($criteria['whereNotIn']) && (count($criteria['whereNotIn']) >= 2) ) {
+        if (array_key_exists('whereNotIn', $criteria) && !\is_null($criteria['whereNotIn']) && (count($criteria['whereNotIn']) >= 2)) {
             $model = $model->whereNotIn($criteria['whereNotIn'][0], $criteria['whereNotIn'][1]);
         }
         return $model;
