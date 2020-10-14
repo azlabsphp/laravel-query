@@ -12,17 +12,22 @@
         "php": "^7.3",
         "illuminate/database": "^7.0",
         "illuminate/support": "^7.0",
+        "illuminate/http": "^7.0",
         "drewlabs/contracts": "dev-master",
-        "drewlabs/utils": "dev-master",
-        "drewlabs/core": "dev-master"
+        "drewlabs/core": "dev-master",
+        "drewlabs/core-helpers": "dev-master"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.0"
     },
     "autoload": {
         "psr-4": {
-            "Drewlabs\\Packages\\Database\\": "src/"
-        }
+            "Drewlabs\\Packages\\Database\\": "src/",
+            "Drewlabs\\Packages\\Database\\Tests\\": "tests/"
+        },
+        "files": [
+            "helpers/query.php"
+        ]
     },
     "repositories":[
         {
@@ -36,6 +41,10 @@
         {
             "type": "vcs",
             "url": "git@github.com:azandrew-sidoine/drewlabs-php-utils.git"
+        },
+        {
+            "type": "vcs",
+            "url": "git@github.com:azandrew-sidoine/drewlabs-php-core-helpers.git"
         }
     ]
 }

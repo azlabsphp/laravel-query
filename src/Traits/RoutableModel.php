@@ -51,7 +51,7 @@ trait RoutableModel
         if (is_null($id) || is_null($idParam) || is_null($route)) {
             return null;
         }
-        return route($route, array_merge(
+        return app('url')->route($route, array_merge(
             array($id => $idParam),
             isset($this->routeTemplateParams) &&
                 is_array($this->routeTemplateParams) ?
