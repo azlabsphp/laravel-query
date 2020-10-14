@@ -2,6 +2,7 @@
 
 namespace Drewlabs\Packages\Database\Extensions;
 
+use Drewlabs\Contracts\Data\IGuardedModel;
 use Illuminate\Database\Eloquent\Model as Eloquent;
 use Drewlabs\Contracts\Data\IParsable;
 use Drewlabs\Contracts\Data\IModelable;
@@ -9,7 +10,7 @@ use Drewlabs\Contracts\Data\IRelatable;
 use Drewlabs\Packages\Database\Traits\IlluminateBaseModel as IlluminateBaseModelTrait;
 
 
-abstract class IlluminateBaseModel extends Eloquent implements IModelable, IParsable, IRelatable
+abstract class IlluminateBaseModel extends Eloquent implements IModelable, IParsable, IRelatable, IGuardedModel
 {
 
     // Default implementation of search query on the model providers

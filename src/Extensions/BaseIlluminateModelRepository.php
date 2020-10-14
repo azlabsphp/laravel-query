@@ -5,7 +5,6 @@ namespace Drewlabs\Packages\Database\Extensions;
 use Drewlabs\Core\Data\Repositories\ModelRepository;
 use Drewlabs\Contracts\Data\IModelable;
 use Drewlabs\Core\Data\Exceptions\RepositoryException;
-use Drewlabs\Utils\Str;
 use Drewlabs\Packages\Database\Contracts\TransactionUtils;
 use Drewlabs\Packages\Database\Traits\IlluminateModelRepository as IlluminateModelRepositoryTrait;
 
@@ -80,8 +79,8 @@ final class BaseIlluminateModelRepository extends ModelRepository
      */
     public function __call($method, $parameters)
     {
-        if (is_string($method) && Str::contains($method, '__')) {
-            $method = Str::contains($method, '::') ? explode('::', $method)[1] : $method;
+        if (is_string($method) && \drewlabs_core_strings_contains($method, '__')) {
+            $method = \drewlabs_core_strings_contains($method, '::') ? explode('::', $method)[1] : $method;
             $items = explode('__', $method);
             // To be used to call the insert or update method on the model
             if ($items[0] === 'insert') {
@@ -162,7 +161,6 @@ final class BaseIlluminateModelRepository extends ModelRepository
     {
         try {
             $this->transactionUtils->startTransaction();
-            // $relation_methods = array_slice($relations, 1);
             $updated = 0;
             $updated = $this->updateById($id, $values, $parse_inputs);
             $model = $this->findById($id, array($this->modelPrimaryKey()));
