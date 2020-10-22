@@ -76,6 +76,7 @@ if (!function_exists('drewlabs_databse_parse_client_request_query_input')) {
         $filters = $in ?? [];
         if ($request->has('_query') && \drewlabs_core_array_is_arrayable($request->get('_query')) && \drewlabs_core_array_is_assoc($request->get('_query'))) {
             $query = $request->get('_query');
+            $query = \drewlabs_core_strings_is_str($query) ? json_decode($query, true) : $query;
             if (!\drewlabs_core_array_is_arrayable($query)) {
                 return $filters;
             }
@@ -104,12 +105,13 @@ if (!function_exists('drewlabs_databse_parse_client_request_query')) {
     /**
      * Parse query provided in a client /GET request
      *
-     * @param \Drewlabs\Contracts\Data\IModelable|\Drewlabs\Contracts\Data\IGuardedModel|\Drewlabs\Contracts\Data\IParsable $model
+     * @param \Drewlabs\Contracts\Data\IModelable|\Drewlabs\Contracts\Data\IGuardedModel|\Drewlabs\Contracts\Data\IParsable|string $model
      * @param \Illuminate\Http\Request $request
      * @return void
      */
     function drewlabs_databse_parse_client_request_query($model, \Illuminate\Http\Request $request)
     {
+        $model = \drewlabs_core_strings_is_str($model) ? new $model : $model;
         $filters = \drewlabs_databse_parse_client_request_query_params($model, $request);
         // Apply the request _query property parser
         return \drewlabs_databse_parse_client_request_query_input($request, $filters);
