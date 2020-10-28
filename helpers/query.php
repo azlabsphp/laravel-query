@@ -139,6 +139,10 @@ if (!function_exists('drewlabs_database_parse_query_method_params')) {
                 return \drewlabs_database_parse_order_by_query($params);
             case 'whereNull':
                 return \drewlabs_database_parse_where_null_query($params);
+            case 'doesntHave':
+                return drewlabs_core_array_is_arrayable($params) ? (isset($params['column']) ? [$method => $params['column']] : []) : [$method => $params];
+            case 'has':
+                return drewlabs_core_array_is_arrayable($params) ? (isset($params['column']) ? [$method => $params['column']] : []) : [$method => $params];
             default:
                 return [];
         }
