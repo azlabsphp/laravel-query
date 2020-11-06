@@ -74,10 +74,10 @@ if (!function_exists('drewlabs_databse_parse_client_request_query_input')) {
     function drewlabs_databse_parse_client_request_query_input(\Illuminate\Http\Request $request, $in = [])
     {
         $filters = $in ?? [];
-        if ($request->has('_query') && \drewlabs_core_array_is_arrayable($request->get('_query')) && \drewlabs_core_array_is_assoc($request->get('_query'))) {
+        if ($request->has('_query')) {
             $query = $request->get('_query');
             $query = \drewlabs_core_strings_is_str($query) ? json_decode($query, true) : $query;
-            if (!\drewlabs_core_array_is_arrayable($query)) {
+            if (!\drewlabs_core_array_is_arrayable($query) || !\drewlabs_core_array_is_assoc($query)) {
                 return $filters;
             }
             $queryMethods = \drewlabs_database_supported_query_methods();
