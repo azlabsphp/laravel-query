@@ -129,6 +129,8 @@ if (!function_exists('drewlabs_database_parse_query_method_params')) {
         switch ($method) {
             case 'where':
                 return \drewlabs_database_parse_client_where_query($params);
+            case 'whereDate':
+                return \drewlabs_database_parse_client_where_query($params);
             case 'whereHas':
                 return \drewlabs_database_client_parse_subquery($params);
             case 'whereDoesntHave':
