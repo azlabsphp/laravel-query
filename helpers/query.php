@@ -74,10 +74,10 @@ if (!function_exists('drewlabs_databse_parse_client_request_query_input')) {
     function drewlabs_databse_parse_client_request_query_input(\Illuminate\Http\Request $request, $in = [])
     {
         $filters = $in ?? [];
-        if ($request->has('_query') && \drewlabs_core_array_is_arrayable($request->get('_query')) && \drewlabs_core_array_is_assoc($request->get('_query'))) {
+        if ($request->has('_query')) {
             $query = $request->get('_query');
             $query = \drewlabs_core_strings_is_str($query) ? json_decode($query, true) : $query;
-            if (!\drewlabs_core_array_is_arrayable($query)) {
+            if (!\drewlabs_core_array_is_arrayable($query) || !\drewlabs_core_array_is_assoc($query)) {
                 return $filters;
             }
             $queryMethods = \drewlabs_database_supported_query_methods();
@@ -111,10 +111,14 @@ if (!function_exists('drewlabs_databse_parse_client_request_query')) {
      */
     function drewlabs_databse_parse_client_request_query($model, \Illuminate\Http\Request $request)
     {
-        $model = \drewlabs_core_strings_is_str($model) ? new $model : $model;
-        $filters = \drewlabs_databse_parse_client_request_query_params($model, $request);
-        // Apply the request _query property parser
-        return \drewlabs_databse_parse_client_request_query_input($request, $filters);
+        return \drewlabs_core_fn_compose(
+            function ($param) use ($request) {
+                return \drewlabs_databse_parse_client_request_query_params($param, $request);
+            },
+            function ($filters) use ($request) {
+                return \drewlabs_databse_parse_client_request_query_input($request, $filters);
+            }
+        )(\drewlabs_core_strings_is_str($model) ? new $model : $model);
     }
 }
 
@@ -239,7 +243,7 @@ if (!function_exists('drewlabs_database_build_inner_query')) {
             if (!\in_array($query['method'], $supportedQueryMethods)) {
                 throw new \InvalidArgumentException(sprintf('Query method %s not found, ', $query['method']));
             }
-            $q->{$query['method']}(...$query['params']);
+            call_user_func_array([$q, $query['method']], $query['params']);
         };
     }
 }
