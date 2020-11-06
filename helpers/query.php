@@ -111,10 +111,14 @@ if (!function_exists('drewlabs_databse_parse_client_request_query')) {
      */
     function drewlabs_databse_parse_client_request_query($model, \Illuminate\Http\Request $request)
     {
-        $model = \drewlabs_core_strings_is_str($model) ? new $model : $model;
-        $filters = \drewlabs_databse_parse_client_request_query_params($model, $request);
-        // Apply the request _query property parser
-        return \drewlabs_databse_parse_client_request_query_input($request, $filters);
+        return \drewlabs_core_fn_compose(
+            function ($param) use ($request) {
+                return \drewlabs_databse_parse_client_request_query_params($param, $request);
+            },
+            function ($filters) use ($request) {
+                return \drewlabs_databse_parse_client_request_query_input($request, $filters);
+            }
+        )(\drewlabs_core_strings_is_str($model) ? new $model : $model);
     }
 }
 
@@ -239,7 +243,7 @@ if (!function_exists('drewlabs_database_build_inner_query')) {
             if (!\in_array($query['method'], $supportedQueryMethods)) {
                 throw new \InvalidArgumentException(sprintf('Query method %s not found, ', $query['method']));
             }
-            $q->{$query['method']}(...$query['params']);
+            call_user_func_array([$q, $query['method']], $query['params']);
         };
     }
 }
