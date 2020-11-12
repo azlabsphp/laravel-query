@@ -9,7 +9,7 @@ use Drewlabs\Contracts\Data\ParseableModelInterface;
 use Drewlabs\Contracts\Data\RelatedModelInterface;
 
 
-abstract class IlluminateBaseModel extends Eloquent implements ModelInterface, ParseableModelInterface, RelatedModelInterface, GuardedModelInterface
+abstract class EloquentModel extends Eloquent implements ModelInterface, ParseableModelInterface, RelatedModelInterface, GuardedModelInterface
 {
     use \Drewlabs\Packages\Database\Traits\RoutableModel;
     use \Drewlabs\Packages\Database\Traits\ModelAppendsTrait;
