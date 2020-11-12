@@ -78,7 +78,7 @@ abstract class EloquentModel extends Eloquent implements ModelInterface, Parseab
     public function getAll(bool $relations = false, array $columns = array('*'))
     {
         if ($relations) {
-            return $this->with($this->getRelations())->get($columns);
+            return $this->with($this->getModelRelationLoadersNames())->get($columns);
         }
         return $this->get($columns);
     }
@@ -112,7 +112,7 @@ abstract class EloquentModel extends Eloquent implements ModelInterface, Parseab
      */
     public function getRelations()
     {
-        return $this->{'relations'} ? $this->{'relations'} : [];
+        return $this->relations ?? [];
     }
 
     /**
@@ -130,5 +130,13 @@ abstract class EloquentModel extends Eloquent implements ModelInterface, Parseab
     {
         $this->{$this->primaryKey} = $value;
         return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getModelRelationLoadersNames()
+    {
+        return $this->relation_methods ?? [];
     }
 }
