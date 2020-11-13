@@ -3,10 +3,12 @@
     "description": "Provides functionnalities for accessing and working with databases using laravel Eloquent, or NoSQL Datatabase providers",
     "type": "library",
     "license": "MIT",
-    "authors": [{
-        "name": "azandrew-sidoine",
-        "email": "asmyns.platonnas29@gmail.com"
-    }],
+    "authors": [
+        {
+            "name": "azandrew-sidoine",
+            "email": "asmyns.platonnas29@gmail.com"
+        }
+    ],
     "minimum-stability": "stable",
     "require": {
         "php": "^7.3",
@@ -29,7 +31,7 @@
             "helpers/query.php"
         ]
     },
-    "repositories":[
+    "repositories": [
         {
             "type": "vcs",
             "url": "git@github.com:liksoft/drewlabs-php-contracts.git"
@@ -42,5 +44,13 @@
             "type": "vcs",
             "url": "git@github.com:liksoft/drewlabs-php-core-helpers.git"
         }
-    ]
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Drewlabs\\PackagesDatabase\\ServiceProvider"
+            ],
+            "aliases": {}
+        }
+    }
 }
