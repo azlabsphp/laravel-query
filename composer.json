@@ -48,7 +48,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Drewlabs\\PackagesDatabase\\ServiceProvider"
+                "Drewlabs\\Packages\\Database\\ServiceProvider"
             ],
             "aliases": {}
         }
