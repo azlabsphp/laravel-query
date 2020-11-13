@@ -16,6 +16,8 @@ abstract class IlluminateBaseModel extends Eloquent implements IModelable, IPars
     // Default implementation of search query on the model providers
     use IlluminateBaseModelTrait;
     use \Drewlabs\Packages\Database\Traits\RoutableModel;
+    use \Drewlabs\Packages\Database\Traits\ModelAppendsTrait;
+    use \Drewlabs\Packages\Database\Traits\GuardedModelTrait;
 
     /**
      * Fillable storage columns of an entity
