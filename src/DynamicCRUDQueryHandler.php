@@ -12,13 +12,13 @@ class DynamicCRUDQueryHandler
      *
      * @var \Drewlabs\Packages\Database\Contracts\TransactionUtils
      */
-    private $transactionHandler;
+    public $transactionHandler;
 
     /**
      *
      * @var IModelRepository
      */
-    private $repository;
+    public $repository;
 
     /**
      * @return static
