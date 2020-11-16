@@ -4,17 +4,12 @@ namespace Drewlabs\Packages\Database\Traits;
 
 use Illuminate\Http\Request;
 
+/**
+ * @deprecated v1.1.2-dev-master
+ */
 
 trait IlluminateBaseModel
 {
-
-    /**
-     * @inheritDoc
-     */
-    public function getGuardedAttributes()
-    {
-        return $this->guarded;
-    }
 
     /**
      * Get the query parameters that exists on the class fillable property and trie building model filter query
@@ -70,30 +65,8 @@ trait IlluminateBaseModel
                     continue;
                 }
                 $filters[$key] = array_merge(isset($filters[$key]) ? $filters[$key] : [], $parsed_value);
-                // $filters = array_merge($filters, \drewlabs_database_parse_request_query($key, $value));
             }
         }
         return $filters;
-    }
-
-    protected function getArrayableAppends()
-    {
-        $route = $this->getIndexRoute();
-        if ($this->withoutAppends) {
-            return !is_null($route) && is_string($route) ? array('_link') : array();
-        }
-        return array_merge(parent::getArrayableAppends(), isset($route) && is_string($route) ? array('_link') : array());
-    }
-
-    /**
-     * Set the value of the withoutAppends property
-     *
-     * @param bool $value
-     * @return static
-     */
-    public function setWithoutAppends($value)
-    {
-        $this->withoutAppends = $value;
-        return $this;
     }
 }
