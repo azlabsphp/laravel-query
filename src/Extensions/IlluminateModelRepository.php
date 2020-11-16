@@ -6,41 +6,18 @@ use Drewlabs\Contracts\Data\DataRepository\Services\IModelAttributesParser;
 use Drewlabs\Contracts\Data\IModelable;
 use Drewlabs\Contracts\Data\ModelInterface;
 use Drewlabs\Contracts\Data\ParseableModelRepository;
+use Drewlabs\Contracts\EntityObject\AbstractEntityObject;
 use Drewlabs\Core\Data\Exceptions\RepositoryException;
 use Drewlabs\Core\Data\Traits\ModelRepository;
-use Drewlabs\Packages\Database\Contracts\TransactionUtils;
 use Drewlabs\Packages\Database\DynamicCRUDQueryHandler;
-use Drewlabs\Packages\Database\Traits\IlluminateModelRepository as IlluminateModelRepositoryTrait;
 use Illuminate\Container\Container;
 
 /**
  * @package Drewlabs\Packages\Database\Extensions
  */
-final class IlluminateModelRepository implements ParseableModelRepository
+final class IlluminateModelRepository extends AbstractEntityObject implements ParseableModelRepository
 {
-    use IlluminateModelRepositoryTrait;
     use ModelRepository;
-    /**
-     * Database transictions utilities providers
-     *
-     * @var TransactionUtils
-     */
-    public $transactionUtils;
-
-    /**
-     * String representation of the model class
-     *
-     * @var string
-     */
-    protected $model_class;
-
-    /**
-     * Class instance to parse CRUD input based on the repository model definition
-     *
-     * @var IModelAttributesParser
-     */
-    protected $attribute_parser;
-
     /**
      * Create an instance of the model repository class
      *
@@ -48,10 +25,24 @@ final class IlluminateModelRepository implements ParseableModelRepository
      */
     public function __construct($modelClass = null)
     {
+        parent::__construct([]);
         if (isset($modelClass)) {
             $this->setModel($modelClass);
         }
-        $this->transactionUtils = Container::getInstance()->make(\Drewlabs\Packages\Database\Contracts\TransactionUtils::class);
+        \drewlabs_core_create_attribute_setter('transactionUtils', Container::getInstance()->make(\Drewlabs\Packages\Database\Contracts\TransactionUtils::class))($this);
+    }
+
+    protected function getJsonableAttributes()
+    {
+        return [
+            'attribute_parser',
+            'model_class',
+            'transactionUtils',
+            'query_model_relation',
+            'skip_filters',
+            'filters'
+
+        ];
     }
 
     public function setModel($modelClass)
@@ -100,7 +91,7 @@ final class IlluminateModelRepository implements ParseableModelRepository
      */
     public function modelAttributesParser()
     {
-        return $this->attribute_parser ?? Container::getInstance()->make(IModelAttributesParser::class);
+        return \drewlabs_core_create_attribute_getter('attribute_parser', null)($this) ?? Container::getInstance()->make(IModelAttributesParser::class);
     }
 
     /**
@@ -125,11 +116,15 @@ final class IlluminateModelRepository implements ParseableModelRepository
             $items = explode('__', $method);
             // To be used to call the insert or update method on the model
             if ($items[0] === 'insert') {
-                return (new DynamicCRUDQueryHandler())->bindTransactionHandler($this->transactionUtils)
+                return (new DynamicCRUDQueryHandler())->bindTransactionHandler(
+                    \drewlabs_core_create_attribute_getter('transactionUtils', null)($this)
+                )
                     ->bindRepository($this)
                     ->create(array_slice($items, 1), ...$parameters);
             } else if ($items[0] === 'update') {
-                (new DynamicCRUDQueryHandler())->bindTransactionHandler($this->transactionUtils)
+                (new DynamicCRUDQueryHandler())->bindTransactionHandler(
+                    \drewlabs_core_create_attribute_getter('transactionUtils', null)($this)
+                )
                     ->bindRepository($this)
                     ->update(array_slice($items, 1), ...$parameters);
             } else {
