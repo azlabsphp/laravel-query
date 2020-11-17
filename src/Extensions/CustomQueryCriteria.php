@@ -10,8 +10,9 @@ use Drewlabs\Packages\Database\FilterQueryParamsParser;
 use Illuminate\Database\Eloquent\Model as Eloquent;
 use Illuminate\Database\Eloquent\Builder;
 use Drewlabs\Packages\Database\JoinQueryParamsParser;
+use Drewlabs\Contracts\Data\ModelFiltersInterface;
 
-class CustomQueryCriteria implements IModelFilter
+class CustomQueryCriteria implements IModelFilter, ModelFiltersInterface
 {
 
     /**
