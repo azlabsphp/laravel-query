@@ -18,6 +18,13 @@ use Illuminate\Container\Container;
 final class IlluminateModelRepository extends AbstractEntityObject implements ParseableModelRepository
 {
     use ModelRepository;
+
+    /**
+     *
+     * @var static
+     */
+    private static $instance;
+
     /**
      * Create an instance of the model repository class
      *
@@ -26,38 +33,40 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
     public function __construct($modelClass = null)
     {
         parent::__construct([]);
+        static::setInstance($this);
         if (isset($modelClass)) {
-            $this->setModel($modelClass);
+            $self = static::getInstance()->setModel($modelClass);
         }
-        \drewlabs_core_create_attribute_setter('transactionUtils', Container::getInstance()->make(\Drewlabs\Packages\Database\Contracts\TransactionUtils::class))($this);
+        $self = \drewlabs_core_create_attribute_setter('transactionUtils', Container::getInstance()->make(\Drewlabs\Packages\Database\Contracts\TransactionUtils::class))($self);
+        static::$instance = $self;
     }
 
     protected function getJsonableAttributes()
     {
         return [
+            'model_instance',
             'attribute_parser',
             'model_class',
             'transactionUtils',
             'query_model_relation',
             'skip_filters',
             'filters'
-
         ];
     }
 
     public function setModel($modelClass)
     {
-        $that = \drewlabs_core_create_attribute_setter('model_class', $modelClass)($this);
+        $that = \drewlabs_core_create_attribute_setter('model_class', $modelClass)(static::getInstance());
         $that->validateModelClass();
         // Create the model instance from the passed configuration
-        $that = \drewlabs_core_create_attribute_setter('model', $this->makeModel())($that);
+        $that = \drewlabs_core_create_attribute_setter('model_instance', $that->makeModel())($that);
         return $that;
     }
 
     private function validateModelClass()
     {
-        $model_class = $this->getModel();
-        if (!(is_string($model_class)) || !($this->makeModel() instanceof ModelInterface)) {
+        $model_class = static::getInstance()->getModel();
+        if (!(is_string($model_class)) || !(static::getInstance()->makeModel() instanceof ModelInterface)) {
             throw new RepositoryException("Constructor parameter must be an instance of string, must be a valid class that exists, and the class must be an instance of " . IModelable::class);
         }
     }
@@ -67,7 +76,7 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
      */
     public function makeModel()
     {
-        return Container::getInstance()->make($this->getModel());
+        return Container::getInstance()->make(static::getInstance()->getModel());
     }
 
     /**
@@ -75,7 +84,7 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
      */
     public function getModel()
     {
-        return \drewlabs_core_create_attribute_getter('model_class', null)($this);
+        return \drewlabs_core_create_attribute_getter('model_class', null)(static::getInstance());
     }
 
     /**
@@ -83,7 +92,7 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
      */
     public function modelPrimaryKey()
     {
-        return $this->makeModel()->getPrimaryKey();
+        return static::getInstance()->makeModel()->getPrimaryKey();
     }
 
     /**
@@ -91,7 +100,7 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
      */
     public function modelAttributesParser()
     {
-        return \drewlabs_core_create_attribute_getter('attribute_parser', null)($this) ?? Container::getInstance()->make(IModelAttributesParser::class);
+        return \drewlabs_core_create_attribute_getter('attribute_parser', null)(static::getInstance()) ?? Container::getInstance()->make(IModelAttributesParser::class);
     }
 
     /**
@@ -99,7 +108,22 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
      */
     public function bindAttributesParser(IModelAttributesParser $parser)
     {
-        return \drewlabs_core_create_attribute_setter('attribute_parser', $parser)($this);
+        return \drewlabs_core_create_attribute_setter('attribute_parser', $parser)(static::getInstance());
+    }
+
+    protected static function getInstance()
+    {
+        return static::$instance;
+    }
+
+    /**
+     *
+     * @param static $instance
+     * @return void
+     */
+    private static function setInstance($instance)
+    {
+        static::$instance = $instance;
     }
 
     /**
@@ -117,15 +141,15 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
             // To be used to call the insert or update method on the model
             if ($items[0] === 'insert') {
                 return (new DynamicCRUDQueryHandler())->bindTransactionHandler(
-                    \drewlabs_core_create_attribute_getter('transactionUtils', null)($this)
+                    \drewlabs_core_create_attribute_getter('transactionUtils', null)(static::getInstance())
                 )
-                    ->bindRepository($this)
+                    ->bindRepository(static::getInstance())
                     ->create(array_slice($items, 1), ...$parameters);
             } else if ($items[0] === 'update') {
                 (new DynamicCRUDQueryHandler())->bindTransactionHandler(
-                    \drewlabs_core_create_attribute_getter('transactionUtils', null)($this)
+                    \drewlabs_core_create_attribute_getter('transactionUtils', null)(static::getInstance())
                 )
-                    ->bindRepository($this)
+                    ->bindRepository(static::getInstance())
                     ->update(array_slice($items, 1), ...$parameters);
             } else {
                 throw new RepositoryException("Error . Undefined method " . $method . " on the model repository class");
