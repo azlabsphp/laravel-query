@@ -7,7 +7,6 @@ use Drewlabs\Packages\Database\Contracts\TransactionUtils;
 
 class DynamicCRUDQueryHandler
 {
-
     /**
      *
      * @var \Drewlabs\Packages\Database\Contracts\TransactionUtils
