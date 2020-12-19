@@ -232,7 +232,15 @@ class CustomQueryCriteria implements IModelFilter, ModelFiltersInterface
     private function applyWhereInQuery($model, array $criteria)
     {
         if (array_key_exists('whereIn', $criteria) && !\is_null($criteria['whereIn'])) {
-            $model = $model->whereIn($criteria['whereIn'][0], $criteria['whereIn'][1]);
+            $isArrayList = \array_filter($criteria['whereIn'], 'is_array') === $criteria['whereIn'];
+            if ($isArrayList) {
+                $model = array_reduce($criteria['whereIn'], function($carry, $curr) {
+                    return count($curr) >= 2 ? $carry->whereIn($curr[0], $curr[1]) : $carry;
+                }, $model);
+
+            } else {
+                $model = (count($criteria['whereIn']) >= 2) ? $model->whereIn($criteria['whereIn'][0], $criteria['whereIn'][1]) : $model;
+            }
         }
         return $model;
     }
@@ -261,8 +269,16 @@ class CustomQueryCriteria implements IModelFilter, ModelFiltersInterface
      */
     private function applyWhereNotInQuery($model, array $criteria)
     {
-        if (array_key_exists('whereNotIn', $criteria) && !\is_null($criteria['whereNotIn']) && (count($criteria['whereNotIn']) >= 2)) {
-            $model = $model->whereNotIn($criteria['whereNotIn'][0], $criteria['whereNotIn'][1]);
+        if (array_key_exists('whereNotIn', $criteria) && !\is_null($criteria['whereNotIn'])) {
+            $isArrayList = \array_filter($criteria['whereNotIn'], 'is_array') === $criteria['whereNotIn'];
+            if ($isArrayList) {
+                $model = array_reduce($criteria['whereNotIn'], function($carry, $curr) {
+                    return count($curr) >= 2 ? $carry->whereNotIn($curr[0], $curr[1]) : $carry;
+                }, $model);
+
+            } else {
+                $model = (count($criteria['whereNotIn']) >= 2) ? $model->whereNotIn($criteria['whereNotIn'][0], $criteria['whereNotIn'][1]) : $model;
+            }
         }
         return $model;
     }
