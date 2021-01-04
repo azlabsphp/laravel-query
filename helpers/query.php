@@ -65,11 +65,11 @@ if (!function_exists('drewlabs_databse_parse_client_request_query_input')) {
 
     /**
      * Operator function that takes in an [\Illuminate\Http\Request], parse the _query object and return a filter
-     * @param Request $request 
-     * @param array $in 
-     * @return array 
-     * @throws BadRequestException 
-     * @throws InvalidArgumentException 
+     * @param Request $request
+     * @param array $in
+     * @return array
+     * @throws BadRequestException
+     * @throws InvalidArgumentException
      */
     function drewlabs_databse_parse_client_request_query_input(\Illuminate\Http\Request $request, $in = [])
     {
