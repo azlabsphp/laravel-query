@@ -10,7 +10,7 @@ use Drewlabs\Contracts\EntityObject\AbstractEntityObject;
 use Drewlabs\Core\Data\Exceptions\RepositoryException;
 use Drewlabs\Core\Data\Traits\ModelRepository;
 use Drewlabs\Packages\Database\DynamicCRUDQueryHandler;
-use Illuminate\Container\Container;
+use Psr\Container\ContainerInterface;
 
 /**
  * @package Drewlabs\Packages\Database\Extensions
@@ -23,22 +23,33 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
      *
      * @var static
      */
-    private static $instance;
+    private $instance;
+
+    /**
+     *
+     * @var ContainerInterface
+     */
+    private $container;
 
     /**
      * Create an instance of the model repository class
      *
      * @param string $modelClass
      */
-    public function __construct($modelClass = null)
+    public function __construct($modelClass = null, ContainerInterface $container = null)
     {
-        parent::__construct([]);
-        static::setInstance($this);
-        if (isset($modelClass)) {
-            $self = static::getInstance()->setModel($modelClass);
+        $illuminateContainerClazz = "Illuminate\\Container\\Container";
+        $this->container = $container ?? (class_exists($illuminateContainerClazz) ? forward_static_call([$illuminateContainerClazz, 'getInstance']) : null);
+        if (is_null($this->container)) {
+            throw new \RuntimeException(\sprintf('Repository class required an instance of %s, Please install the illuminate/container package or, make sure the framework has a class that implements the psr4 container contract that is passed as dependency to the class constructor', ContainerInterface::class));
         }
-        $self = \drewlabs_core_create_attribute_setter('transactionUtils', Container::getInstance()->make(\Drewlabs\Packages\Database\Contracts\TransactionUtils::class))($self);
-        static::$instance = $self;
+        // Call the parent constructor to initialize the class
+        parent::__construct([
+            'transactionUtils' => $this->container ? $this->container->get(\Drewlabs\Packages\Database\Contracts\TransactionUtils::class) : null
+        ]);
+        if (isset($modelClass)) {
+            $this->setModel($modelClass);
+        }
     }
 
     protected function getJsonableAttributes()
@@ -56,19 +67,24 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
 
     public function setModel($modelClass)
     {
-        $that = \drewlabs_core_create_attribute_setter('model_class', $modelClass)(static::getInstance());
-        $that->validateModelClass();
+        $that = \drewlabs_core_create_attribute_setter('model_class', $modelClass)($this);
+        $that = $that->validateModelClass();
         // Create the model instance from the passed configuration
         $that = \drewlabs_core_create_attribute_setter('model_instance', $that->makeModel())($that);
         return $that;
     }
 
+    /**
+     * @return static
+     */
     private function validateModelClass()
     {
-        $model_class = static::getInstance()->getModel();
-        if (!(is_string($model_class)) || !(static::getInstance()->makeModel() instanceof ModelInterface)) {
+        $self = $this;
+        $model_class = $self->getModel();
+        if (!(is_string($model_class)) || !($self->makeModel() instanceof ModelInterface)) {
             throw new RepositoryException("Constructor parameter must be an instance of string, must be a valid class that exists, and the class must be an instance of " . IModelable::class);
         }
+        return $self;
     }
 
     /**
@@ -76,7 +92,7 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
      */
     public function makeModel()
     {
-        return Container::getInstance()->make(static::getInstance()->getModel());
+        return \drewlabs_core_create_attribute_getter('container', null)($this)->get($this->getModel());
     }
 
     /**
@@ -84,7 +100,7 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
      */
     public function getModel()
     {
-        return \drewlabs_core_create_attribute_getter('model_class', null)(static::getInstance());
+        return \drewlabs_core_create_attribute_getter('model_class', null)($this);
     }
 
     /**
@@ -92,7 +108,7 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
      */
     public function modelPrimaryKey()
     {
-        return static::getInstance()->makeModel()->getPrimaryKey();
+        return $this->makeModel()->getPrimaryKey();
     }
 
     /**
@@ -100,7 +116,7 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
      */
     public function modelAttributesParser()
     {
-        return \drewlabs_core_create_attribute_getter('attribute_parser', null)(static::getInstance()) ?? Container::getInstance()->make(IModelAttributesParser::class);
+        return \drewlabs_core_create_attribute_getter('attribute_parser', null)($this) ?? $this->container->get(IModelAttributesParser::class);
     }
 
     /**
@@ -108,22 +124,7 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
      */
     public function bindAttributesParser(IModelAttributesParser $parser)
     {
-        return \drewlabs_core_create_attribute_setter('attribute_parser', $parser)(static::getInstance());
-    }
-
-    protected static function getInstance()
-    {
-        return static::$instance;
-    }
-
-    /**
-     *
-     * @param static $instance
-     * @return void
-     */
-    private static function setInstance($instance)
-    {
-        static::$instance = $instance;
+        return \drewlabs_core_create_attribute_setter('attribute_parser', $parser)($this);
     }
 
     /**
@@ -141,15 +142,15 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
             // To be used to call the insert or update method on the model
             if ($items[0] === 'insert') {
                 return (new DynamicCRUDQueryHandler())->bindTransactionHandler(
-                    \drewlabs_core_create_attribute_getter('transactionUtils', null)(static::getInstance())
+                    \drewlabs_core_create_attribute_getter('transactionUtils', null)($this)
                 )
-                    ->bindRepository(static::getInstance())
+                    ->bindRepository($this)
                     ->create(array_slice($items, 1), ...$parameters);
             } else if ($items[0] === 'update') {
                 (new DynamicCRUDQueryHandler())->bindTransactionHandler(
-                    \drewlabs_core_create_attribute_getter('transactionUtils', null)(static::getInstance())
+                    \drewlabs_core_create_attribute_getter('transactionUtils', null)($this)
                 )
-                    ->bindRepository(static::getInstance())
+                    ->bindRepository($this)
                     ->update(array_slice($items, 1), ...$parameters);
             } else {
                 throw new RepositoryException("Error . Undefined method " . $method . " on the model repository class");

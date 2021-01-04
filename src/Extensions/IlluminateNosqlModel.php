@@ -3,23 +3,18 @@
 namespace Drewlabs\Packages\Database\Extensions;
 
 use Drewlabs\Core\Database\NoSql\NosqlModel as NoSqlBaseModel;
-use Drewlabs\Contracts\Data\IParsable;
+use Drewlabs\Contracts\Data\ParseableModelInterface;
 
-final class IlluminateNosqlModel extends NoSqlBaseModel implements IParsable
+final class IlluminateNosqlModel extends NoSqlBaseModel implements ParseableModelInterface
 {
+    use \Drewlabs\Packages\Database\Traits\GuardedModelTrait;
+    use \Drewlabs\Packages\Database\Traits\WithHiddenModelTrait;
     /**
      * Fillable storage columns of an entity
      *
      * @return array
      */
     protected $fillable = [];
-
-    /**
-     * Model state input maps
-     *
-     * @return array
-     */
-    protected $model_states = [];
 
     /**
      * Dictionnary mapping of the fillable entries of the model and the request inputs
