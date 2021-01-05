@@ -24,12 +24,16 @@
     },
     "autoload": {
         "psr-4": {
-            "Drewlabs\\Packages\\Database\\": "src/",
-            "Drewlabs\\Packages\\Database\\Tests\\": "tests/"
+            "Drewlabs\\Packages\\Database\\": "src/"
         },
         "files": [
             "helpers/query.php"
         ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Drewlabs\\Packages\\Database\\Tests\\": "tests/"
+        }
     },
     "repositories": [
         {

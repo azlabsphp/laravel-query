@@ -11,6 +11,7 @@ use Drewlabs\Core\Data\Exceptions\RepositoryException;
 use Drewlabs\Core\Data\Traits\ModelRepository;
 use Drewlabs\Packages\Database\DynamicCRUDQueryHandler;
 use Psr\Container\ContainerInterface;
+use Drewlabs\Packages\Database\Contracts\TransactionUtils;
 
 /**
  * @package Drewlabs\Packages\Database\Extensions
@@ -20,32 +21,26 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
     use ModelRepository;
 
     /**
-     *
-     * @var static
-     */
-    private $instance;
-
-    /**
-     *
-     * @var ContainerInterface
-     */
-    private $container;
-
-    /**
      * Create an instance of the model repository class
      *
      * @param string $modelClass
      */
-    public function __construct($modelClass = null, ContainerInterface $container = null)
-    {
+    public function __construct(
+        $modelClass = null,
+        ContainerInterface $container = null,
+        TransactionUtils $transaction = null,
+        IModelAttributesParser $modelAttributesParser = null
+    ) {
         $illuminateContainerClazz = "Illuminate\\Container\\Container";
-        $this->container = $container ?? (class_exists($illuminateContainerClazz) ? forward_static_call([$illuminateContainerClazz, 'getInstance']) : null);
-        if (is_null($this->container)) {
+        $container = $container ?? (class_exists($illuminateContainerClazz) ? forward_static_call([$illuminateContainerClazz, 'getInstance']) : null);
+        if (is_null($container)) {
             throw new \RuntimeException(\sprintf('Repository class required an instance of %s, Please install the illuminate/container package or, make sure the framework has a class that implements the psr4 container contract that is passed as dependency to the class constructor', ContainerInterface::class));
         }
         // Call the parent constructor to initialize the class
         parent::__construct([
-            'transactionUtils' => $this->container ? $this->container->get(\Drewlabs\Packages\Database\Contracts\TransactionUtils::class) : null
+            'container' => $container,
+            'transactionUtils' => $transaction ?? $container->get(\Drewlabs\Packages\Database\Contracts\TransactionUtils::class),
+            'attribute_parser' => $modelAttributesParser ?? $container->get(IModelAttributesParser::class)
         ]);
         if (isset($modelClass)) {
             $this->setModel($modelClass);
@@ -55,6 +50,7 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
     protected function getJsonableAttributes()
     {
         return [
+            'container',
             'model_instance',
             'attribute_parser',
             'model_class',
@@ -116,7 +112,7 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
      */
     public function modelAttributesParser()
     {
-        return \drewlabs_core_create_attribute_getter('attribute_parser', null)($this) ?? $this->container->get(IModelAttributesParser::class);
+        return \drewlabs_core_create_attribute_getter('attribute_parser', null)($this) ?? (\drewlabs_core_create_attribute_getter('container', null)($this))->get(IModelAttributesParser::class);
     }
 
     /**
