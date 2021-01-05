@@ -9,7 +9,9 @@ use Drewlabs\Contracts\Data\IModelable;
 use Drewlabs\Contracts\Data\IRelatable;
 use Drewlabs\Packages\Database\Traits\IlluminateBaseModel as IlluminateBaseModelTrait;
 
-
+/**
+ * @deprecated v2.8.x
+ */
 abstract class IlluminateBaseModel extends Eloquent implements IModelable, IParsable, IRelatable, IGuardedModel
 {
 
