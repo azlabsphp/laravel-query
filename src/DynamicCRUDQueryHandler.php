@@ -9,7 +9,7 @@ class DynamicCRUDQueryHandler
 {
     /**
      *
-     * @var \Drewlabs\Packages\Database\Contracts\TransactionUtils
+     * @var TransactionUtils
      */
     public $transactionHandler;
 
@@ -24,6 +24,10 @@ class DynamicCRUDQueryHandler
      */
     public function bindTransactionHandler(TransactionUtils $hanlder)
     {
+        $illuminateContainerClazz = "Illuminate\\Container\\Container";
+        $hanlder = $hanlder ?? (class_exists($illuminateContainerClazz) ?
+            forward_static_call([$illuminateContainerClazz, 'getInstance'])
+            ->get(TransactionUtils::class) : null);
         return drewlabs_core_create_attribute_setter('transactionHandler', $hanlder)($this);
     }
 
@@ -34,6 +38,7 @@ class DynamicCRUDQueryHandler
     {
         return drewlabs_core_create_attribute_setter('repository', $repository)($this);
     }
+
     /**
      * Provide functionnalities for inserting a model with it related
      *
