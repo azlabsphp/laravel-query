@@ -21,21 +21,6 @@ abstract class EloquentModel extends Eloquent implements ModelInterface, Parseab
      * @return array
      */
     protected $fillable = [];
-
-    /**
-     * Model state input maps
-     *
-     * @return array
-     */
-    protected $model_states = [];
-
-    /**
-     * Defines model relationships with other models
-     *
-     * @return array
-     */
-    protected $relations = [];
-
     /**
      * Property for controlling if appended contents should be added to the model query json result
      *
