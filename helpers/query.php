@@ -9,7 +9,7 @@ if (!function_exists('drewlabs_databse_parse_client_request_query_params')) {
      *
      * @param \Drewlabs\Contracts\Data\IModelable|\Drewlabs\Contracts\Data\IGuardedModel|\Drewlabs\Contracts\Data\IParsable $model
      * @param \Illuminate\Http\Request $request
-     * @return void
+     * @return array|mixed
      */
     function drewlabs_databse_parse_client_request_query_params($model, \Illuminate\Http\Request $request)
     {
@@ -107,7 +107,7 @@ if (!function_exists('drewlabs_databse_parse_client_request_query')) {
      *
      * @param \Drewlabs\Contracts\Data\IModelable|\Drewlabs\Contracts\Data\IGuardedModel|\Drewlabs\Contracts\Data\IParsable|string $model
      * @param \Illuminate\Http\Request $request
-     * @return void
+     * @return array|mixed
      */
     function drewlabs_databse_parse_client_request_query($model, \Illuminate\Http\Request $request)
     {
