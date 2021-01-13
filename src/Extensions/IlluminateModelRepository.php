@@ -43,7 +43,7 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
             'attribute_parser' => $modelAttributesParser ?? $container->get(IModelAttributesParser::class)
         ]);
         if (isset($modelClass)) {
-            $this->setModel($modelClass);
+            $this->resolveRepositoryModel($modelClass, $this->container);
         }
     }
 
@@ -63,24 +63,30 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
 
     public function setModel($modelClass)
     {
-        $that = \drewlabs_core_create_attribute_setter('model_class', $modelClass)($this);
-        $that = $that->validateModelClass();
-        // Create the model instance from the passed configuration
-        $that = \drewlabs_core_create_attribute_setter('model_instance', $that->makeModel())($that);
+        $that = drewlabs_core_copy_object($this)->resolveRepositoryModel($modelClass);
         return $that;
     }
 
     /**
      * @return static
      */
-    private function validateModelClass()
+    private function resolveRepositoryModel($clazz = null, ContainerInterface $container = null)
     {
-        $self = $this;
-        $model_class = $self->getModel();
-        if (!(is_string($model_class)) || !($self->makeModel() instanceof ModelInterface)) {
+        $model_class = $clazz ?? $this->getModel();
+        $container = $container ?? \drewlabs_core_create_attribute_getter('container', null)($this);
+        $model = $this->internalMakeModel($model_class, $container);
+        if (!(is_string($model_class)) || !($model instanceof ModelInterface)) {
             throw new RepositoryException("Constructor parameter must be an instance of string, must be a valid class that exists, and the class must be an instance of " . IModelable::class);
         }
-        return $self;
+        $this->model_instance = $model;
+        $this->model_class = $model_class;
+        return $this;
+    }
+
+    private function internalMakeModel(string $clazz, ContainerInterface $container = null)
+    {
+        $container = $container ?? \drewlabs_core_create_attribute_getter('container', null)($this);
+        return $container ? $container->get($clazz) : new $clazz;
     }
 
     /**
@@ -88,7 +94,7 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
      */
     public function makeModel()
     {
-        return \drewlabs_core_create_attribute_getter('container', null)($this)->get($this->getModel());
+        return $this->internalMakeModel($this->getModel(), \drewlabs_core_create_attribute_getter('container', null)($this));
     }
 
     /**
