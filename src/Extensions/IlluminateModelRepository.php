@@ -68,7 +68,7 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
 
     public function setModel($modelClass)
     {
-        $that = $this->resolveRepositoryModel($modelClass);
+        $that = drewlabs_core_copy_object($this)->resolveRepositoryModel($modelClass);
         return $that;
     }
 
