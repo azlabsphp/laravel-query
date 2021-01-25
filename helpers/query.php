@@ -22,7 +22,9 @@ if (!function_exists('drewlabs_databse_parse_client_request_query_params')) {
             $searchable = array_merge($model->getFillables(), $model->getGuardedAttributes());
             if (!empty($value)) {
                 if (in_array($key, $searchable)) {
-                    $filters['orWhere'][] = array($key, 'like', '%' . $value . '%');
+                    $operator = is_numeric($value) || is_bool($value) || is_integer($value) ? '=' : 'like';
+                    $value = is_numeric($value) || is_bool($value) || is_integer($value) ? $value : '%' . $value . '%';
+                    $filters['orWhere'][] = array($key, $operator, $value);
                 } else if (\drewlabs_core_strings_contains($key, ['__'])) {
                     $exploded = \explode('__', $key);
                     $relation = $exploded[0];
@@ -145,6 +147,12 @@ if (!function_exists('drewlabs_database_parse_query_method_params')) {
                 return \drewlabs_database_parse_order_by_query($params);
             case 'whereNull':
                 return \drewlabs_database_parse_where_null_query($params);
+            case 'orWhereNull':
+                return \drewlabs_database_parse_where_null_query($params);
+            case 'whereNotNull':
+                return \drewlabs_database_parse_where_null_query($params);
+            case 'orWhereNotNull':
+                return \drewlabs_database_parse_where_null_query($params);
             case 'doesntHave':
                 return drewlabs_core_array_is_arrayable($params) ? (isset($params['column']) ? [$method => $params['column']] : []) : [$method => $params];
             case 'has':
@@ -164,13 +172,49 @@ if (!function_exists('drewlabs_database_parse_where_null_query')) {
      */
     function drewlabs_database_parse_where_null_query($params)
     {
-        if (\drewlabs_core_strings_is_str($params)) {
-            return $params;
+        // TODO : Optimize algorithm for duplicate values
+        $assocParserFn = function (array $value) use (&$assocParserFn) {
+            if (\drewlabs_core_strings_is_str($value)) {
+                return $value;
+            }
+            $arrayIsAssoc = drewlabs_core_array_is_assoc($value);
+            if (!$arrayIsAssoc) {
+                return array_reduce($value, function ($carry, $current) use (&$assocParserFn) {
+                    $result = $current;
+                    if (\drewlabs_core_array_is_arrayable($result) && drewlabs_core_array_is_assoc($result)) {
+                        $result = $assocParserFn($current);
+                    }
+                    return in_array($result, $carry) ? $carry : array_merge($carry, \drewlabs_core_array_is_arrayable($result) ? $result : [$result]);
+                }, []);
+            }
+            if ($arrayIsAssoc && !isset($value['column'])) {
+                throw new \InvalidArgumentException('orderBy query requires column key');
+            }
+            return $value['column'];
+        };
+        $valueParserFn = function ($value) use ($assocParserFn) {
+            if (\drewlabs_core_strings_is_str($value)) {
+                return $value;
+            }
+            return $assocParserFn($value);
+        };
+        if (\drewlabs_core_array_is_arrayable($params)) {
+            $isArrayList = array_filter($params, function ($item) {
+                return drewlabs_core_array_is_arrayable($item);
+            }) === $params;
+            if ($isArrayList) {
+                return array_reduce($params, function ($carry, $current) use ($valueParserFn) {
+                    $result = $valueParserFn($current);
+                    if (in_array($result, $carry)) {
+                        return $carry;
+                    }
+                    return array_merge($carry, $result);
+                }, []);
+            } else {
+                return $assocParserFn($params);
+            }
         }
-        if (!isset($params['column'])) {
-            throw new \InvalidArgumentException('orderBy query requires column key');
-        }
-        return $params['column'];
+        return $valueParserFn($params);
     }
 }
 
@@ -297,7 +341,12 @@ if (!function_exists('drewlabs_core_supported_query_methods')) {
             // Supporting joins queries
             'join',
             'rightJoin',
-            'leftJoin'
+            'leftJoin',
+            // Supporting whereNull and whereNotNull queries
+            'whereNull',
+            'orWhereNull',
+            'whereNotNull',
+            'orWhereNotNull'
         ];
     }
 }
