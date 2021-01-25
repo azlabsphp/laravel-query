@@ -3,12 +3,9 @@
 namespace Drewlabs\Packages\Database\Extensions;
 
 use Drewlabs\Contracts\Data\IModelFilter;
-use Drewlabs\Contracts\Data\IModelable;
 use Drewlabs\Contracts\Data\DataRepository\Repositories\IModelRepository;
 use Drewlabs\Packages\Database\Contracts\IJoinQueryParser;
 use Drewlabs\Packages\Database\FilterQueryParamsParser;
-use Illuminate\Database\Eloquent\Model as Eloquent;
-use Illuminate\Database\Eloquent\Builder;
 use Drewlabs\Packages\Database\JoinQueryParamsParser;
 use Drewlabs\Contracts\Data\ModelFiltersInterface;
 
@@ -23,7 +20,7 @@ class CustomQueryCriteria implements IModelFilter, ModelFiltersInterface
     protected $query_criteria;
 
     /**
-     * @var Eloquent|Model|Builder
+     * @var mixed
      */
     protected $model;
 
@@ -60,9 +57,9 @@ class CustomQueryCriteria implements IModelFilter, ModelFiltersInterface
     /**
      * apply a where query to the model
      *
-     * @param Eloquent|IModelable|Builder $model
+     * @param mixed $model
      * @param array|callback $criteria
-     * @return Eloquent|IModelable|Builder
+     * @return mixed
      */
     private function applyWhereQuery($model, $criteria)
     {
@@ -85,9 +82,9 @@ class CustomQueryCriteria implements IModelFilter, ModelFiltersInterface
     /**
      * apply a where query to the model
      *
-     * @param Eloquent|IModelable|Builder $model
+     * @param mixed $model
      * @param array $criteria
-     * @return Eloquent|IModelable|Builder
+     * @return mixed
      */
     private function applyWhereHasQuery($model, $criteria)
     {
@@ -108,9 +105,9 @@ class CustomQueryCriteria implements IModelFilter, ModelFiltersInterface
     /**
      * apply a where query to the model
      *
-     * @param Eloquent|IModelable|Builder $model
+     * @param mixed $model
      * @param array $criteria
-     * @return Eloquent|IModelable|Builder
+     * @return mixed
      */
     private function applyWhereDoesntHaveQuery($model, $criteria)
     {
@@ -131,9 +128,9 @@ class CustomQueryCriteria implements IModelFilter, ModelFiltersInterface
     /**
      * apply a whereDate query to the model
      *
-     * @param Eloquent|IModelable|Builder $model
+     * @param mixed $model
      * @param array $criteria
-     * @return Eloquent|IModelable|Builder
+     * @return mixed
      */
     private function applyWhereDateQuery($model, $criteria)
     {
@@ -154,9 +151,9 @@ class CustomQueryCriteria implements IModelFilter, ModelFiltersInterface
     /**
      * Apply a has query
      *
-     * @param Eloquent|IModelable|Builder $model
+     * @param mixed $model
      * @param array $criteria
-     * @return Eloquent|IModelable|Builder
+     * @return mixed
      */
     private function applyHasQuery($model, $criteria)
     {
@@ -177,9 +174,9 @@ class CustomQueryCriteria implements IModelFilter, ModelFiltersInterface
     /**
      * Apply a has query
      *
-     * @param Eloquent|IModelable|Builder $model
+     * @param mixed $model
      * @param array $criteria
-     * @return Eloquent|IModelable|Builder
+     * @return mixed
      */
     private function applyDoesntHaveQuery($model, $criteria)
     {
@@ -200,9 +197,9 @@ class CustomQueryCriteria implements IModelFilter, ModelFiltersInterface
     /**
      * apply an orWhere query to the model
      *
-     * @param Eloquent|IModelable|Builder $model
+     * @param mixed $model
      * @param array $criteria
-     * @return Eloquent|IModelable|Builder
+     * @return mixed
      */
     private function applyOrWhereQuery($model, $criteria)
     {
@@ -225,19 +222,18 @@ class CustomQueryCriteria implements IModelFilter, ModelFiltersInterface
     /**
      * apply a whereIn query to the model
      *
-     * @param Eloquent|IModelable|Builder $model
+     * @param mixed $model
      * @param array $criteria
-     * @return Eloquent|IModelable|Builder
+     * @return mixed
      */
     private function applyWhereInQuery($model, array $criteria)
     {
         if (array_key_exists('whereIn', $criteria) && !\is_null($criteria['whereIn'])) {
             $isArrayList = \array_filter($criteria['whereIn'], 'is_array') === $criteria['whereIn'];
             if ($isArrayList) {
-                $model = array_reduce($criteria['whereIn'], function($carry, $curr) {
+                $model = array_reduce($criteria['whereIn'], function ($carry, $curr) {
                     return count($curr) >= 2 ? $carry->whereIn($curr[0], $curr[1]) : $carry;
                 }, $model);
-
             } else {
                 $model = (count($criteria['whereIn']) >= 2) ? $model->whereIn($criteria['whereIn'][0], $criteria['whereIn'][1]) : $model;
             }
@@ -248,9 +244,9 @@ class CustomQueryCriteria implements IModelFilter, ModelFiltersInterface
     /**
      * apply a whereBetween query to the model
      *
-     * @param Eloquent|IModelable|Builder $model
+     * @param mixed $model
      * @param array $criteria
-     * @return Eloquent|IModelable|Builder
+     * @return mixed
      */
     private function applyWhereBetweenQuery($model, array $criteria)
     {
@@ -263,19 +259,18 @@ class CustomQueryCriteria implements IModelFilter, ModelFiltersInterface
     /**
      * apply a whereNotIn query to the model
      *
-     * @param Eloquent|IModelable|Builder $model
+     * @param mixed $model
      * @param array $criteria
-     * @return Eloquent|IModelable|Builder
+     * @return mixed
      */
     private function applyWhereNotInQuery($model, array $criteria)
     {
         if (array_key_exists('whereNotIn', $criteria) && !\is_null($criteria['whereNotIn'])) {
             $isArrayList = \array_filter($criteria['whereNotIn'], 'is_array') === $criteria['whereNotIn'];
             if ($isArrayList) {
-                $model = array_reduce($criteria['whereNotIn'], function($carry, $curr) {
+                $model = array_reduce($criteria['whereNotIn'], function ($carry, $curr) {
                     return count($curr) >= 2 ? $carry->whereNotIn($curr[0], $curr[1]) : $carry;
                 }, $model);
-
             } else {
                 $model = (count($criteria['whereNotIn']) >= 2) ? $model->whereNotIn($criteria['whereNotIn'][0], $criteria['whereNotIn'][1]) : $model;
             }
@@ -286,9 +281,9 @@ class CustomQueryCriteria implements IModelFilter, ModelFiltersInterface
     /**
      * apply an orderBy query to the model
      *
-     * @param Eloquent|IModelable|Builder $model
+     * @param mixed $model
      * @param array $criteria
-     * @return Eloquent|IModelable|Builder
+     * @return mixed
      */
     private function applyOrderByQuery($model, array $criteria)
     {
@@ -301,9 +296,9 @@ class CustomQueryCriteria implements IModelFilter, ModelFiltersInterface
     /**
      * Apply group by query on the provided model instance
      *
-     * @param Eloquent|IModelable|Builder $model
+     * @param mixed $model
      * @param array[]|string $criteria
-     * @return Eloquent|IModelable|Builder
+     * @return mixed
      */
     private function applyGroupByQuery($model, array $criteria)
     {
@@ -324,9 +319,9 @@ class CustomQueryCriteria implements IModelFilter, ModelFiltersInterface
     /**
      * apply a join query on the model query to the model
      *
-     * @param Eloquent|IModelable|Builder $model
+     * @param mixed $model
      * @param array|callback $criteria
-     * @return Eloquent|IModelable|Builder
+     * @return mixed
      */
     private function applyJoinQuery($model, $criteria)
     {
@@ -336,9 +331,9 @@ class CustomQueryCriteria implements IModelFilter, ModelFiltersInterface
     /**
      * apply a right join query on the model
      *
-     * @param Eloquent|IModelable|Builder $model
+     * @param mixed $model
      * @param array|callback $criteria
-     * @return Eloquent|IModelable|Builder
+     * @return mixed
      */
     private function applyRightJoinQuery($model, $criteria)
     {
@@ -348,9 +343,9 @@ class CustomQueryCriteria implements IModelFilter, ModelFiltersInterface
     /**
      * apply a left join query on the model
      *
-     * @param Eloquent|IModelable|Builder $model
+     * @param mixed $model
      * @param array|callback $criteria
-     * @return Eloquent|IModelable|Builder
+     * @return mixed
      */
     private function applyLeftJoinQuery($model, $criteria)
     {
@@ -378,9 +373,9 @@ class CustomQueryCriteria implements IModelFilter, ModelFiltersInterface
      * apply an skip query to the model
      *
      * @deprecated 1.0.2
-     * @param Eloquent|IModelable|Builder $model
+     * @param mixed $model
      * @param array $criteria
-     * @return Eloquent|IModelable|Builder
+     * @return mixed
      */
     private function applySkipQuery($model, array $criteria)
     {
@@ -394,14 +389,100 @@ class CustomQueryCriteria implements IModelFilter, ModelFiltersInterface
      * apply an skip query to the model
      *
      * @deprecated 1.0.2
-     * @param Eloquent|IModelable|Builder $model
+     * @param mixed $model
      * @param array $criteria
-     * @return Eloquent|IModelable|Builder
+     * @return mixed
      */
     private function applyTakeQuery($model, array $criteria)
     {
         if (array_key_exists('take', $criteria) && !\is_null($criteria['take'])) {
             $model = $model->take($criteria['take']);
+        }
+        return $model;
+    }
+
+
+    /**
+     * apply an whereNull query to the model
+     *
+     * @param mixed $model
+     * @param array $criteria
+     * @return mixed
+     */
+    private function applyWhereNullQuery($model, $criteria)
+    {
+        if (array_key_exists('whereNull', $criteria) && !\is_null($criteria['whereNull'])) {
+            $isArrayList = \array_filter($$criteria['whereNull'], 'is_array') === $criteria['whereNull'];
+            if (!$isArrayList) {
+                $criteria['whereNull'] = [$criteria['whereNull']];
+            }
+            $model = array_reduce($criteria['whereNull'], function ($carry, $current) {
+                return $carry->whereNull($current);
+            }, $model);
+        }
+        return $model;
+    }
+
+    /**
+     * apply an whereNotNull query to the model
+     *
+     * @param mixed $model
+     * @param array $criteria
+     * @return mixed
+     */
+    private function applyWhereNotNullQuery($model, $criteria)
+    {
+        if (array_key_exists('whereNotNull', $criteria) && !\is_null($criteria['whereNotNull'])) {
+            $isArrayList = \array_filter($$criteria['whereNotNull'], 'is_array') === $criteria['whereNotNull'];
+            if (!$isArrayList) {
+                $criteria['whereNotNull'] = [$criteria['whereNotNull']];
+            }
+            $model = array_reduce($criteria['whereNotNull'], function ($carry, $current) {
+                return $carry->whereNotNull($current);
+            }, $model);
+        }
+        return $model;
+    }
+
+
+    /**
+     * apply an orWhereNull query to the model
+     *
+     * @param mixed $model
+     * @param array $criteria
+     * @return mixed
+     */
+    private function applyOrWhereNullQuery($model, $criteria)
+    {
+        if (array_key_exists('orWhereNull', $criteria) && !\is_null($criteria['orWhereNull'])) {
+            $isArrayList = \array_filter($$criteria['orWhereNull'], 'is_array') === $criteria['orWhereNull'];
+            if (!$isArrayList) {
+                $criteria['orWhereNull'] = [$criteria['orWhereNull']];
+            }
+            $model = array_reduce($criteria['orWhereNull'], function ($carry, $current) {
+                return $carry->orWhereNull($current);
+            }, $model);
+        }
+        return $model;
+    }
+
+    /**
+     * apply an orWhereNotNull query to the model
+     *
+     * @param mixed $model
+     * @param array $criteria
+     * @return mixed
+     */
+    private function applyOrWhereNotNull($model, $criteria)
+    {
+        if (array_key_exists('orWhereNotNull', $criteria) && !\is_null($criteria['orWhereNotNull'])) {
+            $isArrayList = \array_filter($$criteria['orWhereNotNull'], 'is_array') === $criteria['orWhereNotNull'];
+            if (!$isArrayList) {
+                $criteria['orWhereNotNull'] = [$criteria['orWhereNotNull']];
+            }
+            $model = array_reduce($criteria['orWhereNotNull'], function ($carry, $current) {
+                return $carry->orWhereNotNull($current);
+            }, $model);
         }
         return $model;
     }
