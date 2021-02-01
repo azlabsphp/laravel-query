@@ -149,7 +149,7 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
                     ->bindRepository($this)
                     ->create(array_slice($items, 1), ...$parameters);
             } else if ($items[0] === 'update') {
-                (new DynamicCRUDQueryHandler())->bindTransactionHandler(
+                return (new DynamicCRUDQueryHandler())->bindTransactionHandler(
                     \drewlabs_core_create_attribute_getter('transactionUtils', null)($this)
                 )
                     ->bindRepository($this)
