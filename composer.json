@@ -12,9 +12,9 @@
     "minimum-stability": "stable",
     "require": {
         "php": "^7.2",
-        "illuminate/database": "^7.0",
-        "illuminate/support": "^7.0",
-        "illuminate/http": "^7.0",
+        "illuminate/contracts": "^5.0|^6.0|^7.0|^8.0",
+        "illuminate/database": "^5.0|^6.0|^7.0|^8.0",
+        "illuminate/support": "^5.0|^6.0|^7.0|^8.0",
         "drewlabs/contracts": "dev-master",
         "drewlabs/core": "dev-master",
         "drewlabs/core-helpers": "dev-master"
@@ -38,15 +38,15 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "git@github.com:azandrew-sidoine/drewlabs-php-contracts.git"
+            "url": "git@github.com:liksoft/drewlabs-php-contracts.git"
         },
         {
             "type": "vcs",
-            "url": "git@github.com:azandrew-sidoine/drewlabs-php-core.git"
+            "url": "git@github.com:liksoft/drewlabs-php-core.git"
         },
         {
             "type": "vcs",
-            "url": "git@github.com:azandrew-sidoine/drewlabs-php-core-helpers.git"
+            "url": "git@github.com:liksoft/drewlabs-php-core-helpers.git"
         }
     ],
     "extra": {
@@ -55,6 +55,9 @@
                 "Drewlabs\\Packages\\Database\\ServiceProvider"
             ],
             "aliases": {}
+        },
+        "branch-alias": {
+            "dev-master": "v3.0.x-dev"
         }
     }
 }
