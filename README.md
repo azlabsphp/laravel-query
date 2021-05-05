@@ -171,6 +171,26 @@ $filter = new \Drewlabs\Packages\Database\Extensions\CustomQueryCriteria([
     'whereNotIn' => [
         ['colum1', [...]],
         ['colum2', [...]]
+    ],
+
+    // Join query
+    'join' => [
+        Folder::class,
+        [
+            'model' => UploadedFile::class,
+            'column' => 'folder_id'
+        ],
+        [
+            'model' => Folder::class,
+            'column' => 'id'
+        ]
+    ],
+    // Normal laravel join
+    'join' => [
+        'table1',
+        'table2.id', 
+        '=', 
+        'table1.user_id'
     ]
 ]);
 
