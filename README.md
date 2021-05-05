@@ -351,41 +351,41 @@ Request queries can be in form of:
 ### Example
 
 ```php
-        // Create the request
-        $request = new \Illuminate\Http\Request([
-            '_query' => [
-                'where' => [['label', '<>', 'Hello World!']],
-                'orWhere' => [
-                    [
-                        'match' => [
-                            'method' => 'whereIn',
-                            'params' => ['url', ['http://localhost', 'http://liksoft.tg']]
-                        ]
-                    ],
-                    [
-                        'id', 340
-                    ]
-                ],
-                'whereNull' => [
-                    'column' => 'basepath'
-                ],
-                'orderBy' => [
-                    'column' => 'id',
-                    'order' => 'DESC'
-                ],
-                'whereIn' => [
-                    [
-                        "column" => 'basepath',
-                        "match" => ['/home/usr/workspace', '/local/usr/Cellar/etc/workspace']
-                    ],
-                    [
-                        'fullpath',
-                        ['/home/usr/workspace', '/local/usr/Cellar/etc/workspace']
-                    ]
+// Create the request
+$request = new \Illuminate\Http\Request([
+    '_query' => [
+        'where' => [['label', '<>', 'Hello World!']],
+        'orWhere' => [
+            [
+                'match' => [
+                    'method' => 'whereIn',
+                    'params' => ['url', ['http://localhost', 'http://liksoft.tg']]
                 ]
             ],
-            'label' => 'Are you there ?',
-            'id' => 320
-        ]);
-        $filters = \drewlabs_databse_parse_client_request_query(new \Drewlabs\Packages\Database\Tests\Stubs\TestModelStub, $request);
+            [
+                'id', 340
+            ]
+        ],
+        'whereNull' => [
+            'column' => 'basepath'
+        ],
+        'orderBy' => [
+            'column' => 'id',
+            'order' => 'DESC'
+        ],
+        'whereIn' => [
+            [
+                "column" => 'basepath',
+                "match" => ['/home/usr/workspace', '/local/usr/Cellar/etc/workspace']
+            ],
+            [
+                'fullpath',
+                ['/home/usr/workspace', '/local/usr/Cellar/etc/workspace']
+            ]
+        ]
+    ],
+    'label' => 'Are you there ?',
+    'id' => 320
+]);
+$filters = \drewlabs_databse_parse_client_request_query(new \Drewlabs\Packages\Database\Tests\Stubs\TestModelStub, $request);
 ```
