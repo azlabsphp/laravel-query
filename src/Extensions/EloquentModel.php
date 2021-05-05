@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Model as Eloquent;
 use Drewlabs\Contracts\Data\ModelInterface;
 use Drewlabs\Contracts\Data\ParseableModelInterface;
 use Drewlabs\Contracts\Data\RelatedModelInterface;
-
-
 abstract class EloquentModel extends Eloquent implements ModelInterface, ParseableModelInterface, RelatedModelInterface, GuardedModelInterface
 {
     use \Drewlabs\Packages\Database\Traits\RoutableModel;

@@ -23,7 +23,6 @@ class FilterQueryParamsParser implements IQueryParser
             return is_null($item) || !isset($item);
         }) === $params;
         if ($allEntiresAreNull) {
-            // dd($params);
             throw new \InvalidArgumentException('Provided query parameters are not defined');
         }
         // Insure that where not working with associative arrays
