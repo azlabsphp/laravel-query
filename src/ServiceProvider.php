@@ -3,7 +3,7 @@
 namespace Drewlabs\Packages\Database;
 
 use Drewlabs\Contracts\Data\ModelFiltersInterface;
-use Drewlabs\Contracts\Data\Parser\ModelAttributeParser;
+use Drewlabs\Contracts\Data\Parser\ModelAttributeParser as ModelAttributesParserContract;
 use Drewlabs\Core\Data\Services\ModelAttributesParser;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Drewlabs\Packages\Database\Contracts\TransactionUtils;
@@ -41,7 +41,7 @@ class ServiceProvider extends BaseServiceProvider
         });
         $this->app->bind(ModelFiltersInterface::class, CustomQueryCriteria::class);
 
-        $this->app->bind(ModelAttributeParser::class, ModelAttributesParser::class);
+        $this->app->bind(ModelAttributesParserContract::class, ModelAttributesParser::class);
         
         // Register Nosql providers bindings
         $this->noSqlBindings();

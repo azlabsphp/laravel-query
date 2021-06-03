@@ -132,7 +132,7 @@ trait ModelRepository
     {
         $that = $this;
         $values = $that->parseInputValues($values);
-        return $upsert ?  call_user_func_array(
+        $result =  $upsert ?  call_user_func_array(
             [\drewlabs_core_create_attribute_getter('model_instance', null)($that), 'updateOrCreate'],
             [
                 !empty($upsertConditions) ? $upsertConditions : $values,
@@ -140,6 +140,8 @@ trait ModelRepository
             ]
         ) :
             \drewlabs_core_create_attribute_getter('model_instance', null)($that)->add($values);
+        // $that->resetScope();
+        return $result;
     }
 
     /**
@@ -149,15 +151,17 @@ trait ModelRepository
     {
         if (\array_filter($values, 'is_array') === $values) {
             $list = array();
-            $self = $this;
+            $that = $this;
             // Loop through individual elements and parse the model state
             foreach ($values as $value) {
                 // Set timestamps values in case of bulk assignement
-                $value = $self->parseInputValues($value);
+                $value = $that->parseInputValues($value);
                 $value = array_merge($value, array('updated_at' => date('Y-m-d H:i:s'), 'created_at' => date('Y-m-d H:i:s')));
                 $list[] = $value;
             }
-            return \drewlabs_core_create_attribute_getter('model_instance', null)($self)->{"insert"}($list);
+            $result = \drewlabs_core_create_attribute_getter('model_instance', null)($that)->{"insert"}($list);
+            // $that->resetScope();
+            return $result;
         }
         throw new RepositoryException(__METHOD__ . ' requires an list of list items for insertion');
     }
@@ -167,11 +171,13 @@ trait ModelRepository
      */
     public function all($columns = array('*'))
     {
-        $self = $this;
-        return $self->makeModel()->getAll(
-            \drewlabs_core_create_attribute_getter('query_model_relation', false)($self),
+        $that = $this;
+        $result = $that->makeModel()->getAll(
+            \drewlabs_core_create_attribute_getter('query_model_relation', false)($that),
             $columns
         );
+        // $that->resetScope();
+        return $result;
     }
 
     /**
@@ -179,11 +185,11 @@ trait ModelRepository
      */
     public function paginate($perPage = 20, $columns = array('*'))
     {
-        $self = $this;
-        $model = $self->makeModel();
-        $query_model_relation = \drewlabs_core_create_attribute_getter('query_model_relation', false)($self);
+        $that = $this;
+        $model = $that->makeModel();
+        $query_model_relation = \drewlabs_core_create_attribute_getter('query_model_relation', false)($that);
         if ($query_model_relation) {
-            $self = $self->loadWith(
+            $that = $that->loadWith(
                 method_exists(
                     $model,
                     'getModelRelationLoadersNames'
@@ -195,13 +201,14 @@ trait ModelRepository
                 \drewlabs_core_create_attribute_getter(
                     'model_instance',
                     null
-                )($self->applyFilter()), 'paginate'
+                )($that->applyFilter()), 'paginate'
             ],
             [
                 $perPage,
                 $columns
             ]
         );
+        // $that->resetScope();
         return $list;
     }
 
@@ -210,24 +217,19 @@ trait ModelRepository
      */
     public function find(array $conditions = array(), array $columns = array('*'))
     {
-        $self = $this;
-        $model = $self->makeModel();
-        $query_model_relation = \drewlabs_core_create_attribute_getter('query_model_relation', false)($self);
-        $that =  $query_model_relation ? $self->loadWith(method_exists(
+        $that = $this;
+        $model = $that->makeModel();
+        $query_model_relation = \drewlabs_core_create_attribute_getter('query_model_relation', false)($that);
+        $that =  $query_model_relation ? $that->loadWith(method_exists(
             $model,
             'getModelRelationLoadersNames'
-        ) ? call_user_func(array($model, 'getModelRelationLoadersNames')) : []) : clone $self;
-        if (empty($conditions)) {
-            return \drewlabs_core_create_attribute_getter(
-                'model_instance',
-                null
-            )($that->applyFilter())->{"get"}($columns);
-        } else {
-            return \drewlabs_core_create_attribute_getter(
-                'model_instance',
-                null
-            )($that)->{'where'}($conditions)->get($columns);
-        }
+        ) ? call_user_func(array($model, 'getModelRelationLoadersNames')) : []) : clone $that;
+        $result = \drewlabs_core_create_attribute_getter(
+            'model_instance',
+            null
+        )($that->applyWhereQuery($conditions))->get($columns);
+        // $that->resetScope();
+        return $result;
     }
 
     /**
@@ -235,13 +237,15 @@ trait ModelRepository
      */
     public function findById($id, array $columns = array('*'))
     {
-        $self = $this;
-        $model = $self->makeModel();
-        $prop = \drewlabs_core_create_attribute_getter('ignore_relations_on_single_model', false)($self);
+        $that = $this;
+        $model = $that->makeModel();
+        $prop = \drewlabs_core_create_attribute_getter('ignore_relations_on_single_model', false)($that);
         if (!$prop) {
-            $self = $self->queryRelation(true);
+            $that = $that->queryRelation(true);
         }
-        return $self->find(array(array($model->getPrimaryKey(), $id)), $columns)->first();
+        $result = $that->find(array(array($model->getPrimaryKey(), $id)), $columns)->first();
+        // $that->resetScope();
+        return $result;
     }
 
     /**
@@ -249,16 +253,18 @@ trait ModelRepository
      */
     public function updateById($id, array $data, bool $parse_inputs = true)
     {
-        $self = $this;
-        $model = $self->makeModel();
-        $result = $self->queryRelation(false)->find(array(array($model->getPrimaryKey(), $id)))->first();
+        $count = 0;
+        $that = $this;
+        $model = $that->makeModel();
+        $result = $that->queryRelation(false)->find(array(array($model->getPrimaryKey(), $id)))->first();
         if ($result) {
             if ($parse_inputs) {
-                $data = $self->parseInputValues($data);
+                $data = $that->parseInputValues($data);
             }
-            return intval($result->update($data));
+            $count = intval($result->update($data));
         }
-        return 0;
+        // $that->resetScope();
+        return $count;
     }
 
     /**
@@ -271,7 +277,7 @@ trait ModelRepository
         if ($parse_inputs) {
             $values = $self->parseInputValues($values);
         }
-        $that = empty($conditions) ? $self->applyFilter() : \drewlabs_core_create_attribute_setter('model_instance', \drewlabs_core_create_attribute_getter('model_instance', null)($self)->{'where'}($conditions))($self);
+        $that = $self->applyWhereQuery($conditions);
         if ($mass_update) {
             // If should mass update the model, mass update it
             $count =  \call_user_func(array(
@@ -295,6 +301,7 @@ trait ModelRepository
                 $count++;
             });
         }
+        // $that->resetScope();
         return $count;
     }
 
@@ -303,15 +310,17 @@ trait ModelRepository
      */
     public function deleteById($id)
     {
-        $self = $this;
-        $model = $self->makeModel();
-        $result = $self->queryRelation(false)->find(array(array($model->getPrimaryKey(), $id)))->first();
+        $that = $this;
+        $model = $that->makeModel();
+        $result = $that->queryRelation(false)->find(array(array($model->getPrimaryKey(), $id)))->first();
+        $count = 0;
         if ($result) {
             // Then save the model to the database
             \call_user_func(array($result, 'delete'));
-            return 1;
+            $count = 1;
         }
-        return 0;
+        // $that->resetScope();
+        return $count;
     }
 
     /**
@@ -319,31 +328,54 @@ trait ModelRepository
      */
     public function delete(array $conditions = array(), bool $mass_delete =  false)
     {
-        $self = $this;
-        // Perform a mass delete on each element of the list of model
         $deleted = 0;
-        $that = empty($conditions) ? $self->applyFilter() : \drewlabs_core_create_attribute_setter(
-            'model_instance',
-            \drewlabs_core_create_attribute_getter('model_instance', null)($self)->{'where'}($conditions)
-        )($self);
+        // Perform a mass delete on each element of the list of model
+        $that = $this->applyWhereQuery($conditions);
         // Perform a mass delete operation
         if ($mass_delete) {
-            return \call_user_func(
+            $deleted = \call_user_func(
                 array(
-                    \drewlabs_core_create_attribute_getter('model_instance', null)($self), 'delete'
+                    \drewlabs_core_create_attribute_getter('model_instance', null)($that), 'delete'
                 )
             );
+        } else {
+            $list = \call_user_func(array(
+                \drewlabs_core_create_attribute_getter(
+                    'model_instance',
+                    null
+                )($that), 'get'
+            ));
+            $list = is_array($list) ? new Collection($list) : $list;
+            $list->each(function ($value) use (&$deleted) {
+                $deleted += $value->delete();
+            });
         }
-        $list = \call_user_func(array(
-            \drewlabs_core_create_attribute_getter(
-                'model_instance',
-                null
-            )($that), 'get'
-        ));
-        $list = is_array($list) ? new Collection($list) : $list;
-        $list->each(function ($value) use (&$deleted) {
-            $deleted += $value->delete();
-        });
+        // $that->resetScope();
         return $deleted;
+    }
+
+    private function applyWhereQuery($conditions)
+    {
+        $self = $this;
+        if (empty($conditions)) {
+            $that = $self->applyFilter();
+        } else if (drewlabs_core_array_is_array_list($conditions)) {
+            $that = \drewlabs_core_create_attribute_setter(
+                'model_instance',
+                \drewlabs_core_create_attribute_getter(
+                    'model_instance',
+                    null
+                )($self)->{'where'}($conditions)
+            )($self);
+        } else {
+            $that = \drewlabs_core_create_attribute_setter(
+                'model_instance',
+                \drewlabs_core_create_attribute_getter(
+                    'model_instance',
+                    null
+                )($self)->{'where'}(...$conditions)
+            )($self);
+        }
+        return $that;
     }
 }
