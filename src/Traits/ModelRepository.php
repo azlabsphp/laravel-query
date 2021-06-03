@@ -237,7 +237,11 @@ trait ModelRepository
     {
         $self = $this;
         $model = $self->makeModel();
-        return $self->queryRelation(true)->find(array(array($model->getPrimaryKey(), $id)), $columns)->first();
+        $prop = \drewlabs_core_create_attribute_getter('ignore_relations_on_single_model', false)($self);
+        if (!$prop) {
+            $self = $self->queryRelation(true);
+        }
+        return $self->find(array(array($model->getPrimaryKey(), $id)), $columns)->first();
     }
 
     /**

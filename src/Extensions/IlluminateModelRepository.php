@@ -57,7 +57,8 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
             'transactionUtils',
             'query_model_relation',
             'skip_filters',
-            'filters'
+            'filters',
+            'ignore_relations_on_single_model'
         ];
     }
 
