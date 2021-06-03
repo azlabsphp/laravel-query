@@ -2,14 +2,13 @@
 
 namespace Drewlabs\Packages\Database\Extensions;
 
-use Drewlabs\Contracts\Data\IModelFilter;
 use Drewlabs\Contracts\Data\DataRepository\Repositories\IModelRepository;
 use Drewlabs\Packages\Database\FilterQueryParamsParser;
 use Drewlabs\Packages\Database\JoinQueryParamsParser;
 use Drewlabs\Contracts\Data\ModelFiltersInterface;
 use Drewlabs\Contracts\Data\Parser\QueryParser;
 
-class CustomQueryCriteria implements IModelFilter, ModelFiltersInterface
+class CustomQueryCriteria implements ModelFiltersInterface
 {
 
     /**

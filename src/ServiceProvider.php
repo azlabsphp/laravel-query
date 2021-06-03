@@ -43,16 +43,6 @@ class ServiceProvider extends BaseServiceProvider
 
         $this->app->bind(ModelAttributeParser::class, ModelAttributesParser::class);
         
-        # region - Must be remove in v4.0
-        $this->app->bind(\Drewlabs\Contracts\Data\IModelFilter::class, function ($app) {
-            return new CustomQueryCriteria();
-        });
-
-        $this->app->bind(\Drewlabs\Contracts\Data\DataRepository\Services\IModelAttributesParser::class, function ($app) {
-            return new ModelAttributesParser($app[\Drewlabs\Contracts\Hasher\IHasher::class]);
-        });
-        # endregion - Must be remove in v4.0
-        
         // Register Nosql providers bindings
         $this->noSqlBindings();
     }
