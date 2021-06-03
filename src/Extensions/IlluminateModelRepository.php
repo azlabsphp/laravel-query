@@ -7,7 +7,7 @@ use Drewlabs\Contracts\Data\Parser\ModelAttributeParser;
 use Drewlabs\Contracts\Data\Repository\ParseableRepository;
 use Drewlabs\Contracts\EntityObject\AbstractEntityObject;
 use Drewlabs\Core\Data\Exceptions\RepositoryException;
-use Drewlabs\Core\Data\Traits\ModelRepository;
+use Drewlabs\Packages\Database\Traits\ModelRepository;
 use Drewlabs\Packages\Database\DynamicCRUDQueryHandler;
 use Psr\Container\ContainerInterface;
 use Drewlabs\Packages\Database\Contracts\TransactionUtils;
