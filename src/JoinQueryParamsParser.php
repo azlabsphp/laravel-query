@@ -2,9 +2,8 @@
 
 namespace Drewlabs\Packages\Database;
 
-use Drewlabs\Packages\Database\Contracts\IJoinQueryParser;
-
-class JoinQueryParamsParser implements IJoinQueryParser
+use Drewlabs\Contracts\Data\Parser\QueryParser;
+class JoinQueryParamsParser implements QueryParser
 {
     /**
      * {@inheritDoc}

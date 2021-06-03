@@ -4,10 +4,10 @@ namespace Drewlabs\Packages\Database\Extensions;
 
 use Drewlabs\Contracts\Data\IModelFilter;
 use Drewlabs\Contracts\Data\DataRepository\Repositories\IModelRepository;
-use Drewlabs\Packages\Database\Contracts\IJoinQueryParser;
 use Drewlabs\Packages\Database\FilterQueryParamsParser;
 use Drewlabs\Packages\Database\JoinQueryParamsParser;
 use Drewlabs\Contracts\Data\ModelFiltersInterface;
+use Drewlabs\Contracts\Data\Parser\QueryParser;
 
 class CustomQueryCriteria implements IModelFilter, ModelFiltersInterface
 {
@@ -25,11 +25,11 @@ class CustomQueryCriteria implements IModelFilter, ModelFiltersInterface
     protected $model;
 
     /**
-     * @var IJoinQueryParser
+     * @var QueryParser
      */
     private $joinQueryParser;
 
-    public function __construct(array $filter_list = null, IJoinQueryParser $joinQueryParser = null)
+    public function __construct(array $filter_list = null, QueryParser $joinQueryParser = null)
     {
         if (isset($filter_list)) {
             $this->setQueryFilters($filter_list);

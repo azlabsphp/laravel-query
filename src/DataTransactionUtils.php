@@ -3,18 +3,27 @@
 namespace Drewlabs\Packages\Database;
 
 use Drewlabs\Packages\Database\Contracts\TransactionUtils as ContractsTransactionUtils;
+use Psr\Container\ContainerInterface;
 
 class DataTransactionUtils implements ContractsTransactionUtils
 {
+    /**
+     *
+     * @var ContainerInterface
+     */
+    private $app;
+
 
     /**
      * Database utilities provider
      *
-     * @param Container $app
+     * @param ContainerInterface $app
      */
-    public function __construct()
+    public function __construct(ContainerInterface $app)
     {
+        $this->app = $app;
     }
+
     /**
      * Start a data inserting transaction
      *
@@ -22,7 +31,7 @@ class DataTransactionUtils implements ContractsTransactionUtils
      */
     public function startTransaction()
     {
-        app()['db']->beginTransaction();
+        $this->app['db']->beginTransaction();
     }
     /**
      * Commit a data inserting transaction
@@ -31,7 +40,7 @@ class DataTransactionUtils implements ContractsTransactionUtils
      */
     public function completeTransaction()
     {
-        app()['db']->commit();
+        $this->app['db']->commit();
     }
     /**
      * Cancel a data insertion transaction
@@ -40,6 +49,6 @@ class DataTransactionUtils implements ContractsTransactionUtils
      */
     public function cancel()
     {
-        app()['db']->rollback();
+        $this->app['db']->rollback();
     }
 }

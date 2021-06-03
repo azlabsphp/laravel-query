@@ -2,9 +2,9 @@
 
 namespace Drewlabs\Packages\Database;
 
-use Drewlabs\Packages\Database\Contracts\IQueryParser;
+use Drewlabs\Contracts\Data\Parser\QueryParser;
 
-class FilterQueryParamsParser implements IQueryParser
+class FilterQueryParamsParser implements QueryParser
 {
     /**
      * {@inheritDoc}

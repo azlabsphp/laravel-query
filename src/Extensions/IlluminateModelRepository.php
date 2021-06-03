@@ -2,21 +2,21 @@
 
 namespace Drewlabs\Packages\Database\Extensions;
 
-use Drewlabs\Contracts\Data\DataRepository\Services\IModelAttributesParser;
-use Drewlabs\Contracts\Data\IModelable;
-use Drewlabs\Contracts\Data\ModelInterface;
-use Drewlabs\Contracts\Data\ParseableModelRepository;
+use Drewlabs\Contracts\Data\Model\Model;
+use Drewlabs\Contracts\Data\Parser\ModelAttributeParser;
+use Drewlabs\Contracts\Data\Repository\ParseableRepository;
 use Drewlabs\Contracts\EntityObject\AbstractEntityObject;
 use Drewlabs\Core\Data\Exceptions\RepositoryException;
 use Drewlabs\Core\Data\Traits\ModelRepository;
 use Drewlabs\Packages\Database\DynamicCRUDQueryHandler;
 use Psr\Container\ContainerInterface;
 use Drewlabs\Packages\Database\Contracts\TransactionUtils;
+use Drewlabs\Contracts\Data\Repository\ModelRepository as ModelRepositoryInterface;
 
 /**
  * @package Drewlabs\Packages\Database\Extensions
  */
-final class IlluminateModelRepository extends AbstractEntityObject implements ParseableModelRepository
+final class IlluminateModelRepository extends AbstractEntityObject implements ParseableRepository, ModelRepositoryInterface
 {
     use ModelRepository;
 
@@ -29,7 +29,7 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
         $modelClass = null,
         ContainerInterface $container = null,
         TransactionUtils $transaction = null,
-        IModelAttributesParser $modelAttributesParser = null
+        ModelAttributeParser $modelAttributesParser = null
     ) {
         $illuminateContainerClazz = "Illuminate\\Container\\Container";
         $container = $container ?? (class_exists($illuminateContainerClazz) ? forward_static_call([$illuminateContainerClazz, 'getInstance']) : null);
@@ -40,10 +40,10 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
         parent::__construct([
             'container' => $container,
             'transactionUtils' => $transaction ?? $container->get(\Drewlabs\Packages\Database\Contracts\TransactionUtils::class),
-            'attribute_parser' => $modelAttributesParser ?? $container->get(IModelAttributesParser::class)
+            'attribute_parser' => $modelAttributesParser ?? $container->get(ModelAttributeParser::class)
         ]);
         if (isset($modelClass)) {
-            $this->resolveRepositoryModel($modelClass, $this->container);
+            $this->resolveModel($modelClass, $this->container);
         }
     }
 
@@ -75,13 +75,13 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
     /**
      * @return static
      */
-    private function resolveRepositoryModel($clazz = null, ContainerInterface $container = null)
+    private function resolveModel($clazz = null, ContainerInterface $container = null)
     {
         $model_class = $clazz ?? $this->getModel();
         $container = $container ?? \drewlabs_core_create_attribute_getter('container', null)($this);
         $model = $this->internalMakeModel($model_class, $container);
-        if (!(is_string($model_class)) || !($model instanceof ModelInterface)) {
-            throw new RepositoryException("Constructor parameter must be an instance of string, must be a valid class that exists, and the class must be an instance of " . IModelable::class);
+        if (!(is_string($model_class)) || !($model instanceof Model)) {
+            throw new RepositoryException("Constructor parameter must be an instance of string, must be a valid class that exists, and the class must be an instance of " . Model::class);
         }
         $this->model_instance = $model;
         $this->model_class = $model_class;
@@ -123,13 +123,13 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
      */
     public function modelAttributesParser()
     {
-        return \drewlabs_core_create_attribute_getter('attribute_parser', null)($this) ?? (\drewlabs_core_create_attribute_getter('container', null)($this))->get(IModelAttributesParser::class);
+        return \drewlabs_core_create_attribute_getter('attribute_parser', null)($this) ?? (\drewlabs_core_create_attribute_getter('container', null)($this))->get(ModelAttributeParser::class);
     }
 
     /**
      * @inheritDoc
      */
-    public function bindAttributesParser(IModelAttributesParser $parser)
+    public function bindAttributesParser(ModelAttributeParser $parser)
     {
         return \drewlabs_core_create_attribute_setter('attribute_parser', $parser)($this);
     }

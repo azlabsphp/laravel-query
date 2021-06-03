@@ -2,16 +2,21 @@
 
 namespace Drewlabs\Packages\Database\Extensions;
 
-use Drewlabs\Contracts\Data\GuardedModelInterface;
+use Drewlabs\Contracts\Data\Model\ActiveModel;
+use Drewlabs\Contracts\Data\Model\GuardedModel;
+use Drewlabs\Contracts\Data\Model\Parseable;
+use Drewlabs\Contracts\Data\Model\Relatable;
+use Drewlabs\Packages\Database\Traits\HavingBooleanAttributes;
+use Drewlabs\Packages\Database\Traits\WithHiddenModelTrait;
 use Illuminate\Database\Eloquent\Model as Eloquent;
-use Drewlabs\Contracts\Data\ModelInterface;
-use Drewlabs\Contracts\Data\ParseableModelInterface;
-use Drewlabs\Contracts\Data\RelatedModelInterface;
-abstract class EloquentModel extends Eloquent implements ModelInterface, ParseableModelInterface, RelatedModelInterface, GuardedModelInterface
+
+abstract class EloquentModel extends Eloquent implements ActiveModel, Parseable, Relatable, GuardedModel
 {
     use \Drewlabs\Packages\Database\Traits\RoutableModel;
     use \Drewlabs\Packages\Database\Traits\ModelAppendsTrait;
     use \Drewlabs\Packages\Database\Traits\GuardedModelTrait;
+    use WithHiddenModelTrait;
+    use HavingBooleanAttributes;
 
     /**
      * Fillable storage columns of an entity

@@ -7,11 +7,11 @@ use Drewlabs\Contracts\Data\IModelable;
 use Drewlabs\Core\Data\Exceptions\RepositoryException;
 use Drewlabs\Packages\Database\Contracts\TransactionUtils;
 use Drewlabs\Packages\Database\Traits\IlluminateModelRepository as IlluminateModelRepositoryTrait;
-
+use Illuminate\Container\Container;
 
 /**
  * @deprecated v3.0 The current repository implementation is deprecated and will be remove in version v4.0 implementation
- * Use {\Drewlabs\Packages\Database\Extensions\IlluminateModelRepository} class instead
+ * Use [\Drewlabs\Packages\Database\Extensions\IlluminateModelRepository] class instead
  */
 final class BaseIlluminateModelRepository extends ModelRepository
 {
@@ -40,7 +40,7 @@ final class BaseIlluminateModelRepository extends ModelRepository
         if (isset($modelClass)) {
             $this->setModel($modelClass);
         }
-        $this->transactionUtils = app(\Drewlabs\Packages\Database\Contracts\TransactionUtils::class);
+        $this->transactionUtils = Container::getInstance()->make(\Drewlabs\Packages\Database\Contracts\TransactionUtils::class);
     }
 
     public function setModel($modelClass)
@@ -64,7 +64,7 @@ final class BaseIlluminateModelRepository extends ModelRepository
      */
     protected function makeModel()
     {
-        return app($this->getModel());
+        return Container::getInstance()->make($this->getModel());
     }
 
     /**

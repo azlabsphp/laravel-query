@@ -3,15 +3,13 @@
 namespace Drewlabs\Packages\Database;
 
 use Drewlabs\Contracts\EntityObject\AbstractEntityObject;
+use Illuminate\Container\Container;
 
 class QueryParamsObject extends AbstractEntityObject
 {
     public function getJsonableAttributes()
     {
-        return [
-            'column',
-            "model"
-        ];
+        return ["column", "model"];
     }
 
     /**
@@ -43,7 +41,7 @@ class QueryParamsObject extends AbstractEntityObject
     public function toString()
     {
         $model = is_string($this->attributes['model']) ? (function_exists('app') ?
-            app($this->attributes['model'])->getTable() : (new $this->attributes['model'])->getTable()) : $this->attributes['model']->getTable();
+            Container::getInstance()->make($this->attributes['model'])->getTable() : (new $this->attributes['model'])->getTable()) : $this->attributes['model']->getTable();
         return trim(\drewlabs_core_strings_concat('.', ...array_values(array_merge([$model], isset($this->attributes['column']) ? [$this->attributes['column']] : []))));
     }
 

@@ -2,7 +2,7 @@
 
 namespace Drewlabs\Packages\Database;
 
-use Drewlabs\Contracts\Data\DataRepository\Repositories\IModelRepository;
+use Drewlabs\Contracts\Data\Repository\ModelRepository;
 use Drewlabs\Packages\Database\Contracts\TransactionUtils;
 
 class DynamicCRUDQueryHandler
@@ -15,7 +15,7 @@ class DynamicCRUDQueryHandler
 
     /**
      *
-     * @var IModelRepository
+     * @var ModelRepository
      */
     public $repository;
 
@@ -34,7 +34,7 @@ class DynamicCRUDQueryHandler
     /**
      * @return static
      */
-    public function bindRepository(IModelRepository $repository)
+    public function bindRepository(ModelRepository $repository)
     {
         return drewlabs_core_create_attribute_setter('repository', $repository)($this);
     }
@@ -52,7 +52,7 @@ class DynamicCRUDQueryHandler
      */
     public function create($relations, $values, $parse_inputs = false, $upsert = false, $conditions = [], $mass_insert = true)
     {
-        if (is_null($this->repository) || !($this->repository instanceof IModelRepository)) {
+        if (is_null($this->repository) || !($this->repository instanceof ModelRepository)) {
             throw new \RuntimeException('Calling ' . __METHOD__ . ' requires binding the repository first. Call bindRepository($repository) method before calling this method');
         }
         try {
@@ -117,7 +117,7 @@ class DynamicCRUDQueryHandler
      */
     public function update($relations, $id, $values, $parse_inputs = false, $upsert = true)
     {
-        if (is_null($this->repository) || !($this->repository instanceof IModelRepository)) {
+        if (is_null($this->repository) || !($this->repository instanceof ModelRepository)) {
             throw new \RuntimeException('Calling ' . __METHOD__ . ' requires binding the repository first. Call bindRepository($repository) method before calling this method');
         }
         try {

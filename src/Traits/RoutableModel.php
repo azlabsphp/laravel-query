@@ -2,6 +2,8 @@
 
 namespace Drewlabs\Packages\Database\Traits;
 
+use Illuminate\Container\Container;
+
 trait RoutableModel
 {
     /**
@@ -51,7 +53,7 @@ trait RoutableModel
         if (is_null($id) || is_null($idParam) || is_null($route)) {
             return null;
         }
-        return app('url')->route($route, array_merge(
+        return Container::getInstance()->make('url')->route($route, array_merge(
             array($id => $idParam),
             isset($this->routeTemplateParams) &&
                 is_array($this->routeTemplateParams) ?

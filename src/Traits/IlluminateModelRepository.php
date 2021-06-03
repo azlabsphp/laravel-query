@@ -2,8 +2,9 @@
 
 namespace Drewlabs\Packages\Database\Traits;
 
-use Drewlabs\Contracts\Data\IParsable;
-use Drewlabs\Contracts\Data\DataRepository\Services\IModelAttributesParser;
+use Drewlabs\Contracts\Data\Model\Parseable;
+use Drewlabs\Contracts\Data\Parser\ModelAttributeParser;
+use Illuminate\Container\Container;
 
 trait IlluminateModelRepository
 {
@@ -72,16 +73,15 @@ trait IlluminateModelRepository
      */
     protected function isInstanceOfIParsable()
     {
-        return $this->makeModel() instanceof IParsable;
+        return $this->makeModel() instanceof Parseable;
     }
 
     /**
-     * Undocumented function
      *
-     * @return IModelAttributesParser
+     * @return ModelAttributeParser
      */
     protected function ModelAttributesParser()
     {
-        return app(IModelAttributesParser::class);
+        return Container::getInstance()->make(ModelAttributeParser::class);
     }
 }

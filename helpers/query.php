@@ -1,23 +1,25 @@
 <?php
 
-use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Exception\BadRequestException;
+use Drewlabs\Contracts\Data\Model\Model;
+use Drewlabs\Contracts\Data\Model\Parseable;
+use Drewlabs\Contracts\Data\Model\GuardedModel;
 
 if (!function_exists('drewlabs_databse_parse_client_request_query_params')) {
+
     /**
      * Parse query provided in a client /GET request
      *
-     * @param \Drewlabs\Contracts\Data\IModelable|\Drewlabs\Contracts\Data\IGuardedModel|\Drewlabs\Contracts\Data\IParsable $model
-     * @param \Illuminate\Http\Request $request
+     * @param Model|GuardedModel|Parseable $model
+     * @param mixed $params_bag
      * @return array|mixed
      */
-    function drewlabs_databse_parse_client_request_query_params($model, \Illuminate\Http\Request $request)
+    function drewlabs_databse_parse_client_request_query_params($model, $params_bag)
     {
         $filters = [];
-        if ($request->has($model->getPrimaryKey()) && !\is_null($request->get($model->getPrimaryKey()))) {
-            $filters['where'][] = array($model->getPrimaryKey(), $request->get($model->getPrimaryKey()));
+        if ($params_bag->has($model->getPrimaryKey()) && !\is_null($params_bag->get($model->getPrimaryKey()))) {
+            $filters['where'][] = array($model->getPrimaryKey(), $params_bag->get($model->getPrimaryKey()));
         }
-        foreach ($request->all() as $key => $value) {
+        foreach ($params_bag->all() as $key => $value) {
             # code...
             $searchable = array_merge($model->getFillables(), $model->getGuardedAttributes());
             if (!empty($value)) {
@@ -66,18 +68,17 @@ if (!function_exists('drewlabs_databse_parse_client_request_query_params')) {
 if (!function_exists('drewlabs_databse_parse_client_request_query_input')) {
 
     /**
-     * Operator function that takes in an [\Illuminate\Http\Request], parse the _query object and return a filter
-     * @param Request $request
+     * Operator function that takes in an object with `get()`, `all()`, `has()` methods defined, parse the _query object and return a filter
+     * @param mixed $params_bag
      * @param array $in
      * @return array
-     * @throws BadRequestException
      * @throws InvalidArgumentException
      */
-    function drewlabs_databse_parse_client_request_query_input(\Illuminate\Http\Request $request, $in = [])
+    function drewlabs_databse_parse_client_request_query_input($params_bag, $in = [])
     {
         $filters = $in ?? [];
-        if ($request->has('_query')) {
-            $query = $request->get('_query');
+        if ($params_bag->has('_query')) {
+            $query = $params_bag->get('_query');
             $query = \drewlabs_core_strings_is_str($query) ? json_decode($query, true) : $query;
             if (!\drewlabs_core_array_is_arrayable($query) || !\drewlabs_core_array_is_assoc($query)) {
                 return $filters;
@@ -107,18 +108,18 @@ if (!function_exists('drewlabs_databse_parse_client_request_query')) {
     /**
      * Parse query provided in a client /GET request
      *
-     * @param \Drewlabs\Contracts\Data\IModelable|\Drewlabs\Contracts\Data\IGuardedModel|\Drewlabs\Contracts\Data\IParsable|string $model
-     * @param \Illuminate\Http\Request $request
+     * @param Model|GuardedModel|Parseable $model
+     * @param mixed $params_bag
      * @return array|mixed
      */
-    function drewlabs_databse_parse_client_request_query($model, \Illuminate\Http\Request $request)
+    function drewlabs_databse_parse_client_request_query($model, $params_bag)
     {
         return \drewlabs_core_fn_compose(
-            function ($param) use ($request) {
-                return \drewlabs_databse_parse_client_request_query_params($param, $request);
+            function ($param) use ($params_bag) {
+                return \drewlabs_databse_parse_client_request_query_params($param, $params_bag);
             },
-            function ($filters) use ($request) {
-                return \drewlabs_databse_parse_client_request_query_input($request, $filters);
+            function ($filters) use ($params_bag) {
+                return \drewlabs_databse_parse_client_request_query_input($params_bag, $filters);
             }
         )(\drewlabs_core_strings_is_str($model) ? new $model : $model);
     }

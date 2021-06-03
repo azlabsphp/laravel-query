@@ -7,16 +7,15 @@ use Illuminate\Database\Eloquent\Model as Eloquent;
 use Drewlabs\Contracts\Data\IParsable;
 use Drewlabs\Contracts\Data\IModelable;
 use Drewlabs\Contracts\Data\IRelatable;
-use Drewlabs\Packages\Database\Traits\IlluminateBaseModel as IlluminateBaseModelTrait;
 
 /**
- * @deprecated v2.8.x
+ * @deprecated v2.8.x Will be remove in releases from v4.0 implementations
+ * Use [Drewlabs\Packages\Database\Extensions\EloquentModel] instead
  */
 abstract class IlluminateBaseModel extends Eloquent implements IModelable, IParsable, IRelatable, IGuardedModel
 {
 
     // Default implementation of search query on the model providers
-    use IlluminateBaseModelTrait;
     use \Drewlabs\Packages\Database\Traits\RoutableModel;
     use \Drewlabs\Packages\Database\Traits\ModelAppendsTrait;
     use \Drewlabs\Packages\Database\Traits\GuardedModelTrait;
