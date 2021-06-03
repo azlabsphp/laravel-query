@@ -7,6 +7,7 @@ use Drewlabs\Contracts\Data\Model\Parseable;
 use Drewlabs\Contracts\Data\Model\Relatable;
 use Drewlabs\Core\Data\Exceptions\RepositoryException;
 use Drewlabs\Contracts\Data\Model\Model;
+use Illuminate\Support\Collection;
 
 trait ModelRepository
 {
@@ -282,7 +283,7 @@ trait ModelRepository
                 null
             )($that)->{"get"}();
             // Collect the list if it is an array
-            $list = is_array($list) ? collect($list) : $list;
+            $list = is_array($list) ? new Collection($list) : $list;
             // Loop through all the item in the list and update their field
             $list->each(function ($value) use (&$count, $values) {
                 // Then save the model to the database
@@ -335,7 +336,7 @@ trait ModelRepository
                 null
             )($that), 'get'
         ));
-        $list = is_array($list) ? collect($list) : $list;
+        $list = is_array($list) ? new Collection($list) : $list;
         $list->each(function ($value) use (&$deleted) {
             $deleted += $value->delete();
         });
