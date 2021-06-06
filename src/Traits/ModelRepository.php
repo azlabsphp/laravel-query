@@ -7,10 +7,12 @@ use Drewlabs\Contracts\Data\Model\Parseable;
 use Drewlabs\Contracts\Data\Model\Relatable;
 use Drewlabs\Core\Data\Exceptions\RepositoryException;
 use Drewlabs\Contracts\Data\Model\Model;
+use Drewlabs\Core\Support\Traits\Overloadable;
 use Illuminate\Support\Collection;
 
 trait ModelRepository
 {
+    use Overloadable;
 
     /**
      * {@inheritDoc}
@@ -128,26 +130,56 @@ trait ModelRepository
     /**
      * @inheritDoc
      */
-    public function insert(array $values, bool $_ = false, $upsert = false, $upsertConditions = [])
+    public function insert(...$args)
     {
-        $that = $this;
-        $values = $that->parseInputValues($values);
-        $result =  $upsert ?  call_user_func_array(
-            [\drewlabs_core_create_attribute_getter('model_instance', null)($that), 'updateOrCreate'],
+        return $this->overload($args, [
+            'insertV1',
+            'insertV2',
+            'insertv3'
+        ]);
+    }
+
+    public function insertV1(array $values, bool $parse_inputs = false, $upsert = false, array $upsertConditions = [])
+    {
+        if ($upsert) {
+            return $this->insertv3($values ?? [], $upsertConditions ?? []);
+        }
+        return $this->insertV2($values);
+    }
+
+    public function insertV2(array $values)
+    {
+        return \drewlabs_core_create_attribute_getter('model_instance', null)($this)->add($values);
+    }
+
+    public function insertv3(array $values, array $conditions)
+    {
+        return call_user_func_array(
+            [\drewlabs_core_create_attribute_getter('model_instance', null)($this), 'updateOrCreate'],
             [
-                !empty($upsertConditions) ? $upsertConditions : $values,
+                !empty($conditions) ? $conditions : $values,
                 $values
             ]
-        ) :
-            \drewlabs_core_create_attribute_getter('model_instance', null)($that)->add($values);
-        // $that->resetScope();
-        return $result;
+        );
     }
 
     /**
      * @inheritDoc
      */
-    public function insertMany(array $values, $_ = true)
+    public function insertMany(...$args)
+    {
+        return $this->overload($args, [
+            'insertManyV1',
+            'insertManyV2'
+        ]);
+    }
+
+    public function insertManyV1(array $values, bool $parse_inputs)
+    {
+        return $this->insertManyV2($values);
+    }
+
+    public function insertManyV2($values)
     {
         if (\array_filter($values, 'is_array') === $values) {
             $list = array();
@@ -208,44 +240,71 @@ trait ModelRepository
                 $columns
             ]
         );
-        // $that->resetScope();
         return $list;
     }
 
     /**
-     * @inheritDoc
+     * Query for a row/rows from the database using user provided argument
+     *
+     * @param array ..$args
      */
-    public function find(array $conditions = array(), array $columns = array('*'))
+    public function find(...$args)
+    {
+        return $this->overload($args, [
+            'findByIntId',
+            'findByStringID',
+            'findByArrayConditions',
+            'findFromFilters'
+        ]);
+    }
+
+    public function findByStringID(string $id, array $columns = ['*'])
+    {
+        $model = $this->makeModel();
+        $that = $this->applyQueryRelationOnSingleRowSelection();
+        return $that->findByArrayConditions(array(array($model->getPrimaryKey(), $id)), $columns)->first();
+    }
+
+    public function findByIntId(int $id, array $columns = ['*'])
+    {
+        return $this->findByStringID((string)$id, $columns);
+    }
+
+    public function findByArrayConditions(array $conditions, array $columns = ['*'])
     {
         $that = $this;
         $model = $that->makeModel();
         $query_model_relation = \drewlabs_core_create_attribute_getter('query_model_relation', false)($that);
-        $that =  $query_model_relation ? $that->loadWith(method_exists(
-            $model,
-            'getModelRelationLoadersNames'
-        ) ? call_user_func(array($model, 'getModelRelationLoadersNames')) : []) : clone $that;
-        $result = \drewlabs_core_create_attribute_getter(
+        return \drewlabs_core_create_attribute_getter(
             'model_instance',
             null
-        )($that->applyWhereQuery($conditions))->get($columns);
-        // $that->resetScope();
-        return $result;
+        )(($query_model_relation ? $that->loadWith(method_exists(
+            $model,
+            'getModelRelationLoadersNames'
+        ) ? call_user_func(array($model, 'getModelRelationLoadersNames')) : []) : clone $that)->applyWhereQuery($conditions))->get($columns);
+    }
+
+    public function findFromFilters(array $columns = ['*'])
+    {
+        // Create the model instance
+        $model = $this->makeModel();
+        $that = $this->applyFilter();
+        $query_model_relation = \drewlabs_core_create_attribute_getter('query_model_relation', false)($that);
+        return \drewlabs_core_create_attribute_getter(
+            'model_instance',
+            null
+        )($query_model_relation ? $that->loadWith(method_exists(
+            $model,
+            'getModelRelationLoadersNames'
+        ) ? call_user_func(array($model, 'getModelRelationLoadersNames')) : []) : clone $that)->get($columns);
     }
 
     /**
-     * @inheritDoc
+     * @deprecated v3.0.1 Use the {@see find()} overloaded method that takes in an id
      */
-    public function findById($id, array $columns = array('*'))
+    public function findById(int $id, array $columns = ['*'])
     {
-        $that = $this;
-        $model = $that->makeModel();
-        $prop = \drewlabs_core_create_attribute_getter('ignore_relations_on_single_model', false)($that);
-        if (!$prop) {
-            $that = $that->queryRelation(true);
-        }
-        $result = $that->find(array(array($model->getPrimaryKey(), $id)), $columns)->first();
-        // $that->resetScope();
-        return $result;
+        return $this->findByIntId($id, $columns);
     }
 
     /**
@@ -253,56 +312,105 @@ trait ModelRepository
      */
     public function updateById($id, array $data, bool $parse_inputs = true)
     {
-        $count = 0;
-        $that = $this;
-        $model = $that->makeModel();
-        $result = $that->queryRelation(false)->find(array(array($model->getPrimaryKey(), $id)))->first();
-        if ($result) {
-            if ($parse_inputs) {
-                $data = $that->parseInputValues($data);
-            }
-            $count = intval($result->update($data));
-        }
-        // $that->resetScope();
-        return $count;
+        return $this->updateByIntID($id, $data);
     }
 
     /**
      * @inheritDoc
      */
-    public function update(array $values, array $conditions = array(), bool $parse_inputs = true, bool $mass_update =  false)
+    public function update(...$args)
     {
-        $self = $this;
-        $count = 0;
-        if ($parse_inputs) {
-            $values = $self->parseInputValues($values);
-        }
-        $that = $self->applyWhereQuery($conditions);
-        if ($mass_update) {
-            // If should mass update the model, mass update it
-            $count =  \call_user_func(array(
-                \drewlabs_core_create_attribute_getter(
-                    'model_instance',
-                    null
-                )($that), 'update'
-            ), $values);
-        } else {
-            //  Get the list of models that matches the query
-            $list = \drewlabs_core_create_attribute_getter(
+        return $this->overload($args, [
+            'updateByStringID',
+            'updateByIntID',
+            'updateFromFilters',
+            'updateFromFilters_',
+            'updateFromConditions',
+            'updateFromConditions_'
+        ]);
+    }
+
+    public function updateByStringID(string $id, $attributes = [])
+    {
+        $that = $this;
+        $model = $that->makeModel();
+        $attributes = $that->parseInputValues($attributes);
+        $result = $that->queryRelation(false)->findByArrayConditions(
+            array(
+                array($model->getPrimaryKey(), $id)
+            )
+        )->first();
+        return is_null($result) ? 0 : intval($result->update($attributes));
+    }
+
+    public function updateByIntID(int $id, array $attributes = [])
+    {
+        return $this->updateByStringID((string)$id, $attributes);
+    }
+
+    public function updateFromFilters(array $values)
+    {
+        $values = $this->parseInputValues($values);
+        return \call_user_func(array(
+            \drewlabs_core_create_attribute_getter(
                 'model_instance',
                 null
-            )($that)->{"get"}();
-            // Collect the list if it is an array
+            )($this->applyFilter()), 'update'
+        ), $values);
+    }
+
+    public function updateFromFilters_(array $values, bool $hot_operation = false)
+    {
+        if (!$hot_operation) {
+            $values = $this->parseInputValues($values);
+            $list = $this->findFromFilters();
             $list = is_array($list) ? new Collection($list) : $list;
             // Loop through all the item in the list and update their field
-            $list->each(function ($value) use (&$count, $values) {
+            return $list->reduce(function ($carr, $model) use ($values) {
                 // Then save the model to the database
-                \call_user_func(array($value, 'update'), $values);
-                $count++;
-            });
+                $model = array_reduce(array_keys($values), function ($carr, $curr) use ($values) {
+                    call_user_func_array([$carr, 'setAttribute'], [$curr, $values[$curr]]);
+                    return $carr;
+                }, $model);
+                \call_user_func(array($model, 'save'), []);
+                $carr += 1;
+                return $carr;
+            }, 0);
         }
-        // $that->resetScope();
-        return $count;
+        return $this->updateFromFilters($values);
+    }
+
+    public function updateFromConditions(array $values, array $conditions = [])
+    {
+        $values = $this->parseInputValues($values);
+        return \call_user_func(array(
+            \drewlabs_core_create_attribute_getter(
+                'model_instance',
+                null
+            )($this->applyWhereQuery($conditions)), 'update'
+        ), $values);
+    }
+
+    public function updateFromConditions_(array $values, array $conditions, bool $hot_operation = false)
+    {
+        if (!$hot_operation) {
+            $values = $this->parseInputValues($values);
+            $list = $this->findByArrayConditions($conditions);
+            $list = is_array($list) ? new Collection($list) : $list;
+            // Loop through all the item in the list and update their field
+            return $list->reduce(function ($carr, $model) use ($values) {
+                // Then save the model to the database
+                $model = array_reduce(array_keys($values), function ($carr, $curr) use ($values) {
+                    call_user_func_array([$carr, 'setAttribute'], [$curr, $values[$curr]]);
+                    return $carr;
+                }, $model);
+                \call_user_func(array($model, 'save'), []);
+                // \call_user_func(array($value, 'update'), $values);
+                $carr += 1;
+                return $carr;
+            }, 0);
+        }
+        return $this->updateFromConditions($values, $conditions);
     }
 
     /**
@@ -310,48 +418,98 @@ trait ModelRepository
      */
     public function deleteById($id)
     {
-        $that = $this;
-        $model = $that->makeModel();
-        $result = $that->queryRelation(false)->find(array(array($model->getPrimaryKey(), $id)))->first();
-        $count = 0;
-        if ($result) {
-            // Then save the model to the database
-            \call_user_func(array($result, 'delete'));
-            $count = 1;
-        }
-        // $that->resetScope();
-        return $count;
+        return $this->deleteByIntID($id);
     }
 
     /**
      * @inheritDoc
      */
-    public function delete(array $conditions = array(), bool $mass_delete =  false)
+    public function delete(...$args)
     {
-        $deleted = 0;
-        // Perform a mass delete on each element of the list of model
-        $that = $this->applyWhereQuery($conditions);
-        // Perform a mass delete operation
-        if ($mass_delete) {
-            $deleted = \call_user_func(
+        return $this->overload($args, [
+            'deleteByStringID',
+            'deleteByIntID',
+            'deleteFromFilters',
+            'deleteFromFilters_',
+            'deleteFromConditions',
+            'deleteFromConditions_'
+        ]);
+    }
+
+
+
+    public function deleteByStringID(string $id)
+    {
+        $that = $this;
+        $model = $that->makeModel();
+        $result = $that->queryRelation(false)->findByArrayConditions(
+            array(
                 array(
-                    \drewlabs_core_create_attribute_getter('model_instance', null)($that), 'delete'
+                    $model->getPrimaryKey(),
+                    $id
                 )
-            );
-        } else {
-            $list = \call_user_func(array(
+            )
+        )->first();
+        // Then save the model to the database
+        return !is_null($result) ? intval(\call_user_func(array($result, 'delete'))) : 0;
+    }
+
+    public function deleteByIntID(int $id)
+    {
+        return $this->deleteByStringID((string)$id);
+    }
+
+    public function deleteFromFilters()
+    {
+        \call_user_func(
+            array(
+                \drewlabs_core_create_attribute_getter('model_instance', null)($this->applyFilter()), 'delete'
+            )
+        );
+        return intval(true);
+    }
+
+    public function deleteFromFilters_(bool $hot_operation = false)
+    {
+        if (!$hot_operation) {
+            $list = $this->findFromFilters();
+            $list = is_array($list) ? new Collection($list) : $list;
+            // Loop through all the item in the list and delete their field
+            return $list->reduce(function ($carr, $model) {
+                \call_user_func(array($model, 'delete'), []);
+                $carr += 1;
+                return $carr;
+            }, 0);
+        }
+        return $this->deleteFromFilters();
+    }
+
+    public function deleteFromConditions(array $conditions = [])
+    {
+        return \call_user_func(
+            array(
                 \drewlabs_core_create_attribute_getter(
                     'model_instance',
                     null
-                )($that), 'get'
-            ));
+                )($this->applyWhereQuery($conditions)), 'delete'
+            ),
+            []
+        );
+    }
+
+    public function deleteFromConditions_(array $conditions, bool $hot_operation = false)
+    {
+        if (!$hot_operation) {
+            $list = $this->findByArrayConditions($conditions);
             $list = is_array($list) ? new Collection($list) : $list;
-            $list->each(function ($value) use (&$deleted) {
-                $deleted += $value->delete();
-            });
+            // Loop through all the item in the list and delete their field
+            return $list->reduce(function ($carr, $model) {
+                \call_user_func(array($model, 'delete'), []);
+                $carr += 1;
+                return $carr;
+            }, 0);
         }
-        // $that->resetScope();
-        return $deleted;
+        return $this->deleteFromConditions($conditions);
     }
 
     private function applyWhereQuery($conditions)
@@ -377,5 +535,11 @@ trait ModelRepository
             )($self);
         }
         return $that;
+    }
+
+    private function applyQueryRelationOnSingleRowSelection()
+    {
+        $prop = \drewlabs_core_create_attribute_getter('ignore_relations_on_single_model', false)($this);
+        return !$prop ? $this->queryRelation(true) : $this;
     }
 }

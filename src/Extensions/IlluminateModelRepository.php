@@ -15,6 +15,31 @@ use Drewlabs\Contracts\Data\Repository\ModelRepository as ModelRepositoryInterfa
 
 /**
  * @package Drewlabs\Packages\Database\Extensions
+ * 
+ * @method mixed insert(array $values, bool $parse_inputs = false, $upsert = false, $conditions = array())
+ * @method mixed insert(array $values, array $conditions)
+ * @method mixed insert(array $values)
+ * 
+ * @method mixed insertMany(array $values, bool $parse_inputs)
+ * @method mixed insertMany(array $values)
+ * 
+ * @method Drewlabs\Contracts\Data\Model\Model|mixed find(string $id, array $columns = ['*'])
+ * @method Drewlabs\Contracts\Data\Model\Model|mixed find(int $id, array $columns = ['*'])
+ * @method Drewlabs\Contracts\Data\Model\Model[]|mixed find(array $conditions = [], array $columns = ['*'])
+ * 
+ * @method int update(string $id, $attributes = [])
+ * @method int update(int $id, array $attributes = [])
+ * @method int update(array $values)
+ * @method int update(array $values, bool $hot_operation = false)
+ * @method int update(array $values, array $conditions = [])
+ * @method int update(array $values, array $conditions = [], bool $hot_operation = false)
+ * @method int|mixed delete(string $id)
+ * @method int|mixed delete(int $id)
+ * @method int|mixed delete()
+ * @method int|mixed delete(bool $hot_operation = false)
+ * @method int|mixed delete(array $conditions = [])
+ * @method int|mixed delete(array $conditions, bool $hot_operation = false)
+ * 
  */
 final class IlluminateModelRepository extends AbstractEntityObject implements ParseableRepository, ModelRepositoryInterface
 {
@@ -64,7 +89,6 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
 
     public function deserializeModelClassAttribute($value)
     {
-
     }
 
     public function setModel($modelClass)
