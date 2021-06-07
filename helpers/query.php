@@ -232,7 +232,7 @@ if (!function_exists('drewlabs_database_parse_order_by_query')) {
 if (!function_exists('drewlabs_database_parse_in_query')) {
     function drewlabs_database_parse_in_query(array $query)
     {
-        if (!\drewlabs_core_array_is_assoc($query) && \drewlabs_core_array_is_array_list($query)) {
+        if (!\drewlabs_core_array_is_assoc($query) && \drewlabs_core_array_is_no_assoc_array_list($query)) {
             // The provided query parameters is an array
             return array_map(function ($q) {
                 return \drewlabs_database_parse_in_query($q);
@@ -256,7 +256,7 @@ if (!function_exists('drewlabs_database_parse_client_where_query')) {
 
     function drewlabs_database_parse_client_where_query(array $query)
     {
-        if (!\drewlabs_core_array_is_assoc($query) && \drewlabs_core_array_is_array_list($query)) {
+        if (!\drewlabs_core_array_is_assoc($query) && \drewlabs_core_array_is_no_assoc_array_list($query)) {
             // The provided query parameters is an array
             return array_map(function ($q) {
                 return \drewlabs_database_parse_client_where_query($q);
@@ -299,7 +299,7 @@ if (!function_exists('drewlabs_database_client_parse_subquery')) {
 
     function drewlabs_database_client_parse_subquery(array $query)
     {
-        if (!\drewlabs_core_array_is_assoc($query) && \drewlabs_core_array_is_array_list($query)) {
+        if (!\drewlabs_core_array_is_assoc($query) && \drewlabs_core_array_is_no_assoc_array_list($query)) {
             return array_map(function ($params) {
                 return [
                     $params['column'],

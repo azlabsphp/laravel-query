@@ -188,7 +188,10 @@ trait ModelRepository
             foreach ($values as $value) {
                 // Set timestamps values in case of bulk assignement
                 $value = $that->parseInputValues($value);
-                $value = array_merge($value, array('updated_at' => date('Y-m-d H:i:s'), 'created_at' => date('Y-m-d H:i:s')));
+                $value = array_merge(
+                    $value,
+                    array('updated_at' => date('Y-m-d H:i:s'), 'created_at' => date('Y-m-d H:i:s'))
+                );
                 $list[] = $value;
             }
             $result = \drewlabs_core_create_attribute_getter('model_instance', null)($that)->{"insert"}($list);
@@ -517,7 +520,7 @@ trait ModelRepository
         $self = $this;
         if (empty($conditions)) {
             $that = $self->applyFilter();
-        } else if (drewlabs_core_array_is_array_list($conditions)) {
+        } else if (drewlabs_core_array_is_no_assoc_array_list($conditions)) {
             $that = \drewlabs_core_create_attribute_setter(
                 'model_instance',
                 \drewlabs_core_create_attribute_getter(
