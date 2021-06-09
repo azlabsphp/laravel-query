@@ -2,7 +2,7 @@
 
 namespace Drewlabs\Packages\Database;
 
-use Drewlabs\Contracts\Data\ModelFiltersInterface;
+use Drewlabs\Contracts\Data\Filters\FiltersInterface;
 use Drewlabs\Contracts\Data\Parser\ModelAttributeParser as ModelAttributesParserContract;
 use Drewlabs\Core\Data\Services\ModelAttributesParser;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
@@ -39,7 +39,7 @@ class ServiceProvider extends BaseServiceProvider
         $this->app->singleton(TransactionUtils::class, function ($app) {
             return new DataTransactionUtils($app);
         });
-        $this->app->bind(ModelFiltersInterface::class, CustomQueryCriteria::class);
+        $this->app->bind(FiltersInterface::class, CustomQueryCriteria::class);
 
         $this->app->bind(ModelAttributesParserContract::class, ModelAttributesParser::class);
         
