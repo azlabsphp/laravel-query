@@ -48,7 +48,7 @@ use Illuminate\Contracts\Pagination\Paginator;
  * @method \Drewlabs\Contracts\Data\Model\Model|mixed update(string $id, $attributes, \Closure $dto_transform_fn = null)
  * @method \Drewlabs\Contracts\Data\Model\Model|mixed update(string $id, $attributes, $params, \Closure $dto_transform_fn = null)
  */
-class EloquentDMLQueryManager implements DMLProvider
+class EloquentDMLManager implements DMLProvider
 {
 
     use ForwardsCalls;
