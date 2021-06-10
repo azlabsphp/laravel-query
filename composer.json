@@ -22,7 +22,8 @@
         "illuminate/pagination": "^8.45"
     },
     "require-dev": {
-        "phpunit/phpunit": "^9.0"
+        "phpunit/phpunit": "^9.0",
+        "phpbench/phpbench": "^1.0"
     },
     "autoload": {
         "psr-4": {
