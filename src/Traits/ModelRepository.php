@@ -157,7 +157,7 @@ trait ModelRepository
         return call_user_func_array(
             [\drewlabs_core_create_attribute_getter('model_instance', null)($this), 'updateOrCreate'],
             [
-                !empty($conditions) ? $conditions : $values,
+                !empty($conditions) ? $conditions : [],
                 $values
             ]
         );
@@ -169,9 +169,15 @@ trait ModelRepository
     public function insertMany(...$args)
     {
         return $this->overload($args, [
+            'insertManyV0',
             'insertManyV1',
             'insertManyV2'
         ]);
+    }
+
+    public function insertManyV0(array $values, bool $parse_inputs = false, bool $_ = false, array $__ = [])
+    {
+        return $this->insertManyV1($values, $parse_inputs);
     }
 
     public function insertManyV1(array $values, bool $parse_inputs)
@@ -315,7 +321,7 @@ trait ModelRepository
      */
     public function updateById($id, array $data, bool $parse_inputs = true)
     {
-        return $this->updateByIntID($id, $data);
+        return $this->updateV1($id, $data);
     }
 
     /**
@@ -324,16 +330,24 @@ trait ModelRepository
     public function update(...$args)
     {
         return $this->overload($args, [
-            'updateByStringID',
-            'updateByIntID',
-            'updateFromFilters',
-            'updateFromFilters_',
-            'updateFromConditions',
-            'updateFromConditions_'
+            'updateV1',
+            'updateV1_1',
+            'updateV2',
+            'updateV2_1',
+            'updateV3',
+            'updateV4',
+            'updateV5',
+            'updateV6',
+            'updateV7'
         ]);
     }
 
-    public function updateByStringID(string $id, $attributes = [])
+    public function updateV1_1(string $id, $attributes = [], bool $_, bool $__ = true)
+    {
+        return $this->updateV1($id, $attributes);
+    }
+
+    public function updateV1(string $id, $attributes = [])
     {
         $that = $this;
         $model = $that->makeModel();
@@ -346,12 +360,17 @@ trait ModelRepository
         return is_null($result) ? 0 : intval($result->update($attributes));
     }
 
-    public function updateByIntID(int $id, array $attributes = [])
+    public function updateV2_1(int $id, $attributes = [], bool $_, bool $__ = true)
     {
-        return $this->updateByStringID((string)$id, $attributes);
+        return $this->updateV2($id, $attributes);
     }
 
-    public function updateFromFilters(array $values)
+    public function updateV2(int $id, array $attributes = [])
+    {
+        return $this->updateV1((string)$id, $attributes);
+    }
+
+    public function updateV3(array $values)
     {
         $values = $this->parseInputValues($values);
         return \call_user_func(array(
@@ -362,7 +381,7 @@ trait ModelRepository
         ), $values);
     }
 
-    public function updateFromFilters_(array $values, bool $hot_operation = false)
+    public function updateV4(array $values, bool $hot_operation = false)
     {
         if (!$hot_operation) {
             $values = $this->parseInputValues($values);
@@ -380,10 +399,10 @@ trait ModelRepository
                 return $carr;
             }, 0);
         }
-        return $this->updateFromFilters($values);
+        return $this->updateV3($values);
     }
 
-    public function updateFromConditions(array $values, array $conditions = [])
+    public function updateV5(array $values, array $conditions = [])
     {
         $values = $this->parseInputValues($values);
         return \call_user_func(array(
@@ -394,7 +413,16 @@ trait ModelRepository
         ), $values);
     }
 
-    public function updateFromConditions_(array $values, array $conditions, bool $hot_operation = false)
+    /**
+     * @deprecated v3.1
+     * Provides support for previous signature of the update method on query filters
+     */
+    public function updateV6(array $values, array $conditions, bool $_ = true, bool $hot_operation = false)
+    {
+        return $this->updateV7($values, $conditions, $hot_operation);
+    }
+
+    public function updateV7(array $values, array $conditions, bool $hot_operation = false)
     {
         if (!$hot_operation) {
             $values = $this->parseInputValues($values);
@@ -413,7 +441,7 @@ trait ModelRepository
                 return $carr;
             }, 0);
         }
-        return $this->updateFromConditions($values, $conditions);
+        return $this->updateV5($values, $conditions);
     }
 
     /**
