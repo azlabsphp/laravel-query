@@ -3,13 +3,13 @@
 namespace Drewlabs\Packages\Database;
 
 use Drewlabs\Packages\Database\Contracts\TransactionUtils as ContractsTransactionUtils;
+use Illuminate\Container\Container;
 use Psr\Container\ContainerInterface;
-
 class DataTransactionUtils implements ContractsTransactionUtils
 {
     /**
      *
-     * @var ContainerInterface
+     * @var Container
      */
     private $app;
 
@@ -17,11 +17,11 @@ class DataTransactionUtils implements ContractsTransactionUtils
     /**
      * Database utilities provider
      *
-     * @param ContainerInterface $app
+     * @param Container $app
      */
-    public function __construct(ContainerInterface $app)
+    public function __construct(ContainerInterface $app = null)
     {
-        $this->app = $app;
+        $this->app = $app ?? Container::getInstance();
     }
 
     /**
