@@ -39,6 +39,8 @@ use Illuminate\Contracts\Pagination\Paginator;
  * @method \Illuminate\Contracts\Pagination\Paginator select(array $query, int $per_page, $page = null, \Closure $callback = null)
  * @method \Illuminate\Contracts\Pagination\Paginator select(array $query, bool $load_relations, int $per_page, $page = null, \Closure $callback = null)
  * @method \Illuminate\Contracts\Pagination\Paginator select(array $query, array $relations, int $per_page, $page = null, \Closure $callback = null)
+ * @method \Illuminate\Contracts\Pagination\Paginator select(array $query, array $relations, int $per_page, $columns = ['*'], $page = null, \Closure $callback = null)
+ * @method \Illuminate\Contracts\Pagination\Paginator select(array $query, bool $load_relations, int $per_page, $columns = ['*'], $page = null, \Closure $callback = null)
  * @method int selectAggregate(array $query = [], string $aggregation = \Drewlabs\Packages\Database\DatabaseQueryBuilderAggregationMethodsEnum::COUNT)
  * 
  * @method int update(array $query, $attributes = [])
@@ -340,8 +342,11 @@ class EloquentDMLManager implements DMLProvider
                 'selectV4',
                 'selectV5',
                 'selectV6',
+                'selectV6_1',
                 'selectV7',
+                'selectV7_1',
                 'selectV8',
+                'selectV8_1',
                 'selectV0'
             ]);
         });
@@ -413,10 +418,24 @@ class EloquentDMLManager implements DMLProvider
      * @param \Closure|null $callback
      * @return DataProviderQueryResultInterface
      */
-    public function selectV4(array $query, bool $load_relations, array $columns = ['*'], \Closure $callback = null)
+    public function selectV4(array $query, bool $load_relations, array $columns = ['*'], \Closure $callback = null, \Closure $cb = null)
     {
         return $this->selectV5($query, $load_relations ? call_user_func([$this->model, 'getModelRelationLoadersNames']) : [], $columns, $callback);
     }
+
+    // /**
+    //  *
+    //  * @param array $query
+    //  * @param boolean $load_relations
+    //  * @param array $columns
+    //  * @param \Closure|null $callback
+    //  * @param ...$leading
+    //  * @return DataProviderQueryResultInterface
+    //  */
+    // public function selectV4_1(array $query, bool $load_relations, array $columns = ['*'], \Closure $callback = null)
+    // {
+    //     return $this->selectV4($query, $load_relations ? call_user_func([$this->model, 'getModelRelationLoadersNames']) : [], $columns, $callback);
+    // }
 
     /**
      *
@@ -462,6 +481,21 @@ class EloquentDMLManager implements DMLProvider
     {
         return $this->selectV7($query, false, $per_page, $page, $callback);
     }
+        
+    /**
+     * Handle pagination functionality
+     * 
+     * @param array $query
+     * @param int $per_page
+     * @param array $columns
+     * @param int $page
+     * @param \Closure|null $callback
+     * @return Paginator
+     */
+    public function selectV6_1(array $query, int $per_page, array $columns = ['*'], $page = null, \Closure $callback = null)
+    {
+        return $this->selectV7_1($query, false, $per_page, $columns, $page, $callback);
+    }
 
     /**
      * Handle pagination functionality
@@ -478,6 +512,23 @@ class EloquentDMLManager implements DMLProvider
         return $this->selectV8($query, $load_relations ? call_user_func([$this->model, 'getModelRelationLoadersNames']) : [], $per_page, $page, $callback);
     }
 
+
+    /**
+     * Handle pagination functionality
+     * 
+     * @param array $query
+     * @param bool $load_relations
+     * @param int $per_page
+     * @param array $columns
+     * @param int $page
+     * @param \Closure|null $callback
+     * @return Paginator
+     */
+    public function selectV7_1(array $query, bool $load_relations, int $per_page, $columns = ['*'], $page = null, \Closure $callback = null)
+    {
+        return $this->selectV8_1($query, $load_relations ? call_user_func([$this->model, 'getModelRelationLoadersNames']) : [], $per_page, $columns, $page, $callback);
+    }
+
     /**
      * Handle pagination functionality
      * 
@@ -489,6 +540,21 @@ class EloquentDMLManager implements DMLProvider
      * @return Paginator
      */
     public function selectV8(array $query, array $relations, int $per_page, $page = null, \Closure $callback = null)
+    {
+        return $this->selectV8_1($query, $relations, $per_page, [], $page, $callback);
+    }
+
+    /**
+     * Handle pagination functionality
+     * 
+     * @param array $query
+     * @param array $relations
+     * @param int $per_page
+     * @param int $page
+     * @param \Closure|null $callback
+     * @return Paginator
+     */
+    public function selectV8_1(array $query, array $relations, int $per_page, $columns = ['*'], $page = null, \Closure $callback = null)
     {
         $callback = $callback ?? function ($value) {
             return $value;
@@ -504,7 +570,7 @@ class EloquentDMLManager implements DMLProvider
                     [$relations]
                 ) : $builder,
                 EloquentQueryBuilderMethodsEnum::PAGINATE,
-                [$per_page, $page]
+                [$per_page]
             )
         );
     }
