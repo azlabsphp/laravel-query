@@ -30,17 +30,22 @@ use Illuminate\Contracts\Pagination\Paginator;
  * @method int delete(array $query)
  * @method int delete(array $query, bool $bulkstatement)
  * 
- * @method \Drewlabs\Contracts\Data\DataProviderQueryResultInterface|mixed select()
+ * @method \Drewlabs\Contracts\Data\DataProviderQueryResultInterface|mixed selectV0()
  * @method \Drewlabs\Contracts\Data\Model\Model|mixed select(string $id, array $columns = ['*'], \Closure $callback = null)
+ * @method \Drewlabs\Contracts\Data\Model\Model|mixed select(string $id, \Closure $callback = null)
  * @method \Drewlabs\Contracts\Data\Model\Model|mixed select(int $id, array $columns = ['*'], \Closure $callback = null)
+ * @method \Drewlabs\Contracts\Data\Model\Model|mixed select(int $id, \Closure $callback = null)
  * @method \Drewlabs\Contracts\Data\DataProviderQueryResultInterface|mixed select(array $query, array $columns = ['*'], \Closure $callback = null)
- * @method \Drewlabs\Contracts\Data\DataProviderQueryResultInterface|mixed select(array $query, bool $load_relations, array $columns = ['*'], \Closure $callback = null)
+ * @method \Drewlabs\Contracts\Data\DataProviderQueryResultInterface|mixed select(array $query, \Closure $callback = null)
+ * @method \Drewlabs\Contracts\Data\DataProviderQueryResultInterface|mixed select(array $query, bool $load_relations, array $columns = ['*'], \Closure $callback = null, \Closure $cb = null)
+ * @method \Drewlabs\Contracts\Data\DataProviderQueryResultInterface|mixed select(array $query, bool $load_relations, \Closure $callback = null, \Closure $cb = null)
  * @method \Drewlabs\Contracts\Data\DataProviderQueryResultInterface|mixed select(array $query, array $relations, array $columns = ['*'], \Closure $callback = null)
- * @method \Illuminate\Contracts\Pagination\Paginator select(array $query, int $per_page, $page = null, \Closure $callback = null)
- * @method \Illuminate\Contracts\Pagination\Paginator select(array $query, bool $load_relations, int $per_page, $page = null, \Closure $callback = null)
- * @method \Illuminate\Contracts\Pagination\Paginator select(array $query, array $relations, int $per_page, $page = null, \Closure $callback = null)
- * @method \Illuminate\Contracts\Pagination\Paginator select(array $query, array $relations, int $per_page, $columns = ['*'], $page = null, \Closure $callback = null)
- * @method \Illuminate\Contracts\Pagination\Paginator select(array $query, bool $load_relations, int $per_page, $columns = ['*'], $page = null, \Closure $callback = null)
+ * @method \Illuminate\Contracts\Pagination\Paginator|mixed select(array $query, int $per_page, int $page = null, \Closure $callback = null)
+ * @method \Illuminate\Contracts\Pagination\Paginator|mixed select(array $query, int $per_page, array $columns = ['*'], int $page = null, \Closure $callback = null)
+ * @method \Illuminate\Contracts\Pagination\Paginator|mixed select(array $query, bool $load_relations, int $per_page, int $page = null, \Closure $callback = null)
+ * @method \Illuminate\Contracts\Pagination\Paginator|mixed select(array $query, bool $load_relations, int $per_page, array $columns = ['*'], int $page = null, \Closure $callback = null)
+ * @method \Illuminate\Contracts\Pagination\Paginator|mixed select(array $query, array $relations, int $per_page, int $page = null, \Closure $callback = null)
+ * @method \Illuminate\Contracts\Pagination\Paginator|mixed select(array $query, array $relations, int $per_page, array $columns = ['*'], int $page = null, \Closure $callback = null)
  * @method int selectAggregate(array $query = [], string $aggregation = \Drewlabs\Packages\Database\DatabaseQueryBuilderAggregationMethodsEnum::COUNT)
  * 
  * @method int update(array $query, $attributes = [])
@@ -297,7 +302,9 @@ class EloquentDMLManager implements DMLProvider
             );
         } else {
             // Select the matching columns
-            $collection = $this->selectV5($query, [])->getCollection();
+            $collection = $this->selectV3_1($query, function ($result) {
+                return $result->getCollection();
+            });
             // Loop through the matching columns and update each
             return (is_array($collection) ? (new Collection($collection)) : $collection)->reduce(function ($carry, $value) {
                 $this->forwardCallTo(
@@ -345,7 +352,6 @@ class EloquentDMLManager implements DMLProvider
                 'selectV4',
                 'selectV4_1',
                 'selectV5',
-                'selectV5_1',
                 'selectV6',
                 'selectV6_1',
                 'selectV7',
@@ -366,7 +372,7 @@ class EloquentDMLManager implements DMLProvider
         $callback = $callback ?? function ($value) {
             return $value;
         };
-        return $callback($this->selectV3([]));
+        return $callback($this->selectV3_1([]));
     }
 
     /**
@@ -445,7 +451,7 @@ class EloquentDMLManager implements DMLProvider
      */
     public function selectV3_1(array $query, \Closure $callback = null)
     {
-        return $this->selectV4($query, false, ['*'], $callback);
+        return $this->selectV5($query, [], ['*'], $callback);
     }
 
     /**
@@ -505,18 +511,6 @@ class EloquentDMLManager implements DMLProvider
     }
 
     /**
-     *
-     * @param array $query
-     * @param array $relations
-     * @param \Closure|null $callback
-     * @return DataProviderQueryResultInterface
-     */
-    public function selectV5_1(array $query, array $relations, \Closure $callback = null)
-    {
-        return $this->selectV5($query, $relations, ['*'], $callback);
-    }
-
-    /**
      * Handle pagination functionality
      * 
      * @param array $query
@@ -525,7 +519,7 @@ class EloquentDMLManager implements DMLProvider
      * @param \Closure|null $callback
      * @return Paginator
      */
-    public function selectV6(array $query, int $per_page, $page = null, \Closure $callback = null)
+    public function selectV6(array $query, int $per_page, int $page = null, \Closure $callback = null)
     {
         return $this->selectV7($query, false, $per_page, $page, $callback);
     }
@@ -540,7 +534,7 @@ class EloquentDMLManager implements DMLProvider
      * @param \Closure|null $callback
      * @return Paginator
      */
-    public function selectV6_1(array $query, int $per_page, array $columns = ['*'], $page = null, \Closure $callback = null)
+    public function selectV6_1(array $query, int $per_page, array $columns = ['*'], int $page = null, \Closure $callback = null)
     {
         return $this->selectV7_1($query, false, $per_page, $columns, $page, $callback);
     }
@@ -555,12 +549,13 @@ class EloquentDMLManager implements DMLProvider
      * @param \Closure|null $callback
      * @return Paginator
      */
-    public function selectV7(array $query, bool $load_relations, int $per_page, $page = null, \Closure $callback = null)
+    public function selectV7(array $query, bool $load_relations, int $per_page, int $page = null, \Closure $callback = null)
     {
-        return $this->selectV8(
+        return $this->selectV8_1(
             $query,
             $load_relations ? call_user_func([$this->model, 'getModelRelationLoadersNames']) : [],
             $per_page,
+            ['*'],
             $page,
             $callback
         );
@@ -578,7 +573,7 @@ class EloquentDMLManager implements DMLProvider
      * @param \Closure|null $callback
      * @return Paginator
      */
-    public function selectV7_1(array $query, bool $load_relations, int $per_page, $columns = ['*'], $page = null, \Closure $callback = null)
+    public function selectV7_1(array $query, bool $load_relations, int $per_page, array $columns = ['*'], int $page = null, \Closure $callback = null)
     {
         return $this->selectV8_1(
             $query,
@@ -600,7 +595,7 @@ class EloquentDMLManager implements DMLProvider
      * @param \Closure|null $callback
      * @return Paginator
      */
-    public function selectV8(array $query, array $relations, int $per_page, $page = null, \Closure $callback = null)
+    public function selectV8(array $query, array $relations, int $per_page, int $page = null, \Closure $callback = null)
     {
         return $this->selectV8_1(
             $query,
@@ -622,7 +617,7 @@ class EloquentDMLManager implements DMLProvider
      * @param \Closure|null $callback
      * @return Paginator
      */
-    public function selectV8_1(array $query, array $relations, int $per_page, $columns = ['*'], $page = null, \Closure $callback = null)
+    public function selectV8_1(array $query, array $relations, int $per_page, array $columns = ['*'], int $page = null, \Closure $callback = null)
     {
         $callback = $callback ?? function ($value) {
             return $value;
@@ -679,7 +674,9 @@ class EloquentDMLManager implements DMLProvider
             );
         } else {
             // Select the matching columns
-            $collection = $this->selectV5($query, [])->getCollection();
+            $collection = $this->selectV3_1($query, function ($result) {
+                return $result->getCollection();
+            });
             // Loop through the matching columns and update each
             return (is_array($collection) ? (new Collection($collection)) : $collection)->reduce(function ($carry, $value) use ($attributes) {
                 $this->forwardCallTo(
