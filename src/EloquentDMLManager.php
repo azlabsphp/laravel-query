@@ -337,10 +337,15 @@ class EloquentDMLManager implements DMLProvider
         return $this->model->getConnection()->transaction(function () use ($args) {
             return $this->overload($args, [
                 'selectV1',
+                'selectV1_1',
                 'selectV2',
+                'selectV2_1',
                 'selectV3',
+                'selectV3_1',
                 'selectV4',
+                'selectV4_1',
                 'selectV5',
+                'selectV5_1',
                 'selectV6',
                 'selectV6_1',
                 'selectV7',
@@ -388,6 +393,17 @@ class EloquentDMLManager implements DMLProvider
 
     /**
      *
+     * @param string $id
+     * @param \Closure $callback
+     * @return Model|mixed
+     */
+    public function selectV1_1(string $id, \Closure $callback = null)
+    {
+        return $this->selectV1($id, ['*'], $callback);
+    }
+
+    /**
+     *
      * @param integer $id
      * @param array $columns
      * @param \Closure|null $callback
@@ -396,6 +412,17 @@ class EloquentDMLManager implements DMLProvider
     public function selectV2(int $id, array $columns = ['*'], \Closure $callback = null)
     {
         return $this->selectV1((string)$id, $columns, $callback);
+    }
+
+    /**
+     *
+     * @param integer $id
+     * @param \Closure|null $callback
+     * @return Model|mixed
+     */
+    public function selectV2_1(int $id, \Closure $callback = null)
+    {
+        return $this->selectV1((string)$id, ['*'], $callback);
     }
 
     /**
@@ -413,6 +440,17 @@ class EloquentDMLManager implements DMLProvider
     /**
      *
      * @param array $query
+     * @param \Closure|null $callback
+     * @return DataProviderQueryResultInterface
+     */
+    public function selectV3_1(array $query, \Closure $callback = null)
+    {
+        return $this->selectV4($query, false, ['*'], $callback);
+    }
+
+    /**
+     *
+     * @param array $query
      * @param boolean $load_relations
      * @param array $columns
      * @param \Closure|null $callback
@@ -423,19 +461,17 @@ class EloquentDMLManager implements DMLProvider
         return $this->selectV5($query, $load_relations ? call_user_func([$this->model, 'getModelRelationLoadersNames']) : [], $columns, $callback);
     }
 
-    // /**
-    //  *
-    //  * @param array $query
-    //  * @param boolean $load_relations
-    //  * @param array $columns
-    //  * @param \Closure|null $callback
-    //  * @param ...$leading
-    //  * @return DataProviderQueryResultInterface
-    //  */
-    // public function selectV4_1(array $query, bool $load_relations, array $columns = ['*'], \Closure $callback = null)
-    // {
-    //     return $this->selectV4($query, $load_relations ? call_user_func([$this->model, 'getModelRelationLoadersNames']) : [], $columns, $callback);
-    // }
+    /**
+     *
+     * @param array $query
+     * @param boolean $load_relations
+     * @param \Closure|null $callback
+     * @return DataProviderQueryResultInterface
+     */
+    public function selectV4_1(array $query, bool $load_relations, \Closure $callback = null, \Closure $cb = null)
+    {
+        return $this->selectV5($query, $load_relations ? call_user_func([$this->model, 'getModelRelationLoadersNames']) : [], ['*'], $callback);
+    }
 
     /**
      *
@@ -469,6 +505,18 @@ class EloquentDMLManager implements DMLProvider
     }
 
     /**
+     *
+     * @param array $query
+     * @param array $relations
+     * @param \Closure|null $callback
+     * @return DataProviderQueryResultInterface
+     */
+    public function selectV5_1(array $query, array $relations, \Closure $callback = null)
+    {
+        return $this->selectV5($query, $relations, ['*'], $callback);
+    }
+
+    /**
      * Handle pagination functionality
      * 
      * @param array $query
@@ -481,7 +529,7 @@ class EloquentDMLManager implements DMLProvider
     {
         return $this->selectV7($query, false, $per_page, $page, $callback);
     }
-        
+
     /**
      * Handle pagination functionality
      * 
@@ -509,7 +557,13 @@ class EloquentDMLManager implements DMLProvider
      */
     public function selectV7(array $query, bool $load_relations, int $per_page, $page = null, \Closure $callback = null)
     {
-        return $this->selectV8($query, $load_relations ? call_user_func([$this->model, 'getModelRelationLoadersNames']) : [], $per_page, $page, $callback);
+        return $this->selectV8(
+            $query,
+            $load_relations ? call_user_func([$this->model, 'getModelRelationLoadersNames']) : [],
+            $per_page,
+            $page,
+            $callback
+        );
     }
 
 
@@ -526,7 +580,14 @@ class EloquentDMLManager implements DMLProvider
      */
     public function selectV7_1(array $query, bool $load_relations, int $per_page, $columns = ['*'], $page = null, \Closure $callback = null)
     {
-        return $this->selectV8_1($query, $load_relations ? call_user_func([$this->model, 'getModelRelationLoadersNames']) : [], $per_page, $columns, $page, $callback);
+        return $this->selectV8_1(
+            $query,
+            $load_relations ? call_user_func([$this->model, 'getModelRelationLoadersNames']) : [],
+            $per_page,
+            $columns,
+            $page,
+            $callback
+        );
     }
 
     /**
@@ -541,7 +602,14 @@ class EloquentDMLManager implements DMLProvider
      */
     public function selectV8(array $query, array $relations, int $per_page, $page = null, \Closure $callback = null)
     {
-        return $this->selectV8_1($query, $relations, $per_page, [], $page, $callback);
+        return $this->selectV8_1(
+            $query,
+            $relations,
+            $per_page,
+            ['*'],
+            $page,
+            $callback
+        );
     }
 
     /**
@@ -559,9 +627,13 @@ class EloquentDMLManager implements DMLProvider
         $callback = $callback ?? function ($value) {
             return $value;
         };
-        $builder = array_reduce(drewlabs_core_array_is_no_assoc_array_list($query) ? $query : [$query], function ($model, $q) {
-            return (new CustomQueryCriteria($q))->apply($model);
-        }, drewlabs_core_create_attribute_getter('model', null)($this));
+        $builder = array_reduce(
+            drewlabs_core_array_is_no_assoc_array_list($query) ? $query : [$query],
+            function ($model, $q) {
+                return (new CustomQueryCriteria($q))->apply($model);
+            },
+            drewlabs_core_create_attribute_getter('model', null)($this)
+        );
         return $callback(
             $this->forwardCallTo(
                 !empty($relations) ? $this->forwardCallTo(
@@ -570,7 +642,7 @@ class EloquentDMLManager implements DMLProvider
                     [$relations]
                 ) : $builder,
                 EloquentQueryBuilderMethodsEnum::PAGINATE,
-                [$per_page]
+                [$per_page, $columns]
             )
         );
     }
