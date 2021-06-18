@@ -53,7 +53,7 @@ abstract class EloquentModel extends Eloquent implements ActiveModel, Parseable,
      */
     public function add(array $items)
     {
-        $isArrayList = \array_filter($items, 'is_array') === $items;
+        $isArrayList = drewlabs_core_array_is_no_assoc_array_list($items);
         if (!$isArrayList) {
             return $this->create($items);
         }
