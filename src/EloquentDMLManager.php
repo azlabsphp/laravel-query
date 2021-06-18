@@ -39,7 +39,7 @@ use Illuminate\Contracts\Pagination\Paginator;
  * @method \Drewlabs\Contracts\Data\DataProviderQueryResultInterface|mixed select(array $query, \Closure $callback = null)
  * @method \Drewlabs\Contracts\Data\DataProviderQueryResultInterface|mixed select(array $query, bool $load_relations, array $columns = ['*'], \Closure $callback = null, \Closure $cb = null)
  * @method \Drewlabs\Contracts\Data\DataProviderQueryResultInterface|mixed select(array $query, bool $load_relations, \Closure $callback = null, \Closure $cb = null)
- * @method \Drewlabs\Contracts\Data\DataProviderQueryResultInterface|mixed select(array $query, array $relations, array $columns = ['*'], \Closure $callback = null)
+ * @method \Drewlabs\Contracts\Data\DataProviderQueryResultInterface|mixed select(array $query, array $relations, array $columns, \Closure $callback = null)
  * @method \Illuminate\Contracts\Pagination\Paginator|mixed select(array $query, int $per_page, int $page = null, \Closure $callback = null)
  * @method \Illuminate\Contracts\Pagination\Paginator|mixed select(array $query, int $per_page, array $columns = ['*'], int $page = null, \Closure $callback = null)
  * @method \Illuminate\Contracts\Pagination\Paginator|mixed select(array $query, bool $load_relations, int $per_page, int $page = null, \Closure $callback = null)
@@ -382,7 +382,7 @@ class EloquentDMLManager implements DMLProvider
      * @param \Closure $callback
      * @return Model|mixed
      */
-    public function selectV1(string $id, array $columns = ['*'], \Closure $callback = null)
+    public function selectV1(string $id, array $columns, \Closure $callback = null)
     {
         $callback = $callback ?? function ($value) {
             return $value;
@@ -415,7 +415,7 @@ class EloquentDMLManager implements DMLProvider
      * @param \Closure|null $callback
      * @return Model|mixed
      */
-    public function selectV2(int $id, array $columns = ['*'], \Closure $callback = null)
+    public function selectV2(int $id, array $columns, \Closure $callback = null)
     {
         return $this->selectV1((string)$id, $columns, $callback);
     }
@@ -438,7 +438,7 @@ class EloquentDMLManager implements DMLProvider
      * @param \Closure|null $callback
      * @return DataProviderQueryResultInterface
      */
-    public function selectV3(array $query, array $columns = ['*'], \Closure $callback = null)
+    public function selectV3(array $query, array $columns, \Closure $callback = null)
     {
         return $this->selectV4($query, false, $columns, $callback);
     }
@@ -462,7 +462,7 @@ class EloquentDMLManager implements DMLProvider
      * @param \Closure|null $callback
      * @return DataProviderQueryResultInterface
      */
-    public function selectV4(array $query, bool $load_relations, array $columns = ['*'], \Closure $callback = null, \Closure $cb = null)
+    public function selectV4(array $query, bool $load_relations, array $columns, \Closure $callback = null, \Closure $cb = null)
     {
         return $this->selectV5($query, $load_relations ? call_user_func([$this->model, 'getModelRelationLoadersNames']) : [], $columns, $callback);
     }
@@ -487,7 +487,7 @@ class EloquentDMLManager implements DMLProvider
      * @param \Closure|null $callback
      * @return DataProviderQueryResultInterface
      */
-    public function selectV5(array $query, array $relations, array $columns = ['*'], \Closure $callback = null)
+    public function selectV5(array $query, array $relations, array $columns, \Closure $callback = null)
     {
         $callback = $callback ?? function ($value) {
             return $value;
@@ -504,7 +504,7 @@ class EloquentDMLManager implements DMLProvider
                         [$relations]
                     ) : $builder,
                     EloquentQueryBuilderMethodsEnum::SELECT,
-                    [$columns]
+                    [empty($columns) ? ['*'] : $columns]
                 )
             )
         );
@@ -534,7 +534,7 @@ class EloquentDMLManager implements DMLProvider
      * @param \Closure|null $callback
      * @return Paginator
      */
-    public function selectV6_1(array $query, int $per_page, array $columns = ['*'], int $page = null, \Closure $callback = null)
+    public function selectV6_1(array $query, int $per_page, array $columns, int $page = null, \Closure $callback = null)
     {
         return $this->selectV7_1($query, false, $per_page, $columns, $page, $callback);
     }
@@ -573,7 +573,7 @@ class EloquentDMLManager implements DMLProvider
      * @param \Closure|null $callback
      * @return Paginator
      */
-    public function selectV7_1(array $query, bool $load_relations, int $per_page, array $columns = ['*'], int $page = null, \Closure $callback = null)
+    public function selectV7_1(array $query, bool $load_relations, int $per_page, array $columns, int $page = null, \Closure $callback = null)
     {
         return $this->selectV8_1(
             $query,
@@ -617,7 +617,7 @@ class EloquentDMLManager implements DMLProvider
      * @param \Closure|null $callback
      * @return Paginator
      */
-    public function selectV8_1(array $query, array $relations, int $per_page, array $columns = ['*'], int $page = null, \Closure $callback = null)
+    public function selectV8_1(array $query, array $relations, int $per_page, array $columns, int $page = null, \Closure $callback = null)
     {
         $callback = $callback ?? function ($value) {
             return $value;
@@ -637,7 +637,7 @@ class EloquentDMLManager implements DMLProvider
                     [$relations]
                 ) : $builder,
                 EloquentQueryBuilderMethodsEnum::PAGINATE,
-                [$per_page, $columns]
+                [$per_page, empty($columns) ? ['*'] : $columns, null, $page ?? 1]
             )
         );
     }
