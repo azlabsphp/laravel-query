@@ -194,7 +194,7 @@ class EloquentDMLManager implements DMLProvider
         $method = $params['method'] ?? EloquentQueryBuilderMethodsEnum::CREATE;
         $upsert = $params['upsert'] ?? false;
         $upsert_conditions = $params['upsert_conditions'] ? $params['upsert_conditions'] : [];
-        if (is_string($method) && \drewlabs_core_strings_contains($method, '__')) {
+        if (is_string($method) && \drewlabs_database_is_dynamic_create_method($method)) {
             $result = create_relations_after_create(
                 $this->forwardCallTo(
                     drewlabs_core_create_attribute_getter('model', null)($this),
@@ -729,7 +729,7 @@ class EloquentDMLManager implements DMLProvider
         $params = drewlabs_database_parse_update_handler_params($params);
         $method = $params['method'];
         $upsert = $params['upsert'] ?? false;
-        return is_string($method) && \drewlabs_core_strings_contains($method, '__') ?
+        return is_string($method) && drewlabs_database_is_dynamic_update_method($method) ?
             $update_model_func($id, $attributes)(function () use ($attributes, $upsert, $that, $method) {
                 drewlabs_database_upsert_relations_after_create(
                     drewlabs_core_create_attribute_getter('model', null)($that),

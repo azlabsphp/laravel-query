@@ -1,5 +1,6 @@
 <?php
 
+use Drewlabs\Packages\Database\EloquentQueryBuilderMethodsEnum;
 use Illuminate\Database\Eloquent\Collection;
 
 if (!function_exists('create_relations_after_create')) {
@@ -109,5 +110,44 @@ if (!function_exists('drewlabs_database_update_or_create_if_condition_match')) {
         if (count($value) === 1) {
             $relation->updateOrCreate($value[0], $value[0]);
         }
+    }
+}
+
+
+if (!function_exists('drewlabs_database_is_dynamic_create_method')) {
+
+    /**
+     * Check if a provided method name is a dynamic method starting with [create] or [insert]
+     *
+     * @param string $method
+     * @return bool
+     */
+    function drewlabs_database_is_dynamic_create_method(string $method)
+    {
+        if (!drewlabs_core_strings_contains($method, '__')) {
+            return false;
+        }
+        $method = drewlabs_core_strings_to_array($method, '__')[0];
+        // TODO : In future release insert must not be supported
+        return in_array($method, [EloquentQueryBuilderMethodsEnum::CREATE, EloquentQueryBuilderMethodsEnum::INSERT_MANY]);
+    }
+}
+
+if (!function_exists('drewlabs_database_is_dynamic_update_method')) {
+
+    /**
+     * Check if a provided method name is a dynamic method starting with [update]
+     *
+     * @param string $method
+     * @return bool
+     */
+    function drewlabs_database_is_dynamic_update_method(string $method)
+    {
+        if (!drewlabs_core_strings_contains($method, '__')) {
+            return false;
+        }
+        $method = drewlabs_core_strings_to_array($method, '__')[0];
+        // TODO : In future release insert must not be supported
+        return in_array($method, [EloquentQueryBuilderMethodsEnum::UPDATE]);
     }
 }
