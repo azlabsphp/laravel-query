@@ -130,9 +130,9 @@ trait ModelRepository
     /**
      * @inheritDoc
      */
-    public function insert(...$args)
+    public function insert($values, $parse_inputs = false, $upsert = false, $upsertConditions = [])
     {
-        return $this->overload($args, [
+        return $this->overload(func_get_args(), [
             'insertV1',
             'insertV2',
             'insertv3'
@@ -166,9 +166,9 @@ trait ModelRepository
     /**
      * @inheritDoc
      */
-    public function insertMany(...$args)
+    public function insertMany($values, $parse_inputs = true)
     {
-        return $this->overload($args, [
+        return $this->overload(func_get_args(), [
             'insertManyV0',
             'insertManyV1',
             'insertManyV2'
@@ -257,9 +257,9 @@ trait ModelRepository
      *
      * @param array ..$args
      */
-    public function find(...$args)
+    public function find($conditions = array(), $columns = array('*'))
     {
-        return $this->overload($args, [
+        return $this->overload(func_get_args(), [
             'findByIntId',
             'findByStringID',
             'findByArrayConditions',
@@ -311,7 +311,7 @@ trait ModelRepository
     /**
      * @deprecated v3.0.1 Use the {@see find()} overloaded method that takes in an id
      */
-    public function findById(int $id, array $columns = ['*'])
+    public function findById($id, array $columns = array('*'))
     {
         return $this->findByIntId($id, $columns);
     }
@@ -327,9 +327,9 @@ trait ModelRepository
     /**
      * @inheritDoc
      */
-    public function update(...$args)
+    public function update($data, $conditions = array(), $parse_inputs = true, $mass_update =  false)
     {
-        return $this->overload($args, [
+        return $this->overload(func_get_args(), [
             'updateV1',
             'updateV1_1',
             'updateV2',
@@ -455,9 +455,9 @@ trait ModelRepository
     /**
      * @inheritDoc
      */
-    public function delete(...$args)
+    public function delete($conditions = array(), $mass_delete =  false)
     {
-        return $this->overload($args, [
+        return $this->overload(func_get_args(), [
             'deleteByStringID',
             'deleteByIntID',
             'deleteFromFilters',
