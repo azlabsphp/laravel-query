@@ -345,8 +345,10 @@ class EloquentDMLManager implements DMLProvider
             return $this->overload($args, [
                 'selectV1',
                 'selectV1_1',
+                'selectV1_2',
                 'selectV2',
                 'selectV2_1',
+                'selectV2_2',
                 'selectV3',
                 'selectV3_1',
                 'selectV4',
@@ -384,15 +386,21 @@ class EloquentDMLManager implements DMLProvider
      */
     public function selectV1(string $id, array $columns, \Closure $callback = null)
     {
+        return $this->selectV1_2($id, true, $columns, $callback);
+    }
+
+    public function selectV1_2(string $id, bool $load_relations, array $columns = ['*'], \Closure $callback = null)
+    {
         $callback = $callback ?? function ($value) {
             return $value;
         };
 
-        $collection =  $this->selectV3(
+        $collection =  $this->selectV4(
             [
                 'where' => [$this->model->getPrimaryKey(), $id],
             ],
-            $columns
+            $load_relations,
+            $columns ?? ['*']
         )->getCollection();
         return $callback(is_array($collection) ? (new Collection($collection))->first() : (method_exists($collection, 'first') ? $collection->first() : $collection));
     }
@@ -429,6 +437,11 @@ class EloquentDMLManager implements DMLProvider
     public function selectV2_1(int $id, \Closure $callback = null)
     {
         return $this->selectV1((string)$id, ['*'], $callback);
+    }
+
+    public function selectV2_2(int $id, bool $load_relations, array $columns = ['*'], \Closure $callback = null)
+    {
+        return $this->selectV1_2((string)$id, $load_relations, $columns, $callback);
     }
 
     /**
