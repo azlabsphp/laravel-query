@@ -411,7 +411,7 @@ class CustomQueryCriteria implements ModelFiltersInterface
     private function applyWhereNullQuery($model, $criteria)
     {
         if (array_key_exists('whereNull', $criteria) && !\is_null($criteria['whereNull'])) {
-            $isArrayList = \array_filter($$criteria['whereNull'], 'is_array') === $criteria['whereNull'];
+            $isArrayList = \array_filter($criteria['whereNull'], 'is_array') === $criteria['whereNull'];
             if (!$isArrayList) {
                 $criteria['whereNull'] = [$criteria['whereNull']];
             }
@@ -432,7 +432,7 @@ class CustomQueryCriteria implements ModelFiltersInterface
     private function applyWhereNotNullQuery($model, $criteria)
     {
         if (array_key_exists('whereNotNull', $criteria) && !\is_null($criteria['whereNotNull'])) {
-            $isArrayList = \array_filter($$criteria['whereNotNull'], 'is_array') === $criteria['whereNotNull'];
+            $isArrayList = \array_filter($criteria['whereNotNull'], 'is_array') === $criteria['whereNotNull'];
             if (!$isArrayList) {
                 $criteria['whereNotNull'] = [$criteria['whereNotNull']];
             }
@@ -454,7 +454,7 @@ class CustomQueryCriteria implements ModelFiltersInterface
     private function applyOrWhereNullQuery($model, $criteria)
     {
         if (array_key_exists('orWhereNull', $criteria) && !\is_null($criteria['orWhereNull'])) {
-            $isArrayList = \array_filter($$criteria['orWhereNull'], 'is_array') === $criteria['orWhereNull'];
+            $isArrayList = \array_filter($criteria['orWhereNull'], 'is_array') === $criteria['orWhereNull'];
             if (!$isArrayList) {
                 $criteria['orWhereNull'] = [$criteria['orWhereNull']];
             }
@@ -475,7 +475,7 @@ class CustomQueryCriteria implements ModelFiltersInterface
     private function applyOrWhereNotNull($model, $criteria)
     {
         if (array_key_exists('orWhereNotNull', $criteria) && !\is_null($criteria['orWhereNotNull'])) {
-            $isArrayList = \array_filter($$criteria['orWhereNotNull'], 'is_array') === $criteria['orWhereNotNull'];
+            $isArrayList = \array_filter($criteria['orWhereNotNull'], 'is_array') === $criteria['orWhereNotNull'];
             if (!$isArrayList) {
                 $criteria['orWhereNotNull'] = [$criteria['orWhereNotNull']];
             }
