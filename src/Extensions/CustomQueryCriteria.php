@@ -411,11 +411,8 @@ class CustomQueryCriteria implements ModelFiltersInterface
     private function applyWhereNullQuery($model, $criteria)
     {
         if (array_key_exists('whereNull', $criteria) && !\is_null($criteria['whereNull'])) {
-            $isArrayList = \array_filter($criteria['whereNull'], 'is_array') === $criteria['whereNull'];
-            if (!$isArrayList) {
-                $criteria['whereNull'] = [$criteria['whereNull']];
-            }
-            $model = array_reduce($criteria['whereNull'], function ($carry, $current) {
+            $filters = is_array($criteria['whereNull']) ? $criteria['whereNull'] : [$criteria['whereNull']];
+            $model = array_reduce($filters, function ($carry, $current) {
                 return $carry->whereNull($current);
             }, $model);
         }
@@ -432,11 +429,8 @@ class CustomQueryCriteria implements ModelFiltersInterface
     private function applyWhereNotNullQuery($model, $criteria)
     {
         if (array_key_exists('whereNotNull', $criteria) && !\is_null($criteria['whereNotNull'])) {
-            $isArrayList = \array_filter($criteria['whereNotNull'], 'is_array') === $criteria['whereNotNull'];
-            if (!$isArrayList) {
-                $criteria['whereNotNull'] = [$criteria['whereNotNull']];
-            }
-            $model = array_reduce($criteria['whereNotNull'], function ($carry, $current) {
+            $filters = is_array($criteria['whereNotNull']) ? $criteria['whereNotNull'] : [$criteria['whereNotNull']];
+            $model = array_reduce($filters, function ($carry, $current) {
                 return $carry->whereNotNull($current);
             }, $model);
         }
@@ -454,11 +448,8 @@ class CustomQueryCriteria implements ModelFiltersInterface
     private function applyOrWhereNullQuery($model, $criteria)
     {
         if (array_key_exists('orWhereNull', $criteria) && !\is_null($criteria['orWhereNull'])) {
-            $isArrayList = \array_filter($criteria['orWhereNull'], 'is_array') === $criteria['orWhereNull'];
-            if (!$isArrayList) {
-                $criteria['orWhereNull'] = [$criteria['orWhereNull']];
-            }
-            $model = array_reduce($criteria['orWhereNull'], function ($carry, $current) {
+            $filters = is_array($criteria['orWhereNull']) ? $criteria['orWhereNull'] : [$criteria['orWhereNull']];
+            $model = array_reduce($filters, function ($carry, $current) {
                 return $carry->orWhereNull($current);
             }, $model);
         }
@@ -475,11 +466,8 @@ class CustomQueryCriteria implements ModelFiltersInterface
     private function applyOrWhereNotNull($model, $criteria)
     {
         if (array_key_exists('orWhereNotNull', $criteria) && !\is_null($criteria['orWhereNotNull'])) {
-            $isArrayList = \array_filter($criteria['orWhereNotNull'], 'is_array') === $criteria['orWhereNotNull'];
-            if (!$isArrayList) {
-                $criteria['orWhereNotNull'] = [$criteria['orWhereNotNull']];
-            }
-            $model = array_reduce($criteria['orWhereNotNull'], function ($carry, $current) {
+            $filters = is_array($criteria['orWhereNotNull']) ? $criteria['orWhereNotNull'] : [$criteria['orWhereNotNull']];
+            $model = array_reduce($filters, function ($carry, $current) {
                 return $carry->orWhereNotNull($current);
             }, $model);
         }
