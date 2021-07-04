@@ -290,15 +290,11 @@ if (!function_exists('drewlabs_database_build_inner_query')) {
             if (!\in_array($query['method'], $supportedQueryMethods)) {
                 throw new \InvalidArgumentException(sprintf('Query method %s not found, ', $query['method']));
             }
-            $method = new ReflectionMethod($q, $query['method']);
             if (drewlabs_core_array_is_no_assoc_array_list($query['params'])) {
-                $method->invoke(
-                    $q, $query['params']);
+                call_user_func([$q, $query['method']], $query['params']);
             } else {
-                $method->invoke(
-                    $q, ...$query['params']); 
+                call_user_func([$q, $query['method']], ...$query['params']);
             }
-            // call_user_func([$q, $query['method']], ...$query['params']);
         };
     }
 }
