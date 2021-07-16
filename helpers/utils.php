@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Collection;
 if (!function_exists('create_relations_after_create')) {
 
     /**
-     * Undocumented function
+     * Call Eloquent model relation {create}/{updateOrCreate} method after the model is inserted
      *
      * @param \Illuminate\Database\Eloquent\Model $model
      * @param array $relations
@@ -50,6 +50,8 @@ if (!function_exists('drewlabs_database_upsert_relations_after_create')) {
 
     /**
      *
+     * Update or create Eloquent model after it was updated
+     * 
      * @param \Illuminate\Database\Eloquent\Model $model
      * @param array $relations
      * @param array $attributes

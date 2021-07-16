@@ -11,6 +11,7 @@ if (!function_exists('drewlabs_databse_parse_client_request_query_params')) {
      *
      * @param Model|GuardedModel|Parseable $model
      * @param mixed $params_bag
+     * @throws \InvalidArgumentException
      * @return array|mixed
      */
     function drewlabs_databse_parse_client_request_query_params($model, $params_bag)
@@ -69,6 +70,7 @@ if (!function_exists('drewlabs_databse_parse_client_request_query_input')) {
 
     /**
      * Operator function that takes in an object with `get()`, `all()`, `has()` methods defined, parse the _query object and return a filter
+     * 
      * @param mixed $params_bag
      * @param array $in
      * @return array
@@ -110,6 +112,7 @@ if (!function_exists('drewlabs_databse_parse_client_request_query')) {
      *
      * @param Model|GuardedModel|Parseable $model
      * @param mixed $params_bag
+     * @throws \InvalidArgumentException
      * @return array|mixed
      */
     function drewlabs_databse_parse_client_request_query($model, $params_bag)
@@ -127,6 +130,14 @@ if (!function_exists('drewlabs_databse_parse_client_request_query')) {
 
 if (!function_exists('drewlabs_database_parse_query_method_params')) {
 
+    /**
+     * Parse the query parameters based on the matching method
+     *
+     * @param string $method
+     * @param string|array<string, mixed> $params
+     * @throws \InvalidArgumentException
+     * @return \Closure|array<string, mixed>
+     */
     function drewlabs_database_parse_query_method_params($method, $params)
     {
         switch ($method) {
@@ -169,6 +180,7 @@ if (!function_exists('drewlabs_database_parse_where_null_query')) {
      * Parse a whereNull Query into an array of parseble request query
      *
      * @param string|array $params
+     * @throws \InvalidArgumentException
      * @return string
      */
     function drewlabs_database_parse_where_null_query($params)
@@ -220,16 +232,32 @@ if (!function_exists('drewlabs_database_parse_where_null_query')) {
 }
 
 if (!function_exists('drewlabs_database_parse_order_by_query')) {
+    /**
+     * Provide a where method parameters parsing implementations
+     *
+     * @param array $params
+     * @throws \InvalidArgumentException
+     * @return array<string, string>
+     */
     function drewlabs_database_parse_order_by_query(array $params)
     {
-        if (!isset($params['column']) && !isset($params['order'])) {
+        if (!(isset($params['by']) || isset($params['column'])) && !isset($params['order'])) {
             throw new \InvalidArgumentException('orderBy query requires column and order keys');
         }
-        return ['by' => $params['column'], 'order' => $params['order']];
+        $by = $params['column'] ?? ($params['by'] ?? 'updated_at');
+        $order = $params['order'] ?? 'DESC';
+        return ['by' => $by, 'order' => $order];
     }
 }
 
 if (!function_exists('drewlabs_database_parse_in_query')) {
+    /**
+     * Generate an in query configuration 
+     *
+     * @param array $query
+     * @throws \InvalidArgumentException
+     * @return array<mixed, mixed>
+     */
     function drewlabs_database_parse_in_query(array $query)
     {
         if (!\drewlabs_core_array_is_assoc($query) && \drewlabs_core_array_is_no_assoc_array_list($query)) {
@@ -254,6 +282,15 @@ if (!function_exists('drewlabs_database_parse_in_query')) {
 
 if (!function_exists('drewlabs_database_parse_client_where_query')) {
 
+    /**
+     * Parse a where method query parameters and return an array parameter
+     * that can be used by a {FiltersInterface} implementation that takes an
+     * array as parameter
+     *
+     * @param array $query
+     * @throws \InvalidArgumentException
+     * @return array
+     */
     function drewlabs_database_parse_client_where_query(array $query)
     {
         if (!\drewlabs_core_array_is_assoc($query) && \drewlabs_core_array_is_no_assoc_array_list($query)) {
@@ -272,6 +309,13 @@ if (!function_exists('drewlabs_database_parse_client_where_query')) {
 
 if (!function_exists('drewlabs_database_validate_query_object')) {
 
+    /**
+     * Validate a query object passed in the request as parameter
+     *
+     * @param array $params
+     * @throws \InvalidArgumentException
+     * @return void
+     */
     function drewlabs_database_validate_query_object(array $params)
     {
         if (!isset($params['method']) || !isset($params['params'])) {
@@ -282,6 +326,13 @@ if (!function_exists('drewlabs_database_validate_query_object')) {
 
 if (!function_exists('drewlabs_database_build_inner_query')) {
 
+    /**
+     * Subquery parameter parser that generate a query Closure
+     *
+     * @param array $query
+     * @throws \InvalidArgumentException
+     * @return \Closure
+     */
     function drewlabs_database_build_inner_query(array $query)
     {
         return function ($q) use ($query) {
@@ -301,6 +352,14 @@ if (!function_exists('drewlabs_database_build_inner_query')) {
 
 if (!function_exists('drewlabs_database_client_parse_subquery')) {
 
+    /**
+     * Parse client provided query parameters and return a parameter array 
+     * for the matching column along with the query Closure
+     *
+     * @param array $query
+     * @throws \InvalidArgumentException
+     * @return array<string, \Closure>
+     */
     function drewlabs_database_client_parse_subquery(array $query)
     {
         if (!\drewlabs_core_array_is_assoc($query) && \drewlabs_core_array_is_no_assoc_array_list($query)) {
