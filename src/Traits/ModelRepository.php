@@ -201,7 +201,6 @@ trait ModelRepository
                 $list[] = $value;
             }
             $result = \drewlabs_core_create_attribute_getter('model_instance', null)($that)->{"insert"}($list);
-            // $that->resetScope();
             return $result;
         }
         throw new RepositoryException(__METHOD__ . ' requires an list of list items for insertion');
@@ -217,7 +216,6 @@ trait ModelRepository
             \drewlabs_core_create_attribute_getter('query_model_relation', false)($that),
             $columns
         );
-        // $that->resetScope();
         return $result;
     }
 

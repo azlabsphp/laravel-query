@@ -2,10 +2,10 @@
 
 namespace Drewlabs\Packages\Database;
 
-use Drewlabs\Contracts\EntityObject\AbstractEntityObject;
+use Drewlabs\Core\EntityObject\ValueObject;
 use Illuminate\Container\Container;
 
-class QueryParamsObject extends AbstractEntityObject
+class QueryParamsObject extends ValueObject
 {
     public function getJsonableAttributes()
     {

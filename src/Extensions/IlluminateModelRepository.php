@@ -5,13 +5,13 @@ namespace Drewlabs\Packages\Database\Extensions;
 use Drewlabs\Contracts\Data\Model\Model;
 use Drewlabs\Contracts\Data\Parser\ModelAttributeParser;
 use Drewlabs\Contracts\Data\Repository\ParseableRepository;
-use Drewlabs\Contracts\EntityObject\AbstractEntityObject;
 use Drewlabs\Core\Data\Exceptions\RepositoryException;
 use Drewlabs\Packages\Database\Traits\ModelRepository;
 use Drewlabs\Packages\Database\DynamicCRUDQueryHandler;
 use Psr\Container\ContainerInterface;
 use Drewlabs\Packages\Database\Contracts\TransactionUtils;
 use Drewlabs\Contracts\Data\Repository\ModelRepository as ModelRepositoryInterface;
+use Drewlabs\Core\EntityObject\ValueObject;
 
 /**
  * @package Drewlabs\Packages\Database\Extensions
@@ -41,7 +41,7 @@ use Drewlabs\Contracts\Data\Repository\ModelRepository as ModelRepositoryInterfa
  * @method int|mixed delete(array $conditions, bool $hot_operation = false)
  * 
  */
-final class IlluminateModelRepository extends AbstractEntityObject implements ParseableRepository, ModelRepositoryInterface
+final class IlluminateModelRepository extends ValueObject implements ParseableRepository, ModelRepositoryInterface
 {
     use ModelRepository;
 
@@ -62,14 +62,24 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
             throw new \RuntimeException(\sprintf('Repository class required an instance of %s, Please install the illuminate/container package or, make sure the framework has a class that implements the psr4 container contract that is passed as dependency to the class constructor', ContainerInterface::class));
         }
         // Call the parent constructor to initialize the class
-        parent::__construct([
+        $attributes = [
             'container' => $container,
             'transactionUtils' => $transaction ?? $container->get(\Drewlabs\Packages\Database\Contracts\TransactionUtils::class),
             'attribute_parser' => $modelAttributesParser ?? $container->get(ModelAttributeParser::class)
-        ]);
-        if (isset($modelClass)) {
-            $this->resolveModel($modelClass, $this->container);
+        ];
+        $model_class = $modelClass;
+        $container = $container;
+        if (null !== $model_class) {
+            $model = $this->internalMakeModel($model_class, $container);
+            if (!(is_string($model_class)) || !($model instanceof Model)) {
+                throw new RepositoryException("Constructor parameter must be an instance of string, must be a valid class that exists, and the class must be an instance of " . Model::class);
+            }
+            $attributes = array_merge($attributes, [
+                'model_instance' => $model,
+                'model_class' => $model_class
+            ]);
         }
+        parent::__construct($attributes);
     }
 
     protected function getJsonableAttributes()
@@ -87,10 +97,6 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
         ];
     }
 
-    public function deserializeModelClassAttribute($value)
-    {
-    }
-
     public function setModel($modelClass)
     {
         $that = drewlabs_core_copy_object($this)->resolveRepositoryModel($modelClass);
@@ -98,7 +104,7 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
     }
 
     /**
-     * @return static
+     * @return self
      */
     private function resolveModel($clazz = null, ContainerInterface $container = null)
     {
@@ -108,9 +114,11 @@ final class IlluminateModelRepository extends AbstractEntityObject implements Pa
         if (!(is_string($model_class)) || !($model instanceof Model)) {
             throw new RepositoryException("Constructor parameter must be an instance of string, must be a valid class that exists, and the class must be an instance of " . Model::class);
         }
-        $this->model_instance = $model;
-        $this->model_class = $model_class;
-        return $this;
+        $self = $this->copyWith([
+            'model_instance' => $model,
+            'model_class' => $model_class
+        ]);
+        return $self;
     }
 
     private function internalMakeModel(string $clazz, ContainerInterface $container = null)
