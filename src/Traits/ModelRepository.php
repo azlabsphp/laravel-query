@@ -340,7 +340,7 @@ trait ModelRepository
         ]);
     }
 
-    public function updateV1_1(string $id, $attributes = [], bool $_, bool $__ = true)
+    public function updateV1_1(string $id, $attributes = [], bool $_ = false, bool $__ = true)
     {
         return $this->updateV1($id, $attributes);
     }
@@ -358,7 +358,7 @@ trait ModelRepository
         return is_null($result) ? 0 : intval($result->update($attributes));
     }
 
-    public function updateV2_1(int $id, $attributes = [], bool $_, bool $__ = true)
+    public function updateV2_1(int $id, $attributes = [], bool $_ = false, bool $__ = true)
     {
         return $this->updateV2($id, $attributes);
     }
