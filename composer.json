@@ -11,15 +11,15 @@
     ],
     "minimum-stability": "stable",
     "require": {
-        "php": "^7.2",
+        "php": ">=7.2",
         "illuminate/contracts": "^5.0|^6.0|^7.0|^8.0",
         "illuminate/database": "^5.0|^6.0|^7.0|^8.0",
         "illuminate/support": "^5.0|^6.0|^7.0|^8.0",
+        "illuminate/pagination": "^5.0|^6.0|^7.0|^8.0",
         "drewlabs/contracts": "v1.0.x-dev",
         "drewlabs/core": "v1.0.x-dev",
         "drewlabs/core-helpers": "v1.0.x-dev",
-        "doctrine/dbal": "^3.1",
-        "illuminate/pagination": "^8.45"
+        "doctrine/dbal": "^3.1"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.0",
