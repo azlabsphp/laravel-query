@@ -7,7 +7,7 @@ use Drewlabs\Contracts\Data\DML\DMLProvider;
 use Drewlabs\Contracts\Data\Model\ActiveModel;
 use Drewlabs\Contracts\Data\Model\Model;
 use Drewlabs\Core\Data\Services\ModelAttributesParser;
-use Drewlabs\Core\Support\Traits\Overloadable;
+use Drewlabs\Support\Traits\Overloadable;
 use Drewlabs\Packages\Database\Extensions\CustomQueryCriteria;
 use Drewlabs\Packages\Database\Extensions\IlluminateModelRepository;
 use Illuminate\Container\Container;

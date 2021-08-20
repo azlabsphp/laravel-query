@@ -7,7 +7,7 @@ use Drewlabs\Contracts\Data\Model\Parseable;
 use Drewlabs\Contracts\Data\Model\Relatable;
 use Drewlabs\Core\Data\Exceptions\RepositoryException;
 use Drewlabs\Contracts\Data\Model\Model;
-use Drewlabs\Core\Support\Traits\Overloadable;
+use Drewlabs\Support\Traits\Overloadable;
 use Illuminate\Support\Collection;
 
 trait ModelRepository
