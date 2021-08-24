@@ -2,8 +2,9 @@
 
 namespace Drewlabs\Packages\Database;
 
-use Drewlabs\Contracts\Data\Repository\ModelRepository;
 use Drewlabs\Packages\Database\Contracts\TransactionUtils;
+use Drewlabs\Contracts\Data\Repository\ModelRepository;
+use ReflectionFunction;
 
 class DynamicCRUDQueryHandler
 {
@@ -55,51 +56,82 @@ class DynamicCRUDQueryHandler
         if (is_null($this->repository) || !($this->repository instanceof ModelRepository)) {
             throw new \RuntimeException('Calling ' . __METHOD__ . ' requires binding the repository first. Call bindRepository($repository) method before calling this method');
         }
-        try {
-            if (isset($this->transactionHandler)) {
-                $this->transactionHandler->startTransaction();
-            }
+        return $this->runTransaction(function () use ($relations, $values, $parse_inputs, $upsert, $conditions, $mass_insert) {
             $model = $this->repository->insert($values, $parse_inputs, $upsert, $conditions);
+            // Loop through model transactions
+            $relations = array_filter($relations ?? [], function ($relation) {
+                return is_string($relation);
+            });
             foreach ($relations as $i) {
-                # code...
-                if (method_exists($model, $i) && array_key_exists($i, $values)  && isset($values[$i])) {
-                    $isArrayList = \array_filter($values[$i], 'is_array') === $values[$i];
-                    if ($isArrayList) {
-                        // If specified to insert item in mass, insert all entries in one query
-                        if ($mass_insert) {
-                            $model->{$i}()->createMany(array_map(function ($value) {
-                                return array_merge(
-                                    $value,
-                                    array(
-                                        'created_at' => date('Y-m-d H:i:s'),
-                                        'updated_at' => date('Y-m-d H:i:s')
-                                    )
-                                );
-                            }, $values[$i]));
-                        } else {
-                            // Else insert each entry individually to provide user of the method
-                            // the ability to listen for each insertion event
-                            foreach ($values[$i] as $k) {
-                                # code...
-                                $model->{$i}()->create($k);
-                            }
-                        }
-                    } else {
-                        $model->{$i}()->create($values[$i]);
-                    }
+                if (!(method_exists($model, $i) && array_key_exists($i, $values)  && isset($values[$i]))) {
+                    continue;
                 }
-            }
-            if (isset($this->transactionHandler)) {
-                $this->transactionHandler->completeTransaction();
+                $isArrayList = \array_filter($values[$i], 'is_array') === $values[$i];
+                $insertAllFunc = function () use ($model, $i, $values, $mass_insert) {
+                    $batchInsertFunc = function () use ($model, $i, $values) {
+                        // TODO : Delete existing model relations and create new ones
+                        $model->{$i}()->createMany(array_map(function ($value) {
+                            return array_merge(
+                                $value,
+                                array(
+                                    'created_at' => date('Y-m-d H:i:s'),
+                                    'updated_at' => date('Y-m-d H:i:s')
+                                )
+                            );
+                        }, $values[$i]));
+                    };
+                    $loopInsertFunc = function () use ($model, $i, $values) {
+                        // TODO : Delete existing model relations and create new ones
+                        foreach ($values[$i] as $k) {
+                            $model->{$i}()->create($k);
+                        }
+                    };
+                    $mass_insert ? $batchInsertFunc() : $loopInsertFunc();
+                };
+                $insertOneFunc = function () use ($model, $i, $values) {
+                    $model->{$i}()->delete();
+                    $model->{$i}()->create($values[$i]);
+                };
+                $isArrayList ? $insertAllFunc() : $insertOneFunc();
             }
             return $model;
-        } catch (\Exception $e) {
+        });
+    }
 
-            if (isset($this->transactionHandler)) {
-                $this->transactionHandler->cancel();
-            }
-            throw new \RuntimeException($e);
+    private function runTransaction(\Closure $callback)
+    {
+        // Start the transaction
+        if (isset($this->transactionHandler)) {
+            $this->transactionHandler->startTransaction();
         }
+        try {
+            // Run the transaction
+            $callbackResult = (new ReflectionFunction($callback))->invoke();
+            // Return the result of the transaction
+            return $this->afterTransaction(function () use ($callbackResult) {
+                return $callbackResult;
+            });
+        } catch (\Exception $e) {
+            return $this->afterCancelTransaction(function () use ($e) {
+                throw new \RuntimeException($e);
+            });
+        }
+    }
+
+    private function afterTransaction(\Closure $callback)
+    {
+        if (isset($this->transactionHandler)) {
+            $this->transactionHandler->completeTransaction();
+        }
+        return (new ReflectionFunction($callback))->invoke();
+    }
+
+    private function afterCancelTransaction(\Closure $callback)
+    {
+        if (isset($this->transactionHandler)) {
+            $this->transactionHandler->cancel();
+        }
+        return (new ReflectionFunction($callback))->invoke();
     }
 
 
@@ -120,59 +152,52 @@ class DynamicCRUDQueryHandler
         if (is_null($this->repository) || !($this->repository instanceof ModelRepository)) {
             throw new \RuntimeException('Calling ' . __METHOD__ . ' requires binding the repository first. Call bindRepository($repository) method before calling this method');
         }
-        try {
-            if (isset($this->transactionHandler)) {
-                $this->transactionHandler->startTransaction();
-            }
+
+        return $this->runTransaction(function () use ($relations, $id, $values, $parse_inputs, $upsert) {
             $updated = 0;
             $updated = $this->repository->updateById($id, $values, $parse_inputs);
             $model = $this->repository->findById($id, array($this->repository->{'modelPrimaryKey'}()));
-            if (!is_null($model)) {
-                foreach ($relations as $i) {
-                    # code...
-                    if (method_exists($model, $i) && array_key_exists($i, $values) && isset($values[$i])) {
-                        if ($upsert) {
-                            $isArrayList = isset($values[$i][0]) && \array_filter($values[$i][0], 'is_array') === $values[$i][0];
-                            if ($isArrayList) {
-                                foreach ($values[$i] as $v) {
-                                    # code...
-                                    $this->updateOrCreateIfMatchCondition($model->{$i}(), $v);
-                                }
-                            } else {
-                                $this->updateOrCreateIfMatchCondition($model->{$i}(), $values[$i]);
-                            }
-                        } else {
-                            $isArrayList = isset($values[$i]) && \array_filter($values[$i], 'is_array') === $values[$i];
-                            if ($isArrayList) {
-                                $model->{$i}()->delete();
-                                // Create many after deleting the all the related
-                                $model->{$i}()->createMany(array_map(function ($value) use ($model) {
-                                    return array_merge(
-                                        $value,
-                                        array(
-                                            'created_at' => date('Y-m-d H:i:s'),
-                                            'updated_at' => date('Y-m-d H:i:s')
-                                        )
-                                    );
-                                }, $values[$i]));
-                            } else {
-                                $model->{$i}()->delete();
-                                $model->{$i}()->create($values[$i]);
-                            }
+
+            // If the model is not found return 0 as result
+            if (null === $model) return $updated;
+
+            // Else loop through the model relations and update them
+            foreach ($relations as $i) {
+                if (!(method_exists($model, $i) && array_key_exists($i, $values) && isset($values[$i]))) continue;
+                $updateOrInsertFunc = function () use ($i, $values, $model) {
+                    $isArrayList = isset($values[$i][0]) && \array_filter($values[$i][0], 'is_array') === $values[$i][0];
+                    $updateOrInsertArrayList = function ()  use ($i, $values, $model) {
+                        foreach ($values[$i] as $v) {
+                            $this->updateOrCreateIfMatchCondition($model->{$i}(), $v);
                         }
-                    }
-                }
-            }
-            if (isset($this->transactionHandler)) {
-                $this->transactionHandler->completeTransaction();
+                    };
+                    $isArrayList ? $updateOrInsertArrayList() : $this->updateOrCreateIfMatchCondition($model->{$i}(), $values[$i]);
+                };
+                $insertFunc = function () use ($i, $values, $model) {
+                    $isArrayList = isset($values[$i]) && \array_filter($values[$i], 'is_array') === $values[$i];
+                    $insertArrayAllFunc = function () use ($i, $values, $model) {
+                        $model->{$i}()->delete();
+                        // Create many after deleting the all the related
+                        $model->{$i}()->createMany(array_map(function ($value){
+                            return array_merge(
+                                $value,
+                                array(
+                                    'created_at' => date('Y-m-d H:i:s'),
+                                    'updated_at' => date('Y-m-d H:i:s')
+                                )
+                            );
+                        }, $values[$i]));
+                    };
+                    $insertOneFunc = function () use ($i, $values, $model) {
+                        $model->{$i}()->delete();
+                        $model->{$i}()->create($values[$i]);
+                    };
+                    $isArrayList ? $insertArrayAllFunc() : $insertOneFunc();
+                };
+                $upsert ? $updateOrInsertFunc() : $insertFunc();
             }
             return $updated;
-        } catch (\Exception $e) {
-            if (isset($this->transactionHandler)) {
-                $this->transactionHandler->cancel();
-            }
-            throw new \RuntimeException($e);
-        }
+        });
     }
 
     private function updateOrCreateIfMatchCondition($relation, $value)

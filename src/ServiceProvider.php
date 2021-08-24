@@ -7,7 +7,7 @@ use Drewlabs\Contracts\Data\Parser\ModelAttributeParser as ModelAttributesParser
 use Drewlabs\Core\Data\Services\ModelAttributesParser;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Drewlabs\Packages\Database\Contracts\TransactionUtils;
-use Drewlabs\Packages\Database\DataTransactionUtils;
+use Drewlabs\Packages\Database\DatabaseTransactionManager;
 use Drewlabs\Packages\Database\Extensions\CustomQueryCriteria;
 
 class ServiceProvider extends BaseServiceProvider
@@ -37,7 +37,7 @@ class ServiceProvider extends BaseServiceProvider
     public function register()
     {
         $this->app->singleton(TransactionUtils::class, function ($app) {
-            return new DataTransactionUtils($app);
+            return new DatabaseTransactionManager($app->make('db'));
         });
         $this->app->bind(FiltersInterface::class, CustomQueryCriteria::class);
 
