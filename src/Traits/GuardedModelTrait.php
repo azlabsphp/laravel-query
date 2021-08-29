@@ -4,7 +4,6 @@ namespace Drewlabs\Packages\Database\Traits;
 
 trait GuardedModelTrait
 {
-
     /**
      * @inheritDoc
      */

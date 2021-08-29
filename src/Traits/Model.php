@@ -12,20 +12,6 @@ trait Model
     use HavingBooleanAttributes;
 
     /**
-     * Fillable storage columns of an entity
-     *
-     * @return array
-     */
-    protected $fillable = [];
-
-    /**
-     * Property for controlling if appended contents should be added to the model query json result
-     *
-     * @var boolean
-     */
-    protected $withoutAppends = false;
-
-    /**
      * Checks if the current model has some relations
      *
      * @return boolean

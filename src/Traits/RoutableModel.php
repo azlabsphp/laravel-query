@@ -6,29 +6,6 @@ use Illuminate\Container\Container;
 
 trait RoutableModel
 {
-    /**
-     * Defines the name of the index path of the current ressource
-     *
-     * @var
-     */
-    protected $indexRoute;
-
-    /**
-     * Identifier column name for the index route
-     *
-     * @var [type]
-     */
-    protected $ressourceIdParam;
-
-    /**
-     * {@inheritDoc}
-     */
-    protected $routeTemplateParams;
-
-    /**
-     * Defines a model entity unique name in the data storage
-     */
-    protected $entityIdentifier;
 
     /**
      * Returns the value matching the id parameter to be passed to the ressource identifier
@@ -68,7 +45,7 @@ trait RoutableModel
      */
     protected function ressourceIdentifier()
     {
-        return isset($this->ressourceIdParam) ? $this->ressourceIdParam : 'id';
+        return $this->ressourceIdParam ?? '';
     }
 
     /**
@@ -78,6 +55,6 @@ trait RoutableModel
      */
     protected function getIndexRoute()
     {
-        return $this->indexRoute;
+        return $this->indexRoute ?? '';
     }
 }

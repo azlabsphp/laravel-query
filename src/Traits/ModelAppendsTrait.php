@@ -4,8 +4,6 @@ namespace Drewlabs\Packages\Database\Traits;
 
 trait ModelAppendsTrait
 {
-
-
     protected function getArrayableAppends()
     {
         $route = $this->getIndexRoute();
