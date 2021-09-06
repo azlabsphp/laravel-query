@@ -41,11 +41,11 @@ trait RoutableModel
     /**
      * Returns the ressource identifier parameter name for the given model
      *
-     * @return string
+     * @return string|null
      */
     protected function ressourceIdentifier()
     {
-        return $this->ressourceIdParam ?? '';
+        return $this->ressourceIdParam ?? 'id';
     }
 
     /**
@@ -55,6 +55,6 @@ trait RoutableModel
      */
     protected function getIndexRoute()
     {
-        return $this->indexRoute ?? '';
+        return $this->indexRoute ?? null;
     }
 }
