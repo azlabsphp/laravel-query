@@ -9,6 +9,6 @@ trait GuardedModelTrait
      */
     public function getGuardedAttributes()
     {
-        return $this->guarded;
+        return $this->guarded ?? [];
     }
 }

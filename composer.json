@@ -32,7 +32,9 @@
         "files": [
             "helpers/query.php",
             "helpers/parsers.php",
-            "helpers/utils.php"
+            "helpers/utils.php",
+            "helpers/transformers.php",
+            "src/proxies.php"
         ]
     },
     "autoload-dev": {

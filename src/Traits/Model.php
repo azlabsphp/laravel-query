@@ -91,4 +91,28 @@ trait Model
     {
         return $this->relation_methods ?? [];
     }
+
+    public function getDeclaredColumns()
+    {
+        // Get table primary key
+        $primaryKey = $this->getPrimaryKey();
+        // Get timestamps columns
+        $timestamps = array_merge(
+            method_exists($this, 'getCreatedAtColumn') ?
+                [$this->getCreatedAtColumn()] :
+                ['created_at'],
+            method_exists($this, 'getUpdatedAtColumn') ?
+                [$this->getUpdatedAtColumn()] :
+                ['updated_at']
+        );
+        // Get list of fillables
+        return drewlabs_core_array_unique(
+            array_merge(
+                $this->getFillables() ?? [],
+                $this->getGuardedAttributes() ?? [],
+                $this->timestamps ? $timestamps : [],
+                $primaryKey ? [$primaryKey] : []
+            )
+        );
+    }
 }
