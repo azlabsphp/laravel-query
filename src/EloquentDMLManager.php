@@ -28,12 +28,12 @@ use function Drewlabs\Packages\Database\Proxy\SelectQueryResult;
  * @method \Drewlabs\Contracts\Data\Model\Model|mixed create(array $attributes, \Closure $callback = null)
  * @method \Drewlabs\Contracts\Data\Model\Model|mixed create(array $attributes, $params, bool $batch, \Closure $callback = null)
  * @method \Drewlabs\Contracts\Data\Model\Model|mixed create(array $attributes, $params = [], \Closure $callback)
- * 
+ *
  * @method bool delete(int $id)
  * @method bool delete(string $id)
  * @method int delete(array $query)
  * @method int delete(array $query, bool $batch)
- * 
+ *
  * @method \Drewlabs\Contracts\Data\DataProviderQueryResultInterface|mixed select()
  * @method \Drewlabs\Contracts\Data\Model\Model|mixed select(string $id, array $columns, \Closure $callback = null)
  * @method \Drewlabs\Contracts\Data\Model\Model|mixed select(string $id, \Closure $callback = null)
@@ -44,7 +44,7 @@ use function Drewlabs\Packages\Database\Proxy\SelectQueryResult;
  * @method \Illuminate\Contracts\Pagination\Paginator|mixed select(array $query, int $per_page, int $page = null, \Closure $callback = null)
  * @method \Illuminate\Contracts\Pagination\Paginator|mixed select(array $query, int $per_page, array $columns, int $page = null, \Closure $callback = null)
  * @method int selectAggregate(array $query = [], string $aggregation = \Drewlabs\Packages\Database\DatabaseQueryBuilderAggregationMethodsEnum::COUNT)
- * 
+ *
  * @method int update(array $query, $attributes = [])
  * @method int update(array $query, $attributes = [], bool $bulkstatement)
  * @method \Drewlabs\Contracts\Data\Model\Model|mixed update(int $id, $attributes, \Closure $dto_transform_fn = null)
@@ -80,11 +80,11 @@ class EloquentDMLManager implements DMLProvider
     ];
 
     /**
-     * 
-     * @param Model|string $clazz 
-     * @return never 
-     * @throws BindingResolutionException 
-     * @throws InvalidArgumentException 
+     *
+     * @param Model|string $clazz
+     * @return never
+     * @throws BindingResolutionException
+     * @throws InvalidArgumentException
      */
     public function __construct($clazz)
     {
@@ -124,9 +124,9 @@ class EloquentDMLManager implements DMLProvider
     }
 
     /**
-     * @param array $attributes 
+     * @param array $attributes
      * @param \Closure|null $callback
-     * @return Model 
+     * @return Model
      */
     public function createV1(array $attributes, \Closure $callback = null)
     {
@@ -463,6 +463,7 @@ class EloquentDMLManager implements DMLProvider
             $this->model->getDeclaredColumns(),
             $model_relations
         );
+        $primaryKey = $this->model->getPrimaryKey();
         return $callback(
             SelectQueryResult(
                 new DataProviderQueryResult(
@@ -473,14 +474,15 @@ class EloquentDMLManager implements DMLProvider
                             [$relations]
                         ) : $builder,
                         EloquentQueryBuilderMethodsEnum::SELECT,
-                        [empty($columns_) || !empty($relations) ? ['*'] : $columns_]
+                        [empty($columns_) || !empty($relations) ? ['*'] : [...$columns_, $primaryKey]]
                     )
                 )
-            )->each(function ($value) use ($columns_, $relations) {
+            )->each(function ($value) use ($columns_, $relations, $primaryKey) {
                 if (!empty($relations)) {
                     $columns = empty($columns_) ? $value->getHidden() :
                         array_diff(
-                            $value->getDeclaredColumns() ?? [],
+                            // Filter out the primary key in order to include it no matter what
+                            drewlabs_core_array_except($value->getDeclaredColumns(), [$primaryKey]) ?? [],
                             array_filter($columns_ ?? [], function ($key) {
                                 return (null !== $key) && ($key !== '*');
                             })
@@ -494,7 +496,7 @@ class EloquentDMLManager implements DMLProvider
 
     /**
      * Handle pagination functionality
-     * 
+     *
      * @param array $query
      * @param int $per_page
      * @param int $page
@@ -508,7 +510,7 @@ class EloquentDMLManager implements DMLProvider
 
     /**
      * Handle pagination functionality
-     * 
+     *
      * @param array $query
      * @param int $per_page
      * @param array $columns
@@ -535,6 +537,7 @@ class EloquentDMLManager implements DMLProvider
             $this->model->getDeclaredColumns(),
             $model_relations
         );
+        $primaryKey = $this->model->getPrimaryKey();
         return $callback(
             SelectQueryResult(
                 new DataProviderQueryResult(
@@ -545,14 +548,15 @@ class EloquentDMLManager implements DMLProvider
                             [$relations]
                         ) : $builder,
                         EloquentQueryBuilderMethodsEnum::PAGINATE,
-                        [$per_page, empty($columns_) || !empty($relations) ? ['*'] : $columns_, null, $page ?? 1]
+                        [$per_page, empty($columns_) || !empty($relations) ? ['*'] : [...$columns_, $primaryKey], null, $page ?? 1]
                     )
                 )
-            )->each(function ($value) use ($columns_, $relations) {
+            )->each(function ($value) use ($columns_, $relations, $primaryKey) {
                 if (!empty($relations)) {
                     $columns = empty($columns_) ? $value->getHidden() :
                         array_diff(
-                            $value->getDeclaredColumns() ?? [],
+                            // Filter out the primary key in order to include it no matter what
+                            drewlabs_core_array_except($value->getDeclaredColumns(), [$primaryKey]) ?? [],
                             array_filter($columns_ ?? [], function ($key) {
                                 return (null !== $key) && ($key !== '*');
                             })
