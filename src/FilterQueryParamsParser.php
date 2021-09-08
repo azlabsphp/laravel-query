@@ -28,7 +28,7 @@ class FilterQueryParamsParser implements QueryParser
         // Insure that where not working with associative arrays
         $params = array_values($params);
         // If the first value of the array is an array, parse it else return it
-        $params[0] = is_array($params[0]) ? (string)(new QueryParamsObject($params[0])) : $params[0];
+        $params[0] = is_array($params[0]) && (isset($params[0]['model']) && $params[0]['column']) ? (string)(new QueryParamsObject($params[0])) : $params[0];
         return $params;
     }
 }
