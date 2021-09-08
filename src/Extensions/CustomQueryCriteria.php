@@ -70,9 +70,15 @@ class CustomQueryCriteria implements ModelFiltersInterface
             $result = (new FilterQueryParamsParser())->parse($criteria['where']);
             $isArrayList = \array_filter($result, 'is_array') === $result;
             if ($isArrayList) {
-                $model = $model->where($result);
+                $model = array_reduce($criteria['where'], function ($model, array $query) {
+                    if (drewlabs_core_array_is_no_assoc_array_list($query)) {
+                        return $model->where($query);
+                    } else {
+                        return $model->where(...$query);
+                    }
+                }, $model);
             } else {
-                $model = $model->where(...$result);
+                $model = $model->where(...$criteria['where']);
             }
         }
         return $model;
@@ -210,7 +216,13 @@ class CustomQueryCriteria implements ModelFiltersInterface
             $result = (new FilterQueryParamsParser())->parse($criteria['orWhere']);
             $isArrayList = \array_filter($result, 'is_array') === $result;
             if ($isArrayList) {
-                $model = $model->orWhere($criteria['orWhere']);
+                $model = array_reduce($criteria['orWhere'], function ($model, array $query) {
+                    if (drewlabs_core_array_is_no_assoc_array_list($query)) {
+                        return $model->orWhere($query);
+                    } else {
+                        return $model->orWhere(...$query);
+                    }
+                }, $model);
             } else {
                 $model = $model->orWhere(...$criteria['orWhere']);
             }
