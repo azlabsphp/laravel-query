@@ -8,6 +8,7 @@
   <testsuites>
     <testsuite name="Core package tests">
       <directory suffix="Test.php">./tests</directory>
+        <exclude>./tests/TestCase.php</exclude>
     </testsuite>
   </testsuites>
   <php>

@@ -4,11 +4,13 @@ namespace Drewlabs\Packages\Database;
 
 use Drewlabs\Contracts\Data\Filters\FiltersInterface;
 use Drewlabs\Contracts\Data\Parser\ModelAttributeParser as ModelAttributesParserContract;
+use Drewlabs\Contracts\Hasher\IHasher;
 use Drewlabs\Core\Data\Services\ModelAttributesParser;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Drewlabs\Packages\Database\Contracts\TransactionUtils;
-use Drewlabs\Packages\Database\DataTransactionUtils;
+use Drewlabs\Packages\Database\DatabaseTransactionManager;
 use Drewlabs\Packages\Database\Extensions\CustomQueryCriteria;
+use Illuminate\Contracts\Container\BindingResolutionException;
 
 class ServiceProvider extends BaseServiceProvider
 {
@@ -37,11 +39,19 @@ class ServiceProvider extends BaseServiceProvider
     public function register()
     {
         $this->app->singleton(TransactionUtils::class, function ($app) {
-            return new DataTransactionUtils($app);
+            return new DatabaseTransactionManager($app->make('db'));
         });
         $this->app->bind(FiltersInterface::class, CustomQueryCriteria::class);
 
-        $this->app->bind(ModelAttributesParserContract::class, ModelAttributesParser::class);
+        $this->app->bind(ModelAttributesParserContract::class, function($app) {
+            try {
+                $hasher = $app->make(IHasher::class);
+                return new ModelAttributesParser($hasher);
+            } catch (BindingResolutionException $e) {
+                $app['log']->info('IHasher interface not registered, please make sure the hasher interface is registered before proceeding!');
+                return new ModelAttributesParser();
+            }
+        });
         
         // Register Nosql providers bindings
         $this->noSqlBindings();

@@ -29,18 +29,18 @@ if (!function_exists('drewlabs_databse_parse_client_request_query_params')) {
                     $value = is_numeric($value) || is_bool($value) || is_integer($value) ? $value : '%' . $value . '%';
                     $filters['orWhere'][] = array($key, $operator, $value);
                 } else if (\drewlabs_core_strings_contains($key, ['__'])) {
-                    $exploded = \explode('__', $key);
-                    $relation = $exploded[0];
-                    $column = $exploded[1];
-                    if (method_exists($model, $relation) && !is_null($column)) {
+                    list($relation, $column) = \explode('__', $key);
+                    $relation = drewlabs_core_strings_replace([':', '%'], '.', $relation ?? '');
+                    $model_method = drewlabs_core_strings_contains($relation, '.') ? drewlabs_core_strings_before('.', $relation) : $relation;
+                    if (method_exists($model, $model_method) && !is_null($column)) {
                         $filters['whereHas'][] = array($relation, function ($query) use ($value, $column) {
                             if (is_array($value)) {
                                 $query->whereIn($column, $value);
-                                return;
+                            } else {
+                                $operator = is_numeric($value) || is_bool($value) ? '=' : 'like';
+                                $value = is_numeric($value) ? $value : '%' . $value . '%';
+                                $query->where($column, $operator, $value);
                             }
-                            $operator = is_numeric($value) || is_bool($value) ? '=' : 'like';
-                            $value = is_numeric($value) ? $value : '%' . $value . '%';
-                            $query->where($column, $operator, $value);
                         });
                     }
                 }
