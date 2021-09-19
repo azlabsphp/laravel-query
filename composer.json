@@ -16,9 +16,9 @@
         "illuminate/database": "^5.0|^6.0|^7.0|^8.0",
         "illuminate/support": "^5.0|^6.0|^7.0|^8.0",
         "illuminate/pagination": "^5.0|^6.0|^7.0|^8.0",
-        "drewlabs/contracts": ">=v1.0.x-dev",
-        "drewlabs/core": ">=v1.0.x-dev",
-        "drewlabs/core-helpers": ">=v1.0.x-dev",
+        "drewlabs/contracts": "^v1.0.x-dev",
+        "drewlabs/core": "^v1.0.x-dev",
+        "drewlabs/core-helpers": "^v1.0.x-dev",
         "doctrine/dbal": "^3.1"
     },
     "require-dev": {
