@@ -154,10 +154,13 @@ trait ModelRepository
 
     public function insertv3(array $values, array $conditions)
     {
+        if ((null === $conditions) || empty($conditions)) {
+            return $this->insertV2($values);
+        }
         return call_user_func_array(
             [\drewlabs_core_create_attribute_getter('model_instance', null)($this), 'updateOrCreate'],
             [
-                !empty($conditions) ? $conditions : [],
+                $conditions,
                 $values
             ]
         );
