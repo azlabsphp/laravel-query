@@ -168,3 +168,61 @@ if (!function_exists('drewlabs_database_apply')) {
         );
     }
 }
+
+//#region Compatibility global functions
+if (!function_exists('apply_callback_to_paginator_data')) {
+    /**
+     * Apply data transformation algorithm provided by the callback to each item of the paginator data
+     *
+     * @param Paginator $item
+     * @param callable $callback
+     * @return Paginator
+     */
+    function apply_callback_to_paginator_data(Paginator $item, callable $callback)
+    {
+        return drewlabs_database_paginator_apply_callback($item, $callback);
+    }
+}
+
+if (!function_exists('map_query_result')) {
+    /**
+     * Apply transformation to response object on a get all request
+     *
+     * @param Paginator|array|mixed $item
+     * @param callable $callback
+     * @return mixed
+     */
+    function map_query_result($item, callable $callback)
+    {
+        return drewlabs_database_map_query_result($item, $callback);
+    }
+}
+
+if (!function_exists('transform_paginator_data')) {
+    /**
+     * Apply data transformation algorithm provided by the callback to paginator data
+     *
+     * @param Paginator $item
+     * @param callable $callback
+     * @return Paginator
+     */
+    function transform_paginator_data($item, callable $callback)
+    {
+        return drewlabs_database_paginator_apply_to_all($item, $callback);
+    }
+}
+
+if (!function_exists('transform_query_result')) {
+    /**
+     * Transform all data by passing them to a user provided callback
+     *
+     * @param Paginator|array|mixed $item
+     * @param callable $callback
+     * @return Paginator|DataProviderQueryResultInterface
+     */
+    function transform_query_result($item, callable $callback)
+    {
+        return drewlabs_database_apply($item, $callback);
+    }
+}
+//#endregion Compatibility global functions
