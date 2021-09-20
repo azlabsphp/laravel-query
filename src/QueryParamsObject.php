@@ -2,7 +2,7 @@
 
 namespace Drewlabs\Packages\Database;
 
-use Drewlabs\Core\EntityObject\ValueObject;
+use Drewlabs\Support\Immutable\ValueObject;
 use Illuminate\Container\Container;
 
 class QueryParamsObject extends ValueObject

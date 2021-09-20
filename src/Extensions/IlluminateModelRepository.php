@@ -11,7 +11,7 @@ use Drewlabs\Packages\Database\DynamicCRUDQueryHandler;
 use Psr\Container\ContainerInterface;
 use Drewlabs\Packages\Database\Contracts\TransactionUtils;
 use Drewlabs\Contracts\Data\Repository\ModelRepository as ModelRepositoryInterface;
-use Drewlabs\Core\EntityObject\ValueObject;
+use Drewlabs\Support\Immutable\ValueObject;
 
 /**
  * @package Drewlabs\Packages\Database\Extensions

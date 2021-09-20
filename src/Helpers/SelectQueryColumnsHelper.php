@@ -15,11 +15,21 @@ class SelectQueryColumnsHelper
      */
     public static function asTuple($values = ['*'], array $declared_columns = [], array $model_relations = [])
     {
+        $relations_ = [];
         $values = $values ?? [];
+        // Add top level relations in the list of relations that can be loaded
+        foreach ($model_relations ?? [] as $key => $value) {
+            if (drewlabs_core_strings_contains($value, '.')) {
+                $relations_[$key] = drewlabs_core_strings_before('.', $value);
+            }
+        }
         // TODO: Get list of relations to be loaded
-        $relations = array_filter($model_relations, function ($relation) use ($values) {
-            return in_array($relation, $values);
-        });
+        $relations = array_filter(
+            array_merge($model_relations, $relations_),
+            function ($relation) use ($values) {
+                return in_array($relation, $values);
+            }
+        );
         // TODO : Filter $columns removing relations
         $columns_ = array_intersect($values, $declared_columns);
         if (in_array('*', $values)) {
