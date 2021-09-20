@@ -189,8 +189,8 @@ class EloquentDMLManager implements DMLProvider
             return $param;
         };
         $method = $params['method'] ?? EloquentQueryBuilderMethodsEnum::CREATE;
-        $upsert = $params['upsert'] ?? false;
         $upsert_conditions = $params['upsert_conditions'] ? $params['upsert_conditions'] : [];
+        $upsert = $params['upsert'] && !empty($upsert_conditions) ? true : false;
         if (is_string($method) && \drewlabs_database_is_dynamic_create_method($method)) {
             $result = create_relations_after_create(
                 $this->forwardCallTo(
