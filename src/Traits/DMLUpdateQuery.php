@@ -84,7 +84,7 @@ trait DMLUpdateQuery
             $key,
             array $values
         ) use ($callback) {
-            return function (\Closure $callable = null)  use (
+            return function (\Closure $callable = null) use (
                 $self,
                 $key,
                 $values,
