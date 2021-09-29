@@ -2,6 +2,7 @@
 
 namespace Drewlabs\Packages\Database\Traits;
 
+use Drewlabs\Contracts\Data\Model\Model;
 use Drewlabs\Packages\Database\EloquentQueryBuilderMethodsEnum;
 use Drewlabs\Packages\Database\Extensions\CustomQueryCriteria;
 use Illuminate\Support\Enumerable;
@@ -100,7 +101,9 @@ trait DMLUpdateQuery
                 // If their is a callable, call the callable, passing in updated model first and the other
                 // params later
                 if ($callable) {
-                    $result = call_user_func($callable, ...[$model_, ...(array_slice(func_get_args(), 1))]);
+                    $params_ = (array_slice(func_get_args(), 1));
+                    $params_ = array_merge($model_, $params_);
+                    $result = call_user_func($callable, ...$params_);
                     $model_ = is_object($result) ? $result : $model_;
                 }
                 // Call the outer callback

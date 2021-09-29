@@ -145,7 +145,7 @@ trait DMLSelectQuery
                             [$relations]
                         ) : $builder,
                         EloquentQueryBuilderMethodsEnum::SELECT,
-                        [empty($columns_) || !empty($relations) ? ['*'] : [...$columns_, $primaryKey]]
+                        [empty($columns_) || !empty($relations) ? ['*'] : drewlabs_core_array_unique(array_merge($columns_ ?? [], [$primaryKey]))]
                     )
                 )
             )->each(function ($value) use ($columns_, $relations, $primaryKey) {
@@ -219,7 +219,7 @@ trait DMLSelectQuery
                             [$relations]
                         ) : $builder,
                         EloquentQueryBuilderMethodsEnum::PAGINATE,
-                        [$per_page, empty($columns_) || !empty($relations) ? ['*'] : [...$columns_, $primaryKey], null, $page ?? 1]
+                        [$per_page, empty($columns_) || !empty($relations) ? ['*'] : drewlabs_core_array_unique(array_merge($columns_ ?? [], [$primaryKey])), null, $page ?? 1]
                     )
                 )
             )->each(function ($value) use ($columns_, $relations, $primaryKey) {
