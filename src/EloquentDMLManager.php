@@ -143,7 +143,7 @@ class EloquentDMLManager implements DMLProvider
     public function selectAggregate(array $query = [], string $aggregation = DatabaseQueryBuilderAggregationMethodsEnum::COUNT)
     {
         if (!in_array($aggregation, static::AGGREGATE_METHODS)) {
-            throw new InvalidArgumentException('The provided method is not part of Illuminate aggregation framework on Query Builder Class');
+            throw new InvalidArgumentException('The provided method is not part of the aggregation framework supported methods');
         }
         return $this->forwardCallTo(
             array_reduce(drewlabs_core_array_is_no_assoc_array_list($query) ? $query : [$query], function ($model, $q) {
