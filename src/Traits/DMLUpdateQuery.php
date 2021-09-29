@@ -102,7 +102,7 @@ trait DMLUpdateQuery
                 // params later
                 if ($callable) {
                     $params_ = (array_slice(func_get_args(), 1));
-                    $params_ = array_merge($model_, $params_);
+                    $params_ = array_merge([$model_], $params_);
                     $result = call_user_func($callable, ...$params_);
                     $model_ = is_object($result) ? $result : $model_;
                 }
