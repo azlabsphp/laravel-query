@@ -7,6 +7,8 @@ use Drewlabs\Packages\Database\EloquentQueryBuilderMethodsEnum;
 use Drewlabs\Packages\Database\Extensions\CustomQueryCriteria;
 use Illuminate\Support\Enumerable;
 
+use function Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;
+
 trait DMLUpdateQuery
 {
     public function update(...$args)
@@ -22,14 +24,63 @@ trait DMLUpdateQuery
         });
     }
 
-    public function updateV2(array $query, $attributes = [], bool $batch = false)
-    {
-        $is_array_list = drewlabs_core_array_is_no_assoc_array_list($query);
+    public function updateV2(
+        array $query,
+        array $attributes,
+        bool $batch = false
+    ) {
+        return $this->updateByQuery($query, $attributes, $batch);
+    }
+
+    public function updateV3(
+        int $id,
+        array $attributes,
+        \Closure $callback = null
+    ) {
+        return $this->updateByID((string)$id, $attributes, [], $callback);
+    }
+    public function updateV4(
+        int $id,
+        array $attributes,
+        $params,
+        \Closure $callback = null
+    ) {
+        return $this->updateByID((string)$id, $attributes, $params, $callback);
+    }
+
+    public function updateV5(
+        string $id,
+        array $attributes,
+        \Closure $callback = null
+    ) {
+        return $this->updateByID((string)$id, $attributes, [], $callback);
+    }
+
+    public function updateV6(
+        string $id,
+        array $attributes,
+        $params,
+        \Closure $callback = null
+    ) {
+        return $this->updateByID($id, $attributes, $params, $callback);
+    }
+
+    private function updateByQuery(
+        array $query,
+        array $attributes,
+        bool $batch = false
+    ) {
         if ($batch) {
             return $this->forwardCallTo(
-                array_reduce($is_array_list ? $query : [$query], function ($model, $q) {
-                    return (new CustomQueryCriteria($q))->apply($model);
-                }, drewlabs_core_create_attribute_getter('model', null)($this)),
+                array_reduce(
+                    drewlabs_core_array_is_no_assoc_array_list($query) ?
+                        $query :
+                        [$query],
+                    function ($model, $q) {
+                        return (new CustomQueryCriteria($q))->apply($model);
+                    },
+                    drewlabs_core_create_attribute_getter('model', null)($this)
+                ),
                 EloquentQueryBuilderMethodsEnum::UPDATE,
                 [$this->parseAttributes(($attributes instanceof Model) ? $attributes->toArray() : $attributes)]
             );
@@ -58,20 +109,12 @@ trait DMLUpdateQuery
         }
     }
 
-    public function updateV3(int $id, $attributes, \Closure $callback = null)
-    {
-        return $this->updateV6((string)$id, $attributes, [], $callback);
-    }
-    public function updateV4(int $id, $attributes, $params, \Closure $callback = null)
-    {
-        return $this->updateV6((string)$id, $attributes, $params, $callback);
-    }
-    public function updateV5(string $id, $attributes, \Closure $callback = null)
-    {
-        return $this->updateV6((string)$id, $attributes, [], $callback);
-    }
-    public function updateV6(string $id, $attributes, $params, \Closure $callback = null)
-    {
+    private function updateByID(
+        $id,
+        array $attributes,
+        $params,
+        \Closure $callback = null
+    ) {
         $callback = $callback ?? function ($value) {
             return $value;
         };
@@ -90,9 +133,12 @@ trait DMLUpdateQuery
                 $values,
                 $callback
             ) {
+                $model = drewlabs_core_create_attribute_getter('model', null)($self);
                 // TODO : Update the model
                 $this->forwardCallTo(
-                    drewlabs_core_create_attribute_getter('model', null)($self),
+                    ModelFiltersHandler([
+                        'where' => [$model->getPrimaryKey(), $key]
+                    ])->apply($model),
                     EloquentQueryBuilderMethodsEnum::UPDATE,
                     [$this->parseAttributes($values)]
                 );
