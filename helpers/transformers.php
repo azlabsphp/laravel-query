@@ -5,10 +5,10 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Pagination\Paginator;
 use Drewlabs\Contracts\Data\DataProviderQueryResultInterface;
 use Drewlabs\Core\Data\DataProviderQueryResult;
-use Drewlabs\Support\Collections\SimpleCollection;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator as ContractsLengthAwarePaginator;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Enumerable;
+
+use function Drewlabs\Support\Proxy\Collection;
 
 if (!function_exists('drewlabs_database_paginator_apply_callback')) {
     /**
@@ -109,33 +109,19 @@ if (!function_exists('drewlabs_database_map_query_result')) {
     {
         if ($item instanceof DataProviderQueryResultInterface) {
             $item = $item->getCollection();
-        } else if (is_array($item)) {
+        } else if (is_array($item) || ($item instanceof \ArrayAccess)) {
             $item = ($value = $item['data'] ?? null) ? $value : $item;
         }
         if ($item instanceof Paginator) {
             return drewlabs_database_paginator_apply_callback($item, $callback);
         }
-        if (is_array($item)) {
-            $collection = new SimpleCollection(
-                array_values(
-                    array_filter(
-                        array_map($callback, $item),
-                        function ($current) {
-                            return isset($current);
-                        }
-                    )
-                )
-            );
-        } else {
-            $collection = new SimpleCollection(
-                ($item instanceof Enumerable ? $item : collect($item ?? []))
-                    ->map($callback)
-                    ->filter(function ($current) {
-                        return isset($current);
-                    })->all()
-            );
-        }
-        return new DataProviderQueryResult($collection);
+        return new DataProviderQueryResult(
+            Collection($item)
+                ->map($callback)
+                ->filter(function ($current) {
+                    return isset($current);
+                })
+        );
     }
 }
 
@@ -157,14 +143,8 @@ if (!function_exists('drewlabs_database_apply')) {
         if ($item instanceof Paginator) {
             return drewlabs_database_paginator_apply_to_all($item, $callback);
         }
-        if (null === $item) {
-            return new DataProviderQueryResult(new SimpleCollection([]));
-        }
-        $result = is_array($item) ? \call_user_func_array($callback, [collect($item)]) : \call_user_func_array($callback, [collect($item)]);
         return new DataProviderQueryResult(
-            new SimpleCollection(
-                is_array($result) ? array_values($result) : array_values($result->all())
-            )
+            \call_user_func($callback, null === $item ? Collection($item) : Collection())
         );
     }
 }
