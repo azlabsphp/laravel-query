@@ -134,13 +134,13 @@ trait DMLUpdateQuery
                 $callback
             ) {
                 $model = drewlabs_core_create_attribute_getter('model', null)($self);
-                // TODO : Update the model
-                $this->forwardCallTo(
-                    ModelFiltersHandler([
-                        'where' => [$model->getPrimaryKey(), $key]
-                    ])->apply($model),
-                    EloquentQueryBuilderMethodsEnum::UPDATE,
-                    [$this->parseAttributes($values)]
+                $this->updateByQuery(
+                    [
+                        'where' => [
+                            $model->getPrimaryKey(), $key
+                        ]
+                    ],
+                    $values
                 );
                 // Select the updated model
                 $model_ = $this->select($key);
