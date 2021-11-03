@@ -4,23 +4,19 @@ namespace Drewlabs\Packages\Database\Traits;
 
 trait HavingBooleanAttributes
 {
-    public function getStatusAttribute()
+    public function getAttribute($name)
     {
-        return isset($this->attributes['status']) ? filter_var($this->attributes['status'], FILTER_VALIDATE_BOOLEAN) : false;
-    }
-
-    public function getHiddenAttribute()
-    {
-        return isset($this->attributes['hidden']) ? filter_var($this->attributes['hidden'], FILTER_VALIDATE_BOOLEAN) : false;
-    }
-
-    public function getIsActiveAttribute()
-    {
-        return isset($this->attributes['is_active']) ? filter_var($this->attributes['is_active'], FILTER_VALIDATE_BOOLEAN) : false;
-    }
-
-    public function getIsVerifiedAttribute()
-    {
-        return isset($this->attributes['is_verified']) ? filter_var($this->attributes['is_verified'], FILTER_VALIDATE_BOOLEAN) : false;
+        if (
+            in_array($name, [
+                'hidden',
+                'is_active',
+                'is_verified',
+                'freezed',
+                'disbaled',
+            ]) && property_exists($this, 'attributes')
+        ) {
+            return filter_var($this->attributes[$name] ?? null, FILTER_VALIDATE_BOOLEAN);
+        }
+        return parent::getAttribute($name);
     }
 }

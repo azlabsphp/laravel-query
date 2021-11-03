@@ -15,9 +15,9 @@ class QueryParamsObject extends ValueObject
     /**
      * {@inheritDoc}
      */
-    public function copyWith(array $attr, $loadGuarded = false)
+    public function copyWith(array $attributes, $set_guarded = false)
     {
-        parent::copyWith($attr, $loadGuarded);
+        parent::copyWith($attributes, $set_guarded);
         $this->validateAttributes();
         return $this;
     }
@@ -25,8 +25,11 @@ class QueryParamsObject extends ValueObject
     private function validateAttributes()
     {
         if (
-            is_null($this->model) ||
-            (is_string($this->model) && !class_exists($this->model)) || (is_object($this->model) && !method_exists($this->model, 'getTable'))
+            (null === $this->model) ||
+            (is_string($this->model) &&
+                !class_exists($this->model)) ||
+            (is_object($this->model) &&
+                !method_exists($this->model, 'getTable'))
         ) {
             throw new \InvalidArgumentException('Make sure to provide a valid Eloquent model or a
             model with getTable method that returns a string to the ["model" => ModelClass]');
@@ -41,8 +44,19 @@ class QueryParamsObject extends ValueObject
     public function toString()
     {
         $model = is_string($this->attributes['model']) ? (function_exists('app') ?
-            Container::getInstance()->make($this->attributes['model'])->getTable() : (new $this->attributes['model'])->getTable()) : $this->attributes['model']->getTable();
-        return trim(\drewlabs_core_strings_concat('.', ...array_values(array_merge([$model], isset($this->attributes['column']) ? [$this->attributes['column']] : []))));
+            Container::getInstance()->make(
+                $this->attributes['model']
+            )->getTable() : (new $this->attributes['model'])->getTable()) :
+            $this->attributes['model']->getTable();
+        return trim(\drewlabs_core_strings_concat(
+            '.',
+            ...array_values(array_merge(
+                [$model],
+                isset($this->attributes['column']) ?
+                    [$this->attributes['column']] :
+                    []
+            ))
+        ));
     }
 
     /**

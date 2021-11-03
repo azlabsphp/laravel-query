@@ -5,10 +5,19 @@ namespace Drewlabs\Packages\Database;
 class EloquentQueryBuilderMethodsEnum
 {
 
+    /**
+     * @var string
+     */
     public const UPSERT = 'updateOrCreate';
 
+    /**
+     * @var string
+     */
     public const WHERE = 'where';
 
+    /**
+     * @var string
+     */
     public const FIRST_OR_CREATE = 'firtOrCreate';
 
     /**

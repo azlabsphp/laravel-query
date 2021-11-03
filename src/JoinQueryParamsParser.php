@@ -12,14 +12,15 @@ class JoinQueryParamsParser implements QueryParser
     {
         $isArrayList = \array_filter($params, 'is_array') === $params;
         return $isArrayList ? array_values(array_map(function ($item) {
-            return $this->parseListElement($item);
-        }, $params)) : $this->parseListElement($params);
+            return $this->parseList($item);
+        }, $params)) : $this->parseList($params);
     }
 
-    private function parseListElement(array $params)
+    private function parseList(array $params)
     {
         $allEntiresAreNull = \array_filter($params, function ($item) {
-            return is_null($item) || !isset($item);
+            return is_null($item) || !isset(
+                $item);
         }) === $params;
         if ($allEntiresAreNull) {
             // dd($params);

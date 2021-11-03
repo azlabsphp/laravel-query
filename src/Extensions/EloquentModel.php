@@ -2,10 +2,7 @@
 
 namespace Drewlabs\Packages\Database\Extensions;
 
-use Drewlabs\Contracts\Data\Model\ActiveModel;
-use Drewlabs\Contracts\Data\Model\GuardedModel;
-use Drewlabs\Contracts\Data\Model\Parseable;
-use Drewlabs\Contracts\Data\Model\Relatable;
+use Drewlabs\Packages\Database\Contracts\AppModel;
 use Drewlabs\Packages\Database\Traits\Model;
 use Illuminate\Database\Eloquent\Model as Eloquent;
 
@@ -14,7 +11,7 @@ use Illuminate\Database\Eloquent\Model as Eloquent;
  * 
  * @deprecated v3.1
  */
-abstract class EloquentModel extends Eloquent implements ActiveModel, Parseable, Relatable, GuardedModel
+abstract class EloquentModel extends Eloquent implements AppModel
 {
     use Model;
 }

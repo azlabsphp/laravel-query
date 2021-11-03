@@ -41,7 +41,9 @@ use Drewlabs\Support\Immutable\ValueObject;
  * @method int|mixed delete(array $conditions, bool $hot_operation = false)
  * 
  */
-final class IlluminateModelRepository extends ValueObject implements ParseableRepository, ModelRepositoryInterface
+final class IlluminateModelRepository extends ValueObject implements
+    ParseableRepository,
+    ModelRepositoryInterface
 {
     use ModelRepository;
 
@@ -156,7 +158,13 @@ final class IlluminateModelRepository extends ValueObject implements ParseableRe
      */
     public function modelAttributesParser()
     {
-        return \drewlabs_core_create_attribute_getter('attribute_parser', null)($this) ?? (\drewlabs_core_create_attribute_getter('container', null)($this))->get(ModelAttributeParser::class);
+        return \drewlabs_core_create_attribute_getter(
+            'attribute_parser',
+            null
+        )($this) ?? (\drewlabs_core_create_attribute_getter(
+            'container',
+            null
+        )($this))->get(ModelAttributeParser::class);
     }
 
     /**

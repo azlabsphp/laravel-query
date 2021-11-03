@@ -2,7 +2,6 @@
 
 namespace Drewlabs\Packages\Database\Extensions;
 
-use Drewlabs\Contracts\Data\DataRepository\Repositories\IModelRepository;
 use Drewlabs\Packages\Database\FilterQueryParamsParser;
 use Drewlabs\Packages\Database\JoinQueryParamsParser;
 use Drewlabs\Contracts\Data\ModelFiltersInterface;
@@ -39,12 +38,11 @@ class CustomQueryCriteria implements ModelFiltersInterface
     /**
      * @inheritDoc
      */
-    public function apply($model, IModelRepository $repository = null)
+    public function apply($model)
     {
         $_model = clone $model;
         $criteria = $this->query_criteria;
         foreach (array_keys($criteria) as $v) {
-            # code...
             $method = 'apply' . ucfirst($v) . 'Query';
             if (method_exists($this, $method)) {
                 $_model = \call_user_func_array(array($this, $method), array($_model, $criteria));
@@ -97,7 +95,6 @@ class CustomQueryCriteria implements ModelFiltersInterface
             $isArrayList = \array_filter($criteria['whereHas'], 'is_array') === $criteria['whereHas'];
             if ($isArrayList) {
                 foreach ($criteria['whereHas'] as $value) {
-                    # code...
                     $model = $model->whereHas($value[0], $value[1]);
                 }
             } else {
