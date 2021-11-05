@@ -17,9 +17,10 @@ if (!function_exists('create_relations_after_create')) {
     function create_relations_after_create($model, array $relations, array $attributes, $batch = false)
     {
         return array_reduce($relations, function ($model, $relation) use ($attributes, $batch) {
-            if (method_exists($model, $relation) && array_key_exists($relation, $attributes)  && isset($attributes[$relation])) {
-                $createMany = function ($model, $relation) use ($attributes, $batch) {
-                    $handlBatch =  function ($model, $relation) use ($attributes) {
+            $keyValue = $attributes[$relation] ?? [];
+            if (method_exists($model, $relation) && !empty($keyValue)) {
+                $createMany = function ($model, $relation) use ($keyValue, $batch) {
+                    $handlBatch =  function ($model, $relation) use ($keyValue) {
                         // There is no need to set the inserted related inputs
                         $model->{$relation}()->createMany(array_map(
                             function ($value) {
@@ -31,11 +32,11 @@ if (!function_exists('create_relations_after_create')) {
                                     ]
                                 );
                             },
-                            $attributes[$relation]
+                            $keyValue
                         ));
                         return $model;
                     };
-                    $handleMap = function ($model, string $relation) use ($attributes) {
+                    $handleMap = function ($model, string $relation) use ($keyValue) {
                         return call_user_func([$model, 'setRelation'], $relation, new Collection(
                             array_map(function ($k) use ($model, $relation) {
                                 // When looping through relation values, if the element is an array list
@@ -46,19 +47,21 @@ if (!function_exists('create_relations_after_create')) {
                                     // else, simply create the entry
                                     return $model->{$relation}()->create($k);
                                 }
-                            }, $attributes[$relation])
+                            }, $keyValue)
                         ));
                     };
                     return $batch ? $handlBatch($model, $relation) : $handleMap($model, $relation);
                 };
-                $createOne = function ($model, $relation) use ($attributes) {
+                $createOne = function ($model, $relation) use ($keyValue) {
                     return call_user_func(
                         [$model, 'setRelation'],
                         $relation,
-                        $model->{$relation}()->create($attributes[$relation])
+                        $model->{$relation}()->create($keyValue)
                     );
                 };
-                return drewlabs_core_array_is_no_assoc_array_list($attributes[$relation]) ? $createMany($model, $relation) : $createOne($model, $relation);
+                return drewlabs_core_array_is_no_assoc_array_list($keyValue) ?
+                    $createMany($model, $relation) :
+                    $createOne($model, $relation);
             }
             return $model;
         }, $model);
@@ -82,19 +85,20 @@ if (!function_exists('drewlabs_database_upsert_relations_after_create')) {
     function drewlabs_database_upsert_relations_after_create($model, array $relations, array $attributes, bool $upsert)
     {
         return array_reduce($relations, function ($model, $relation) use ($attributes, $upsert) {
-            if (method_exists($model, $relation) && array_key_exists($relation, $attributes) && isset($attributes[$relation])) {
+            $keyValue = $attributes[$relation] ?? [];
+            if (method_exists($model, $relation) && !empty($keyValue)) {
                 if ($upsert) {
-                    drewlabs_core_array_is_no_assoc_array_list($attributes[$relation][0] ?? []) ?
-                        (function ($model, string $relation) use ($attributes) {
-                            foreach ($attributes[$relation] as $v) {
+                    drewlabs_core_array_is_no_assoc_array_list($keyValue[0] ?? []) ?
+                        (function ($model, string $relation) use ($keyValue) {
+                            foreach ($keyValue as $v) {
                                 drewlabs_database_update_or_create($model->{$relation}(), $v);
                             }
-                        })($model, $relation) : (function ($model, string $relation) use ($attributes) {
-                            return drewlabs_database_update_or_create($model->{$relation}(), $attributes[$relation]);
+                        })($model, $relation) : (function ($model, string $relation) use ($keyValue) {
+                            return drewlabs_database_update_or_create($model->{$relation}(), $keyValue);
                         })($model, $relation);
                 } else {
-                    drewlabs_core_array_is_no_assoc_array_list($attributes[$relation]) ?
-                        (function ($model, $relation) use ($attributes) {
+                    drewlabs_core_array_is_no_assoc_array_list($keyValue) ?
+                        (function ($model, $relation) use ($keyValue) {
                             $model->{$relation}()->delete();
                             // Create many after deleting the all the related
                             $model->{$relation}()->createMany(
@@ -106,11 +110,11 @@ if (!function_exists('drewlabs_database_upsert_relations_after_create')) {
                                             'updated_at' => date('Y-m-d H:i:s')
                                         ]
                                     );
-                                }, $attributes[$relation])
+                                }, $keyValue)
                             );
-                        })($model, $relation) : (function ($model, $relation) use ($attributes) {
+                        })($model, $relation) : (function ($model, $relation) use ($keyValue) {
                             $model->{$relation}()->delete();
-                            $model->{$relation}()->create($attributes[$relation]);
+                            $model->{$relation}()->create($keyValue);
                         })($model, $relation);
                 }
             }
