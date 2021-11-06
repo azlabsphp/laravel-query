@@ -187,47 +187,78 @@ if (!function_exists('drewlabs_database_parse_where_null_query')) {
     {
         // TODO : Optimize algorithm for duplicate values
         $assocParserFn = function (array $value) use (&$assocParserFn) {
-            if (\drewlabs_core_strings_is_str($value)) {
+            if (drewlabs_core_strings_is_str($value)) {
                 return $value;
             }
-            $arrayIsAssoc = drewlabs_core_array_is_assoc($value);
-            if (!$arrayIsAssoc) {
-                return array_reduce($value, function ($carry, $current) use (&$assocParserFn) {
-                    $result = $current;
-                    if (\drewlabs_core_array_is_arrayable($result) && drewlabs_core_array_is_assoc($result)) {
-                        $result = $assocParserFn($current);
-                    }
-                    return in_array($result, $carry) ? $carry : array_merge($carry, \drewlabs_core_array_is_arrayable($result) ? $result : [$result]);
-                }, []);
+            $is_assoc = drewlabs_core_array_is_assoc($value);
+            if (!$is_assoc) {
+                return array_reduce(
+                    $value,
+                    function ($carry, $current) use (&$assocParserFn) {
+                        $result = $current;
+                        if (\drewlabs_core_array_is_arrayable($result) && drewlabs_core_array_is_assoc($result)) {
+                            $result = $assocParserFn($current);
+                        }
+                        return in_array($result, $carry) ?
+                            $carry :
+                            array_merge(
+                                $carry,
+                                \drewlabs_core_array_is_arrayable($result) ?
+                                    $result :
+                                    [$result]
+                            );
+                    },
+                    []
+                );
             }
-            if ($arrayIsAssoc && !isset($value['column'])) {
+            if ($is_assoc && !isset($value['column'])) {
                 throw new \InvalidArgumentException('orderBy query requires column key');
             }
-            return $value['column'];
+            return $value['column'] ?? $value[0] ?? null;
         };
         $valueParserFn = function ($value) use ($assocParserFn) {
-            if (\drewlabs_core_strings_is_str($value)) {
+            if (drewlabs_core_strings_is_str($value)) {
                 return $value;
             }
             return $assocParserFn($value);
         };
+    
+        $removeNull = function ($arr) {
+            if (is_array($arr)) {
+                return array_filter($arr, function ($value_) {
+                    return null !== $value_;
+                });
+            }
+            return $arr;
+        };
+        $isArrayList = function ($arr) {
+            return array_filter(
+                $arr,
+                function ($item) {
+                    return drewlabs_core_array_is_arrayable($item);
+                }
+            ) === $arr;
+        };
         if (\drewlabs_core_array_is_arrayable($params)) {
-            $isArrayList = array_filter($params, function ($item) {
-                return drewlabs_core_array_is_arrayable($item);
-            }) === $params;
-            if ($isArrayList) {
-                return array_reduce($params, function ($carry, $current) use ($valueParserFn) {
-                    $result = $valueParserFn($current);
-                    if (in_array($result, $carry)) {
-                        return $carry;
-                    }
-                    return array_merge($carry, $result);
-                }, []);
+            if ($isArrayList($params)) {
+                return $removeNull(
+                    array_reduce(
+                        $params,
+                        function ($carry, $current) use ($valueParserFn) {
+                            $result = $valueParserFn($current);
+                            if (in_array($result, $carry)) {
+                                return $carry;
+                            }
+                            return array_merge($carry, is_array($result) ? $result : [$result]);
+                        },
+                        []
+                    )
+                );
             } else {
-                return $assocParserFn($params);
+                return $removeNull($assocParserFn($params));
             }
         }
-        return $valueParserFn($params);
+        return $removeNull($valueParserFn($params));
     }
 }
 
