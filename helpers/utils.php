@@ -8,7 +8,7 @@ if (!function_exists('create_relations_after_create')) {
     /**
      * Call Eloquent model relation {create}/{updateOrCreate} method after the model is inserted
      *
-     * @param \Illuminate\Database\Eloquent\Model $model
+     * @param mixed $model
      * @param array $relations
      * @param array $attributes
      * @param boolean $batch
