@@ -1,12 +1,34 @@
-# drewlabs/database package documentation
+# Database package
 
-The current package is under activate developpement and API may change during versions implementation.
+This package provides wrapper arround Laravel Illuminate Database ORM. It provides a ModelRepository, a stable API for performing CRUD operations on a database abstracting away various methods for interacting with database.
 
-## Providers
+## Instalation
 
-By default providers are automatically registered when running Laravel application after composer finishes installing the package.
+```json
+// ...
+"require": {
+    // Other dependencies
+    "drewlabs/database": "^1.0"
+},
+// ...
+"repositories": [
+    //...
+    {
+        "type": "vcs",
+        "url": "git@github.com:liksoft/drewlabs-php-packages-database.git"
+    }
+]
+```
 
-- For Lumen appliation we must manually register the providers in the bootstrap/app.php:
+## Usage
+
+### Providers
+
+* Laravel
+    When using Laravel framework the service provider is automatically registered.
+
+* Lumen
+    For Lumen appliation you must manually register the providers in the bootstrap/app.php:
 
 ```php
 // bootstrap/app.php
@@ -15,12 +37,185 @@ $app->register(\Drewlabs\Packages\Database\ServiceProvider::class);
 // ...
 ```
 
-### Repository class
+### Components
+
+#### The Database Query Language (DMLManager::class)
+
+This component offer a unified language for quering the database using SELECT, CREATE, UPDATE and DELETE METHOD. It heavily makes use of PHP dictionnary a.k.a arrays for various operations.
+
+* Creating instance of the DMLManager
+
+```php
+// ...
+use function Drewlabs\Packages\Database\Proxy\DMLManager;
+
+// Example class
+use App\Models\Example;
+
+// Create a query manager for querying database using Example model
+$ql = DMLManager(Example::class);
+```
+
+* Create
+
+The method takes in the attributes to insert into the database table as a row.
+
+```php
+$ql = DMLManager(Example::class);
+
+// Insert single values to the database
+$example = $dmlManager->create([
+    'label' => '<EXAMPLE LABEL>',
+]);
+```
+
+Note:
+In it complex form, the create method takes in the attributes to insert and a set of parameters:
+
+```php
+// [
+//     'upsert' => true, // Optional:Boolean
+//     'upsert_condition' => [
+//         // Condition for an upsertion operation
+//     ],
+//     'method': "create__relation_name_1__relation_name_2" // Complex method definition for inserting data and it child relations
+// ]
+
+$person = $dmlManager->create(
+    // Attributes to insert
+    [
+        'firstname' => 'FERA ADEVOU',
+        'lastname' => 'EKPEH',
+        'phonenumber' => '+22892002345',
+        'age' => 33,
+        'sex' => 'M',
+        'addresses' => [
+            [
+                'postal_code' => 'BP 228 LOME - TOGO',
+                'country' => 'TOGO',
+                'city' => 'LOME',
+                'email' => 'lordfera@gmail.com',
+            ],
+        ],
+        'profile' => [
+            'url' => 'https://i.picsum.photos/id/733/200/300.jpg?hmac=JYkTVVdGOo8BnLPxu1zWliHFvwXKurY-uTov5YiuX2s'
+        ]
+    ],
+    // Parameter
+    [
+        'method' => 'create__addresses__profile',
+    ]
+);
+```
+
+The create method also takes in a 3rd parameter `PHP Closure` that can be executed after the create operation
+
+Examples:
+
+```php
+$ql = DMLManager(Example::class);
+
+// Insert single values to the database
+$example = $dmlManager->create([
+    'label' => '<EXAMPLE LABEL>',
+], function($value) {
+    // Do something with the created value
+});
+```
+
+* Update
+
+As the `create` method, the `update` method also provides overloaded method implementations for interacting with the database.
+
+```php
+$person = $ql->update(
+    1, 
+    [
+        'firstname' => 'BENBOSS'
+    ]
+);
+
+// Update by ID String
+$person = $ql->update(
+    "1", 
+    [
+        'firstname' => 'AZANDREW'
+    ]
+);
+
+// Update using query without mass update
+$count = $ql->update(
+    [
+        'where' => ['firstname', 'SIDOINE']
+    ],
+    [
+        'firstname' => 'AZANDREW'
+    ]
+);
+```
+
+* Delete
+
+Delete provides an interface for deleting items based on there id or a complex query.
+
+```php
+$ql = DMLManager(Person::class);
+    // DELETE AN ITEM BY ID
+$result = $ql->delete(1);
+
+    // DELET AN ITEM USING COMPLEX QUERY
+$result = $ql->delete(
+    [
+        'where' => ['firstname', 'SIDOINE']
+    ],
+    true
+);
+```
+
+* Select
+
+`select` method of the DMLManger, provides a single method for querying rows in the database using either a complex query array for which each key correspond to a laravel eloquent model methods.
+
+```php
+$ql = DMLManager(Person::class);
+    $person = $ql->select("1", ['*'], function ($model) {
+        return $model->toArray();
+    });
+    // Select by ID
+    $person = $ql->select(1);
+    $list = $ql->select(
+        [
+            'where' => [
+                'firstname', 'BENJAMIN'
+            ],
+            'orWhere' => [
+                'lastname', 'AZOMEDOH'
+            ]
+        ],
+        ['firstname', 'addresses']
+    );
+
+    // Select using complex where and orWhere queries
+    $list = $ql->select(
+        [
+            'where' => [
+                'firstname', 'BENJAMIN'
+            ],
+            'orWhere' => [
+                'lastname', 'AZOMEDOH'
+            ]
+        ],
+        15,
+        ['addresses', 'profile'],
+        1
+    );
+```
+
+#### Repository class
 
 They repository class provides method for working with database model without exposing Laravel/Eloquent model implementations. It tries to mimic complex query through array of query parameters.
 
-- Creating a repository class:
-
+* Creating a repository class:
 
 ```php
 
@@ -37,31 +232,22 @@ $repository = new \Drewlabs\Packages\Database\Extensions\IlluminateModelReposito
 
 ```
 
-- Get class name binded to the repository:
+* Get class name binded to the repository:
 
 ```php
 $modelClass = $repository->getModel();
 ```
 
-- Binding model attribute parser:
-
-By default the package comes with an attribute parser that is use to set/hydrate model properties from array passed as parameter when creating or updating a model. To override the default parser:
+* Performing CRUD operations
 
 ```php
 
-$repository = $repository->bindAttributesParser(new AttributeParserClass());
-
-```
-Note: The model attribute parser must implements [Drewlabs\Contracts\Data\DataRepository\Services\IModelAttributesParser] interface and provide method for parsing the array inputs.
-
-- Performing CRUD operations
-
-```php
+use Drewlabs\Packages\Database\Extensions\IlluminateModelRepository;
 // Insert new item to the table
 /// Syntax:
 /// $repository->insert(Array <Data>, bool <ParseInput>, bool <Upsert>, Array <UpsertConditions>);
 
-$repository = new \Drewlabs\Packages\Database\Extensions\IlluminateModelRepository(Example::class);
+$repository = IlluminateModelRepository(Example::class);
 
 $result = $repository->insert([
     'label' => '...',
@@ -93,24 +279,20 @@ $result = $repository->insertMany([
 
 $result = $repository->updateById($id, array $data);
 
-
 /// Update based on conditions
 /// $repository->updateById(array $values, array $conditions, bool $parse_input = true, bool $mass_uptate = true) -> int; Returns the number of updated items
 
 $result = $repository->updateById($values, $conditions, $parse_input = true, $mass_uptate = true);
-
 
 /// Delete value by id
 /// $repository->deleteById(int|mixed $id) -> int; Returns the 0 if no value is deleted and 1 if value is deleted
 
 $result = $repository->deleteById($id);
 
-
 /// Delete based on conditions
 /// $repository->delete(array $conditions, bool $mass_delete = true) -> int; Returns the number of deleted items
 
 $result = $repository->delete($conditions, $mass_delete = true);
-
 
 /// Querying for Items in the database
 
@@ -120,22 +302,27 @@ $result = $repository->findById($id, $columns = ['*']);
 // Note the CustomFilter is your user provided class that implement {Drewlabs\Contracts\Data\IModelFilter} interface
 $result = $repository->pushFilter(new CustomFilters())->find([], $columns = ['*']);
 
-
 /// Pagination
 $result = $repository->pushFilter(new CustomFilters())->paginate($item_per_page = 20, $columns = ['*']);
 ```
 
-- Default query filter
+#### Query filters
+
+Query filters provides a way to easily apply database select query using PHP array mapping keys of the array of a given method of the framework ORM, and each values to the list of parameters.
+
+* Default query filter
 
 The package comes with a handy query filter class that provide implementation for applying queries to an illuminate model. The default query filter take advantage of PHP dynamic call on object to apply the query params to eloquent model.
 
-
 ```php
+
+use Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;
+
 /// Using the default query filter without a repository
 
 /// Note: Each key is an eloquent model/Eloquent query builder method 
 /// Parameters are passed in the order and the same way they are passed to the model method, but are specified as array
-$filter = new \Drewlabs\Packages\Database\Extensions\CustomQueryCriteria([
+$filter = ModelFiltersHandler([
     // Creatigng a where query
     'where' => [
         ['label', '<LabelValue>'],
@@ -194,7 +381,6 @@ $filter = new \Drewlabs\Packages\Database\Extensions\CustomQueryCriteria([
     ]
 ]);
 
-
 /// Applying the query to an Eloquent model and call the Builder get() method to retrieve the matching model
 $result = $filter->apply(new Example())->get($columns = ['*']);
 
@@ -202,7 +388,53 @@ $result = $filter->apply(new Example())->get($columns = ['*']);
 $result = $repository->pushFilter($filter)->find([], $columns = ['*']);
 ```
 
-Note : Supported method are:
+#### Client request filters Generator
+
+Request query filter handler is a global function for generating query filters from an HTTP request parameters. It helps/allow developper to query the database table from client application whithout interaction of the backend application.
+
+### Example
+
+```php
+
+// imports
+use Drewlabs\Packages\Database\Tests\Stubs\TestModelStub;
+
+// Create the request
+$request = new \Illuminate\Http\Request([
+    '_query' => [
+        'where' => ['label', '<>', 'Hello World!'],
+        'orWhere' => [
+            [
+                'match' => [
+                    'method' => 'whereIn',
+                    'params' => ['url', ['http://localhost', 'http://liksoft.tg']]
+                ]
+            ],
+            [
+                'id', 340
+            ]
+        ],
+        'whereNull' => [
+            'column' => 'basepath'
+        ],
+        'whereIn' => [
+            [
+                "column" => 'basepath',
+                "match" => ['/home/usr/workspace', '/local/usr/Cellar/etc/workspace']
+            ],
+            [
+                'fullpath',
+                ['/home/usr/workspace', '/local/usr/Cellar/etc/workspace']
+            ]
+        ]
+    ],
+    'label' => 'Are you there ?',
+    'id' => 320
+]);
+$filters = \drewlabs_databse_parse_client_request_query(new TestModelStub, $request);
+```
+
+* Here is a list of Eloquent methods supported by the package:
 
 ```php
 $methods = [
@@ -233,179 +465,85 @@ $methods = [
 ]
 ```
 
-## Model
+#### ORM Model
 
-In order to be repository compatible, the model class must implement [Drewlabs\Contracts\Data\ModelInterface] interface. The package comes with a wrapper arrounf Eloquent model class that already implements the interface.
-
-Therefore to make your model compatible with the repository interface, simply extends [Drewlabs\Packages\Database\Extensions\EloquentModel] class.
+In order to be repository compatible, the model class must implement [Drewlabs\Contracts\Data\Model] interface.
 
 Example:
 
 ```php
-/// This example class can serve as template for any model that is due to be compatible with IlluminateModelRepository and IValidator class
-namespace App\Models;
 
-use Drewlabs\Core\Validator\Contracts\Validatable;
-use Drewlabs\Packages\Database\Extensions\EloquentModel as Model;
-use Illuminate\Validation\Rule;
+namespace App\Models\Patients;
 
-class Example extends Model implements Validatable
+use Drewlabs\Packages\Database\Traits\Model;
+use Drewlabs\Contracts\Data\Model\ActiveModel;
+use Drewlabs\Contracts\Data\Model\Parseable;
+use Drewlabs\Contracts\Data\Model\Relatable;
+use Drewlabs\Contracts\Data\Model\GuardedModel;
+use Illuminate\Database\Eloquent\Model as EloquentModel;
+
+final class Adresse extends EloquentModel implements ActiveModel, Parseable, Relatable, GuardedModel
 {
+
+    use Model;
 
     /**
      * Model referenced table
-     *
+     * 
      * @var string
      */
-    protected $table = "examples";
+    protected $table = "adresse";
 
     /**
-     * Unique identifier of table referenced by model
-     *
-     * @var string
+     * List of values that must be hidden when generating the json output
+     * 
+     * @var array
      */
-    protected $primaryKey = "id";
-
     protected $hidden = [];
 
+    /**
+     * List of attributes that will be appended to the json output of the model
+     * 
+     * @var array
+     */
     protected $appends = [];
 
     /**
      * List of fillable properties of the current model
-     *
+     * 
      * @var array
      */
     protected $fillable = [
-        // ... Add fillable properties
+        "id",
+        "adresse",
+        "ville",
     ];
 
     /**
-     * Model relations definitions
-     *
+     * List of fillable properties of the current model
+     * 
      * @var array
      */
     public $relation_methods = [];
 
-    // View model interface implementations
-    // Methods below let the model being elligible for IValidator class
+    /**
+     * Table primary key
+     * 
+     * @var string
+     */
+    protected $primaryKey = "id";
 
     /**
-     * @inheritDoc
+     * Bootstrap the model and its traits.
+     * 
+     *
+     * @return void
      */
-    public function rules()
+    protected static function boot()
     {
-        return array();
+        # code...
+        parent::boot();
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function updateRules()
-    {
-        return array();
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function messages()
-    {
-        return array();
-    }
 }
-
-```
-
-## Client request filters Generator
-
-This method takes a parameter \Illuminate\Http\Request and tries to generate query filters that can be used by the CustomQueryCriteria Class instances.
-Request queries can be in form of:
-
-```php
-[
-    "whereIn" => [
-        "column" => $column,
-        "match" => $array
-    ],
-    "where" => [$column, $operator, $condition],
-    "where" => [$column, $condition],
-    "where" => [
-        "match" => [
-            "method" => "whereIn"
-            "params" => [$column, $condition]
-        ]
-    ],
-    "whereNotIn" => [
-        "column" => $column,
-        "match" => $array
-    ],
-    "whereNull" => $column,
-    "orWhere" => [$column, $operator, $condition],
-    "orWhere" => [
-        "match" => [
-            "method" => "whereIn"
-            "params" => [$column, $condition]
-        ]
-    ],
-    "orderBy" => [
-            "order" => $order,
-            "by" => $by
-    ],
-    "whereHas" => [
-        "column" => $relation,
-        "match" => [
-            "method" => "whereIn"
-            "params" => [$column, $condition]
-        ]
-    ],
-    "doesntHave" => [
-        "column" => $relation,
-        "match" => [
-            "method" => "whereIn"
-            "params" => [$column, $condition]
-        ]
-    ]
-]
-```
-
-### Example
-
-```php
-// Create the request
-$request = new \Illuminate\Http\Request([
-    '_query' => [
-        'where' => [['label', '<>', 'Hello World!']],
-        'orWhere' => [
-            [
-                'match' => [
-                    'method' => 'whereIn',
-                    'params' => ['url', ['http://localhost', 'http://liksoft.tg']]
-                ]
-            ],
-            [
-                'id', 340
-            ]
-        ],
-        'whereNull' => [
-            'column' => 'basepath'
-        ],
-        'orderBy' => [
-            'column' => 'id',
-            'order' => 'DESC'
-        ],
-        'whereIn' => [
-            [
-                "column" => 'basepath',
-                "match" => ['/home/usr/workspace', '/local/usr/Cellar/etc/workspace']
-            ],
-            [
-                'fullpath',
-                ['/home/usr/workspace', '/local/usr/Cellar/etc/workspace']
-            ]
-        ]
-    ],
-    'label' => 'Are you there ?',
-    'id' => 320
-]);
-$filters = \drewlabs_databse_parse_client_request_query(new \Drewlabs\Packages\Database\Tests\Stubs\TestModelStub, $request);
 ```
