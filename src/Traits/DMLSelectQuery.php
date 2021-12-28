@@ -3,6 +3,7 @@
 namespace Drewlabs\Packages\Database\Traits;
 
 use Drewlabs\Contracts\Data\DataProviderQueryResultInterface;
+use Drewlabs\Contracts\Data\Model\Relatable;
 use Drewlabs\Core\Data\DataProviderQueryResult;
 use Drewlabs\Packages\Database\EloquentQueryBuilderMethodsEnum;
 use Drewlabs\Packages\Database\Extensions\CustomQueryCriteria;
@@ -128,7 +129,7 @@ trait DMLSelectQuery
             },
             drewlabs_core_create_attribute_getter('model', null)($this)
         );
-        $model_relations = method_exists($this->model, 'getModelRelationLoadersNames') ? call_user_func([$this->model, 'getModelRelationLoadersNames']) : [];
+        $model_relations = method_exists($this->model, 'getModelRelationLoadersNames') || ($this->model instanceof Relatable) ? $this->model->getModelRelationLoadersNames() : [];
         [$columns_, $relations] = SelectQueryColumnsHelper::asTuple(
             $columns,
             $this->model->getDeclaredColumns(),
@@ -202,7 +203,7 @@ trait DMLSelectQuery
             drewlabs_core_create_attribute_getter('model', null)($this)
         );
         // TODO : Get model relations
-        $model_relations = method_exists($this->model, 'getModelRelationLoadersNames') ? call_user_func([$this->model, 'getModelRelationLoadersNames']) : [];
+        $model_relations = method_exists($this->model, 'getModelRelationLoadersNames') || ($this->model instanceof Relatable) ? $this->model->getModelRelationLoadersNames() : [];
         [$columns_, $relations] = SelectQueryColumnsHelper::asTuple(
             $columns,
             $this->model->getDeclaredColumns(),

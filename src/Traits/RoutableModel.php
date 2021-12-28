@@ -9,7 +9,7 @@ trait RoutableModel
 
     /**
      * Returns the value matching the id parameter to be passed to the ressource identifier
-     *
+     * @deprecated 1.0.72
      * @return int|string
      */
     protected function getRouteIdParam()
@@ -25,7 +25,7 @@ trait RoutableModel
     public function getLinkAttribute()
     {
         $id = $this->ressourceIdentifier();
-        $idParam = $this->getRouteIdParam();
+        $idParam = $this->getKey();
         $route =  $this->getIndexRoute();
         if (is_null($id) || is_null($idParam) || is_null($route)) {
             return null;
