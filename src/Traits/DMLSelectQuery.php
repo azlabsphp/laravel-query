@@ -20,6 +20,7 @@ use Drewlabs\Packages\Database\EloquentQueryBuilderMethodsEnum;
 use Drewlabs\Packages\Database\Extensions\CustomQueryCriteria;
 use Drewlabs\Packages\Database\Helpers\SelectQueryColumnsHelper;
 use function Drewlabs\Packages\Database\Proxy\SelectQueryResult;
+
 use Drewlabs\Support\Collections\SimpleCollection;
 
 use Illuminate\Contracts\Pagination\Paginator;
@@ -65,14 +66,14 @@ trait DMLSelectQuery
         $callback = $callback ?? static function ($value) {
             return $value;
         };
-        $collection = $this->selectV5(
-            [
-                'where' => [$this->model->getPrimaryKey(), $id],
-            ],
-            $columns ?? ['*']
-        )->getCollection();
-
-        return $callback(\is_array($collection) ? (new SimpleCollection($collection))->first() : (method_exists($collection, 'first') ? $collection->first() : $collection));
+        return $callback(
+            $this->selectV5(
+                [
+                    'where' => [$this->model->getPrimaryKey(), $id],
+                ],
+                $columns ?? ['*']
+            )->first()
+        );
     }
 
     /**
@@ -110,7 +111,7 @@ trait DMLSelectQuery
     }
 
     /**
-     * @return DataProviderQueryResultInterface
+     * @return mixed
      */
     public function selectV5(array $query, array $columns, ?\Closure $callback = null)
     {

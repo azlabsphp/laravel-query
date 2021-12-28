@@ -87,16 +87,9 @@ trait DMLDeleteQuery
                 []
             );
         } else {
-            // Select the matching columns
-            $collection = $this->selectV3($query, static function ($result) {
-                return $result->getCollection();
-            });
             // Loop through the matching columns and update each
             return array_reduce(
-                \is_array($collection) ?
-                    $collection : ($collection instanceof Enumerable ?
-                        $collection->all() : (method_exists($collection, 'all') ?
-                            $collection->all() : $collection)),
+                $this->select($query)->all(),
                 function ($carry, $value) {
                     $this->forwardCallTo(
                         $value,
