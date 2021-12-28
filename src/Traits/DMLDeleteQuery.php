@@ -1,5 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
+/*
+ * This file is part of the Drewlabs package.
+ *
+ * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Drewlabs\Packages\Database\Traits;
 
 use Drewlabs\Packages\Database\EloquentQueryBuilderMethodsEnum;
@@ -15,41 +26,35 @@ trait DMLDeleteQuery
                 'deleteV1',
                 'deleteV2',
                 'deleteV3',
-                'deleteV4'
+                'deleteV4',
             ]);
         });
     }
 
     /**
-     *
-     * @param integer $id
      * @return bool
      */
     public function deleteV1(int $id)
     {
-        return $this->deleteV2((string)$id);
+        return $this->deleteV2((string) $id);
     }
 
     /**
-     *
-     * @param string $id
      * @return bool
      */
     public function deleteV2(string $id)
     {
-        return 1 === (int)($this->deleteV3(
+        return 1 === (int) ($this->deleteV3(
             [
                 'where' => [
                     drewlabs_core_create_attribute_getter('model', null)($this)->getPrimaryKey(),
-                    $id
-                ]
+                    $id,
+                ],
             ]
         )) ? true : false;
     }
 
     /**
-     *
-     * @param array $query
      * @return int
      */
     public function deleteV3(array $query)
@@ -58,9 +63,6 @@ trait DMLDeleteQuery
     }
 
     /**
-     *
-     * @param array $query
-     * @param boolean $batch
      * @return int
      */
     public function deleteV4(array $query, bool $batch)
@@ -70,14 +72,13 @@ trait DMLDeleteQuery
 
     private function applyDelete(array $query, bool $batch = false)
     {
-
         if ($batch) {
             return $this->forwardCallTo(
                 array_reduce(
                     drewlabs_core_array_is_no_assoc_array_list($query) ?
                         $query :
                         [$query],
-                    function ($model, $q) {
+                    static function ($model, $q) {
                         return (new CustomQueryCriteria($q))->apply($model);
                     },
                     drewlabs_core_create_attribute_getter('model', null)($this)
@@ -87,12 +88,12 @@ trait DMLDeleteQuery
             );
         } else {
             // Select the matching columns
-            $collection = $this->selectV3($query, function ($result) {
+            $collection = $this->selectV3($query, static function ($result) {
                 return $result->getCollection();
             });
             // Loop through the matching columns and update each
             return array_reduce(
-                is_array($collection) ?
+                \is_array($collection) ?
                     $collection : ($collection instanceof Enumerable ?
                         $collection->all() : (method_exists($collection, 'all') ?
                             $collection->all() : $collection)),
@@ -102,7 +103,8 @@ trait DMLDeleteQuery
                         EloquentQueryBuilderMethodsEnum::DELETE,
                         []
                     );
-                    $carry += 1;
+                    ++$carry;
+
                     return $carry;
                 },
                 0

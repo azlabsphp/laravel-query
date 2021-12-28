@@ -1,26 +1,37 @@
 <?php
 
+declare(strict_types=1);
+
+/*
+ * This file is part of the Drewlabs package.
+ *
+ * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Drewlabs\Packages\Database;
 
 use Drewlabs\Packages\Database\Contracts\TransactionUtils as ContractsTransactionUtils;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Container\BindingResolutionException;
-use ReflectionFunction;
 
 class DatabaseTransactionManager implements ContractsTransactionUtils
 {
     /**
-     *
      * @var mixed
      */
     private $db;
 
     /**
-     * Creates an instance of the {@link TransactionUtils} interface
-     * 
-     * @param mixed|null $db 
-     * @return self 
-     * @throws BindingResolutionException 
+     * Creates an instance of the {@link TransactionUtils} interface.
+     *
+     * @param mixed|null $db
+     *
+     * @throws BindingResolutionException
+     *
+     * @return self
      */
     public function __construct($db = null)
     {
@@ -28,7 +39,7 @@ class DatabaseTransactionManager implements ContractsTransactionUtils
     }
 
     /**
-     * Start a data inserting transaction
+     * Start a data inserting transaction.
      *
      * @return void
      */
@@ -36,8 +47,9 @@ class DatabaseTransactionManager implements ContractsTransactionUtils
     {
         $this->db->beginTransaction();
     }
+
     /**
-     * Commit a data inserting transaction
+     * Commit a data inserting transaction.
      *
      * @return void
      */
@@ -45,10 +57,11 @@ class DatabaseTransactionManager implements ContractsTransactionUtils
     {
         $this->db->commit();
     }
+
     /**
-     * Cancel a data insertion transaction
+     * Cancel a data insertion transaction.
      *
-     * @return boolean
+     * @return bool
      */
     public function cancel()
     {
@@ -61,13 +74,13 @@ class DatabaseTransactionManager implements ContractsTransactionUtils
         $this->startTransaction();
         try {
             // Run the transaction
-            $callbackResult = (new ReflectionFunction($callback))->invoke();
+            $callbackResult = (new \ReflectionFunction($callback))->invoke();
             // Return the result of the transaction
-            return $this->afterTransaction(function () use ($callbackResult) {
+            return $this->afterTransaction(static function () use ($callbackResult) {
                 return $callbackResult;
             });
         } catch (\Exception $e) {
-            return $this->afterCancelTransaction(function () use ($e) {
+            return $this->afterCancelTransaction(static function () use ($e) {
                 throw new \RuntimeException($e);
             });
         }
@@ -76,12 +89,14 @@ class DatabaseTransactionManager implements ContractsTransactionUtils
     private function afterTransaction(\Closure $callback)
     {
         $this->completeTransaction();
-        return (new ReflectionFunction($callback))->invoke();
+
+        return (new \ReflectionFunction($callback))->invoke();
     }
 
     private function afterCancelTransaction(\Closure $callback)
     {
         $this->cancel();
-        return (new ReflectionFunction($callback))->invoke();
+
+        return (new \ReflectionFunction($callback))->invoke();
     }
 }

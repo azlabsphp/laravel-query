@@ -1,8 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
+/*
+ * This file is part of the Drewlabs package.
+ *
+ * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Drewlabs\Packages\Database;
 
 use Drewlabs\Contracts\Data\Parser\QueryParser;
+
 class JoinQueryParamsParser implements QueryParser
 {
     /**
@@ -10,17 +22,24 @@ class JoinQueryParamsParser implements QueryParser
      */
     public function parse(array $params)
     {
-        $isArrayList = \array_filter($params, 'is_array') === $params;
-        return $isArrayList ? array_values(array_map(function ($item) {
-            return $this->parseList($item);
-        }, $params)) : $this->parseList($params);
+        $isArrayList = array_filter($params, 'is_array') === $params;
+
+        return $isArrayList ? iterator_to_array(
+            drewlabs_core_iter_map(
+                new \ArrayIterator($params),
+                function ($item) {
+                    return $this->parseList($item);
+                }
+            )
+        ) : $this->parseList($params);
     }
 
     private function parseList(array $params)
     {
-        $allEntiresAreNull = \array_filter($params, function ($item) {
-            return is_null($item) || !isset(
-                $item);
+        $allEntiresAreNull = array_filter($params, static function ($item) {
+            return null === $item || !isset(
+                $item
+            );
         }) === $params;
         if ($allEntiresAreNull) {
             // dd($params);
@@ -29,20 +48,21 @@ class JoinQueryParamsParser implements QueryParser
         // Insure that where not working with associative arrays
         $params = array_values($params);
         // Case the operator part if missing
-        if (count($params) === 3) {
-            $params[0] = (is_string($params[0]) && !class_exists($params[0])) ? $params[0] : (string)(new QueryParamsObject(
-                is_array($params[0]) ? $params[0] : ['model' => $params[0]]
+        if (3 === \count($params)) {
+            $params[0] = (\is_string($params[0]) && !class_exists($params[0])) ? $params[0] : (string) (new QueryParamsObject(
+                \is_array($params[0]) ? $params[0] : ['model' => $params[0]]
             ));
-            $params[1] = is_string($params[1]) ? $params[1] : (string)(new QueryParamsObject($params[1]));
-            $params[2] = is_string($params[2]) ? $params[2] : (string)(new QueryParamsObject($params[2]));
+            $params[1] = \is_string($params[1]) ? $params[1] : (string) (new QueryParamsObject($params[1]));
+            $params[2] = \is_string($params[2]) ? $params[2] : (string) (new QueryParamsObject($params[2]));
             array_splice($params, 2, 1, ['=', $params[2]]);
         } else {
-            $params[0] = (is_string($params[0]) && !class_exists($params[0])) ? $params[0] : (new QueryParamsObject(
-                is_array($params[0]) ? $params[0] : ['model' => $params[0]]
+            $params[0] = (\is_string($params[0]) && !class_exists($params[0])) ? $params[0] : (new QueryParamsObject(
+                \is_array($params[0]) ? $params[0] : ['model' => $params[0]]
             ));
-            $params[1] = is_string($params[1]) ? $params[1] : (string)(new QueryParamsObject($params[1]));
-            $params[3] = is_string($params[3]) ? $params[3] : (string)(new QueryParamsObject($params[3]));
+            $params[1] = \is_string($params[1]) ? $params[1] : (string) (new QueryParamsObject($params[1]));
+            $params[3] = \is_string($params[3]) ? $params[3] : (string) (new QueryParamsObject($params[3]));
         }
+
         return $params;
     }
 }

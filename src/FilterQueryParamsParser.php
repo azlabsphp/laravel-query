@@ -1,5 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
+/*
+ * This file is part of the Drewlabs package.
+ *
+ * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Drewlabs\Packages\Database;
 
 use Drewlabs\Contracts\Data\Parser\QueryParser;
@@ -11,16 +22,22 @@ class FilterQueryParamsParser implements QueryParser
      */
     public function parse(array $params)
     {
-        $isArrayList = \array_filter($params, 'is_array') === $params;
-        return $isArrayList ? array_values(array_map(function ($item) {
-            return $this->parseList($item);
-        }, $params)) : $this->parseList($params);
+        $isArrayList = array_filter($params, 'is_array') === $params;
+
+        return $isArrayList ? iterator_to_array(
+            drewlabs_core_iter_map(
+                new \ArrayIterator($params),
+                function ($item) {
+                    return $this->parseList($item);
+                }
+            )
+        ) : $this->parseList($params);
     }
 
     private function parseList(array $params)
     {
-        $allEntiresAreNull = \array_filter($params, function ($item) {
-            return is_null($item) || !isset($item);
+        $allEntiresAreNull = array_filter($params, static function ($item) {
+            return null === $item || !isset($item);
         }) === $params;
         if ($allEntiresAreNull) {
             throw new \InvalidArgumentException('Provided query parameters are not defined');
@@ -28,7 +45,8 @@ class FilterQueryParamsParser implements QueryParser
         // Insure that where not working with associative arrays
         $params = array_values($params);
         // If the first value of the array is an array, parse it else return it
-        $params[0] = is_array($params[0]) && (isset($params[0]['model']) && $params[0]['column']) ? (string)(new QueryParamsObject($params[0])) : $params[0];
+        $params[0] = \is_array($params[0]) && (isset($params[0]['model']) && $params[0]['column']) ? (string) (new QueryParamsObject($params[0])) : $params[0];
+
         return $params;
     }
 }

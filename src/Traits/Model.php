@@ -1,27 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
+/*
+ * This file is part of the Drewlabs package.
+ *
+ * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Drewlabs\Packages\Database\Traits;
 
 trait Model
 {
+    use AppendedAttributes;
+    use BooleanAttributes;
+    use GuardedModel;
+    use HiddenAttributes;
     use RoutableModel;
-    use ModelAppendsTrait;
-    use GuardedModelTrait;
-    use WithHiddenModelTrait;
-    use HavingBooleanAttributes;
 
     /**
-     * Checks if the current model has some relations
-     *
-     * @return boolean
-     */
-    protected function hasRelations()
-    {
-        return is_array($this->getRelations()) ?: false;
-    }
-
-    /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function add(array $items)
     {
@@ -29,22 +30,24 @@ trait Model
         if (!$isArrayList) {
             return $this->create($items);
         }
+
         return $this->insert($items);
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
-    public function getAll(bool $relations = false, array $columns = array('*'))
+    public function getAll(bool $relations = false, array $columns = ['*'])
     {
         if ($relations) {
             return $this->with($this->getModelRelationLoadersNames())->get($columns);
         }
+
         return $this->get($columns);
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getFillables()
     {
@@ -52,7 +55,7 @@ trait Model
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getRelations()
     {
@@ -60,17 +63,17 @@ trait Model
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getPrimaryKey()
     {
-        return isset($this->primaryKey) ? $this->primaryKey : 'id';
+        return $this->primaryKey ?? 'id';
     }
 
     /**
      * @deprecated v3.1
-     * 
-     * @inheritDoc
+     *
+     * {@inheritDoc}
      */
     public function setPrimaryKey($value)
     {
@@ -80,11 +83,12 @@ trait Model
     public function setKey($value)
     {
         $this->{$this->getPrimaryKey()} = $value;
+
         return $this;
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getModelRelationLoadersNames()
     {
@@ -113,5 +117,15 @@ trait Model
                 $primaryKey ? [$primaryKey] : []
             )
         );
+    }
+
+    /**
+     * Checks if the current model has some relations.
+     *
+     * @return bool
+     */
+    protected function hasRelations()
+    {
+        return \is_array($this->getRelations()) ?: false;
     }
 }

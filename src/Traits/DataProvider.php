@@ -19,13 +19,13 @@ use Drewlabs\Packages\Database\Extensions\CustomQueryCriteria;
 
 trait DataProvider
 {
-
     /**
      * {@inheritDoc}
      */
     public function create(array $attributes, $params = [])
     {
         $params = $this->parseProviderCreateHandlerParams($params);
+
         return $this->repository->resetScope()->{$params['method']}(
             $attributes,
             true,
@@ -41,7 +41,7 @@ trait DataProvider
     {
         if (\is_array($query)) {
             return $this->repository->resetScope()->pushFilter(
-                (new CustomQueryCriteria)->setQueryFilters(
+                (new CustomQueryCriteria())->setQueryFilters(
                     $query
                 )
             )->delete([], $batch);
@@ -67,11 +67,11 @@ trait DataProvider
         }
 
         return $shouldPaginate ? $this->repository->resetScope()->pushFilter(
-            (new CustomQueryCriteria)
+            (new CustomQueryCriteria())
                 ->setQueryFilters(null === $query ? [] : $query)
         )->{$relationFn}($relationQuery)->paginate($limit) : new DataProviderQueryResult(
             $this->repository->resetScope()->pushFilter(
-                (new CustomQueryCriteria)->setQueryFilters($query)
+                (new CustomQueryCriteria())->setQueryFilters($query)
             )->{$relationFn}($relationQuery)->find([], $columns)
         );
     }
@@ -98,7 +98,7 @@ trait DataProvider
         $params = $this->parseProviderUpdateHandlerParams($params);
         if (\is_array($query)) {
             return $this->repository->resetScope()->pushFilter(
-                (new CustomQueryCriteria)->setQueryFilters($query)
+                (new CustomQueryCriteria())->setQueryFilters($query)
             )->update($attributes, [], true, $params['should_mass_update']);
         }
 
@@ -111,7 +111,6 @@ trait DataProvider
     }
 
     /**
-     *
      * @param array|DataProviderHandlerParamsInterface $params
      *
      * @return void
@@ -122,7 +121,6 @@ trait DataProvider
     }
 
     /**
-     *
      * @param array|DataProviderHandlerParamsInterface $params
      *
      * @return void
