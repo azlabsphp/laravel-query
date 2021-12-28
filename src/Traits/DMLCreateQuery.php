@@ -42,7 +42,7 @@ trait DMLCreateQuery
         };
 
         return $callback(
-            $this->forwardCallTo(
+            $this->proxy(
                 drewlabs_core_create_attribute_getter('model', null)($this),
                 'add',
                 [$this->parseAttributes($attributes)]
@@ -98,7 +98,7 @@ trait DMLCreateQuery
         $upsert = $params['upsert'] && !empty($upsert_conditions) ? true : false;
         if (\is_string($method) && drewlabs_database_is_dynamic_create_method($method)) {
             $result = create_relations_after_create(
-                $this->forwardCallTo(
+                $this->proxy(
                     drewlabs_core_create_attribute_getter('model', null)($this),
                     $upsert ? EloquentQueryBuilderMethodsEnum::UPSERT : EloquentQueryBuilderMethodsEnum::CREATE,
                     // if Upserting, pass the upsertion condition first else, pass in the attributes
@@ -109,7 +109,7 @@ trait DMLCreateQuery
                 $batch
             );
         } else {
-            $result = $this->forwardCallTo(
+            $result = $this->proxy(
                 drewlabs_core_create_attribute_getter('model', null)($this),
                 $method,
                 // if Upserting, pass the upsertion condition first else, pass in the attributes

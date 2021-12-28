@@ -23,11 +23,12 @@ use Drewlabs\Packages\Database\Traits\DMLCreateQuery;
 use Drewlabs\Packages\Database\Traits\DMLDeleteQuery;
 use Drewlabs\Packages\Database\Traits\DMLSelectQuery;
 use Drewlabs\Packages\Database\Traits\DMLUpdateQuery;
+use Drewlabs\Support\Traits\MethodProxy;
 use Drewlabs\Support\Traits\Overloadable;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Model as Eloquent;
-use Illuminate\Support\Traits\ForwardsCalls;
+
 
 /**
  * @method \Drewlabs\Contracts\Data\Model\Model|mixed                      create(array $attributes, \Closure $callback = null)
@@ -61,7 +62,7 @@ class EloquentDMLManager implements DMLProvider
     use DMLDeleteQuery;
     use DMLSelectQuery;
     use DMLUpdateQuery;
-    use ForwardsCalls;
+    use MethodProxy;
     use Overloadable;
 
     public const AGGREGATE_METHODS = [
@@ -124,7 +125,7 @@ class EloquentDMLManager implements DMLProvider
             throw new \InvalidArgumentException(__METHOD__.' requires an list of list items for insertion');
         }
 
-        return $this->forwardCallTo(
+        return $this->proxy(
             drewlabs_core_create_attribute_getter('model', null)($this),
             EloquentQueryBuilderMethodsEnum::INSERT_MANY,
             [
@@ -152,7 +153,7 @@ class EloquentDMLManager implements DMLProvider
             throw new \InvalidArgumentException('The provided method is not part of the aggregation framework supported methods');
         }
 
-        return $this->forwardCallTo(
+        return $this->proxy(
             array_reduce(drewlabs_core_array_is_no_assoc_array_list($query) ? $query : [$query], static function ($model, $q) {
                 return (new CustomQueryCriteria($q))->apply($model);
             }, drewlabs_core_create_attribute_getter('model', null)($this)),

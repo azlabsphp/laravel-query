@@ -43,18 +43,6 @@ trait RoutableModel
     }
 
     /**
-     * Returns the value matching the id parameter to be passed to the ressource identifier.
-     *
-     * @deprecated 1.0.72
-     *
-     * @return int|string
-     */
-    protected function getRouteIdParam()
-    {
-        return $this->getKey();
-    }
-
-    /**
      * Returns the ressource identifier parameter name for the given model.
      *
      * @return string|null

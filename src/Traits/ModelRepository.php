@@ -19,7 +19,8 @@ use Drewlabs\Contracts\Data\Model\Parseable;
 use Drewlabs\Contracts\Data\Model\Relatable;
 use Drewlabs\Core\Data\Exceptions\RepositoryException;
 use Drewlabs\Support\Traits\Overloadable;
-use Illuminate\Support\Collection;
+
+use function Drewlabs\Support\Proxy\Collection;
 
 trait ModelRepository
 {
@@ -400,7 +401,7 @@ trait ModelRepository
         if (!$hot_operation) {
             $values = $this->parseInputValues($values);
             $list = $this->findFromFilters();
-            $list = \is_array($list) ? new Collection($list) : $list;
+            $list = \is_array($list) ? Collection($list) : $list;
             // Loop through all the item in the list and update their field
             return $list->reduce(static function ($carr, $model) use ($values) {
                 // Then save the model to the database
@@ -445,7 +446,7 @@ trait ModelRepository
         if (!$hot_operation) {
             $values = $this->parseInputValues($values);
             $list = $this->findByArrayConditions($conditions);
-            $list = \is_array($list) ? new Collection($list) : $list;
+            $list = \is_array($list) ? Collection($list) : $list;
             // Loop through all the item in the list and update their field
             return $list->reduce(static function ($carr, $model) use ($values) {
                 // Then save the model to the database
@@ -524,7 +525,7 @@ trait ModelRepository
     {
         if (!$hot_operation) {
             $list = $this->findFromFilters();
-            $list = \is_array($list) ? new Collection($list) : $list;
+            $list = \is_array($list) ? Collection($list) : $list;
             // Loop through all the item in the list and delete their field
             return $list->reduce(static function ($carr, $model) {
                 \call_user_func([$model, 'delete'], []);
@@ -554,7 +555,7 @@ trait ModelRepository
     {
         if (!$hot_operation) {
             $list = $this->findByArrayConditions($conditions);
-            $list = \is_array($list) ? new Collection($list) : $list;
+            $list = \is_array($list) ? Collection($list) : $list;
             // Loop through all the item in the list and delete their field
             return $list->reduce(static function ($carr, $model) {
                 \call_user_func([$model, 'delete'], []);

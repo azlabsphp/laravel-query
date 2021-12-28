@@ -450,42 +450,6 @@ class CustomQueryCriteria implements ModelFiltersInterface
     }
 
     /**
-     * apply an skip query to the model.
-     *
-     * @deprecated 1.0.2
-     *
-     * @param mixed $model
-     *
-     * @return mixed
-     */
-    private function applySkipQuery($model, array $criteria)
-    {
-        if (\array_key_exists('skip', $criteria) && null !== $criteria['skip']) {
-            $model = $model->skip($criteria['skip']);
-        }
-
-        return $model;
-    }
-
-    /**
-     * apply an skip query to the model.
-     *
-     * @deprecated 1.0.2
-     *
-     * @param mixed $model
-     *
-     * @return mixed
-     */
-    private function applyTakeQuery($model, array $criteria)
-    {
-        if (\array_key_exists('take', $criteria) && null !== $criteria['take']) {
-            $model = $model->take($criteria['take']);
-        }
-
-        return $model;
-    }
-
-    /**
      * apply an whereNull query to the model.
      *
      * @param mixed $model

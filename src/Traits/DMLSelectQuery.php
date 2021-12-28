@@ -136,8 +136,8 @@ trait DMLSelectQuery
         return $callback(
             SelectQueryResult(
                 new DataProviderQueryResult(
-                    $this->forwardCallTo(
-                        !empty($relations) ? $this->forwardCallTo(
+                    $this->proxy(
+                        !empty($relations) ? $this->proxy(
                             $builder,
                             'with',
                             [$relations]
@@ -206,8 +206,8 @@ trait DMLSelectQuery
         return $callback(
             SelectQueryResult(
                 new DataProviderQueryResult(
-                    $this->forwardCallTo(
-                        !empty($relations) ? $this->forwardCallTo(
+                    $this->proxy(
+                        !empty($relations) ? $this->proxy(
                             $builder,
                             'with',
                             [$relations]

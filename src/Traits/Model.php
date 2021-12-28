@@ -70,16 +70,6 @@ trait Model
         return $this->primaryKey ?? 'id';
     }
 
-    /**
-     * @deprecated v3.1
-     *
-     * {@inheritDoc}
-     */
-    public function setPrimaryKey($value)
-    {
-        return $this->setKey($value);
-    }
-
     public function setKey($value)
     {
         $this->{$this->getPrimaryKey()} = $value;

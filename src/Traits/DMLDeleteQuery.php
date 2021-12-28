@@ -15,7 +15,6 @@ namespace Drewlabs\Packages\Database\Traits;
 
 use Drewlabs\Packages\Database\EloquentQueryBuilderMethodsEnum;
 use Drewlabs\Packages\Database\Extensions\CustomQueryCriteria;
-use Illuminate\Support\Enumerable;
 
 trait DMLDeleteQuery
 {
@@ -73,7 +72,7 @@ trait DMLDeleteQuery
     private function applyDelete(array $query, bool $batch = false)
     {
         if ($batch) {
-            return $this->forwardCallTo(
+            return $this->proxy(
                 array_reduce(
                     drewlabs_core_array_is_no_assoc_array_list($query) ?
                         $query :
@@ -91,7 +90,7 @@ trait DMLDeleteQuery
             return array_reduce(
                 $this->select($query)->all(),
                 function ($carry, $value) {
-                    $this->forwardCallTo(
+                    $this->proxy(
                         $value,
                         EloquentQueryBuilderMethodsEnum::DELETE,
                         []

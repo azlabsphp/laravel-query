@@ -16,7 +16,6 @@ namespace Drewlabs\Packages\Database\Traits;
 use Drewlabs\Contracts\Data\Model\Model;
 use Drewlabs\Packages\Database\EloquentQueryBuilderMethodsEnum;
 use Drewlabs\Packages\Database\Extensions\CustomQueryCriteria;
-use Illuminate\Support\Enumerable;
 
 trait DMLUpdateQuery
 {
@@ -81,7 +80,7 @@ trait DMLUpdateQuery
         bool $batch = false
     ) {
         if ($batch) {
-            return $this->forwardCallTo(
+            return $this->proxy(
                 array_reduce(
                     drewlabs_core_array_is_no_assoc_array_list($query) ?
                         $query :
@@ -99,7 +98,7 @@ trait DMLUpdateQuery
             return array_reduce(
                 $this->select($query)->all(),
                 function ($carry, $value) use ($attributes) {
-                    $this->forwardCallTo(
+                    $this->proxy(
                         $value,
                         EloquentQueryBuilderMethodsEnum::UPDATE,
                         [$this->parseAttributes(($attributes instanceof Model) ? $attributes->toArray() : $attributes)]
