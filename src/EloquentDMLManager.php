@@ -23,37 +23,37 @@ use Drewlabs\Packages\Database\Traits\DMLCreateQuery;
 use Drewlabs\Packages\Database\Traits\DMLDeleteQuery;
 use Drewlabs\Packages\Database\Traits\DMLSelectQuery;
 use Drewlabs\Packages\Database\Traits\DMLUpdateQuery;
+use Drewlabs\Packages\Database\Traits\HasIocContainer;
 use Drewlabs\Support\Traits\MethodProxy;
 use Drewlabs\Support\Traits\Overloadable;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Model as Eloquent;
 
-
 /**
- * @method \Drewlabs\Contracts\Data\Model\Model|mixed                      create(array $attributes, \Closure $callback = null)
- * @method \Drewlabs\Contracts\Data\Model\Model|mixed                      create(array $attributes, $params, bool $batch, \Closure $callback = null)
- * @method \Drewlabs\Contracts\Data\Model\Model|mixed                      create(array $attributes, $params = [], \Closure $callback)
- * @method bool                                                            delete(int $id)
- * @method bool                                                            delete(string $id)
- * @method int                                                             delete(array $query)
- * @method int                                                             delete(array $query, bool $batch)
- * @method \Drewlabs\Contracts\Data\DataProviderQueryResultInterface|mixed select()
- * @method \Drewlabs\Contracts\Data\Model\Model|mixed                      select(string $id, array $columns, \Closure $callback = null)
- * @method \Drewlabs\Contracts\Data\Model\Model|mixed                      select(string $id, \Closure $callback = null)
- * @method \Drewlabs\Contracts\Data\Model\Model|mixed                      select(int $id, array $columns, \Closure $callback = null)
- * @method \Drewlabs\Contracts\Data\Model\Model|mixed                      select(int $id, \Closure $callback = null)
- * @method \Drewlabs\Contracts\Data\DataProviderQueryResultInterface|mixed select(array $query, \Closure $callback = null)
- * @method \Drewlabs\Contracts\Data\DataProviderQueryResultInterface|mixed select(array $query, array $columns, \Closure $callback = null)
- * @method \Illuminate\Contracts\Pagination\Paginator|mixed                select(array $query, int $per_page, int $page = null, \Closure $callback = null)
- * @method \Illuminate\Contracts\Pagination\Paginator|mixed                select(array $query, int $per_page, array $columns, int $page = null, \Closure $callback = null)
- * @method int                                                             selectAggregate(array $query = [], string $aggregation = \Drewlabs\Packages\Database\DatabaseQueryBuilderAggregationMethodsEnum::COUNT)
- * @method int                                                             update(array $query, $attributes = [])
- * @method int                                                             update(array $query, $attributes = [], bool $bulkstatement)
- * @method \Drewlabs\Contracts\Data\Model\Model|mixed                      update(int $id, $attributes, \Closure $dto_transform_fn = null)
- * @method \Drewlabs\Contracts\Data\Model\Model|mixed                      update(int $id, $attributes, $params, \Closure $dto_transform_fn = null)
- * @method \Drewlabs\Contracts\Data\Model\Model|mixed                      update(string $id, $attributes, \Closure $dto_transform_fn = null)
- * @method \Drewlabs\Contracts\Data\Model\Model|mixed                      update(string $id, $attributes, $params, \Closure $dto_transform_fn = null)
+ * @method \Drewlabs\Contracts\Data\Model\Model|mixed           create(array $attributes, \Closure $callback = null)
+ * @method \Drewlabs\Contracts\Data\Model\Model|mixed           create(array $attributes, $params, bool $batch, \Closure $callback = null)
+ * @method \Drewlabs\Contracts\Data\Model\Model|mixed           create(array $attributes, $params = [], \Closure $callback)
+ * @method bool                                                 delete(int $id)
+ * @method bool                                                 delete(string $id)
+ * @method int                                                  delete(array $query)
+ * @method int                                                  delete(array $query, bool $batch)
+ * @method \Drewlabs\Contracts\Data\EnumerableQueryResult|mixed select()
+ * @method \Drewlabs\Contracts\Data\Model\Model|mixed           select(string $id, array $columns, \Closure $callback = null)
+ * @method \Drewlabs\Contracts\Data\Model\Model|mixed           select(string $id, \Closure $callback = null)
+ * @method \Drewlabs\Contracts\Data\Model\Model|mixed           select(int $id, array $columns, \Closure $callback = null)
+ * @method \Drewlabs\Contracts\Data\Model\Model|mixed           select(int $id, \Closure $callback = null)
+ * @method \Drewlabs\Contracts\Data\EnumerableQueryResult|mixed select(array $query, \Closure $callback = null)
+ * @method \Drewlabs\Contracts\Data\EnumerableQueryResult|mixed select(array $query, array $columns, \Closure $callback = null)
+ * @method \Illuminate\Contracts\Pagination\Paginator|mixed     select(array $query, int $per_page, int $page = null, \Closure $callback = null)
+ * @method \Illuminate\Contracts\Pagination\Paginator|mixed     select(array $query, int $per_page, array $columns, int $page = null, \Closure $callback = null)
+ * @method int                                                  selectAggregate(array $query = [], string $aggregation = \Drewlabs\Packages\Database\DatabaseQueryBuilderAggregationMethodsEnum::COUNT)
+ * @method int                                                  update(array $query, $attributes = [])
+ * @method int                                                  update(array $query, $attributes = [], bool $bulkstatement)
+ * @method \Drewlabs\Contracts\Data\Model\Model|mixed           update(int $id, $attributes, \Closure $dto_transform_fn = null)
+ * @method \Drewlabs\Contracts\Data\Model\Model|mixed           update(int $id, $attributes, $params, \Closure $dto_transform_fn = null)
+ * @method \Drewlabs\Contracts\Data\Model\Model|mixed           update(string $id, $attributes, \Closure $dto_transform_fn = null)
+ * @method \Drewlabs\Contracts\Data\Model\Model|mixed           update(string $id, $attributes, $params, \Closure $dto_transform_fn = null)
  */
 class EloquentDMLManager implements DMLProvider
 {
@@ -103,7 +103,7 @@ class EloquentDMLManager implements DMLProvider
         if (\is_string($clazz)) {
             $this->model_class = $clazz;
             // Create the model instance
-            $this->model = Container::getInstance()->make($this->model_class);
+            $this->model = $this->createResolver($this->model_class)();
 
             return;
         }

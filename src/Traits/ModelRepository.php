@@ -18,13 +18,14 @@ use Drewlabs\Contracts\Data\Model\Model;
 use Drewlabs\Contracts\Data\Model\Parseable;
 use Drewlabs\Contracts\Data\Model\Relatable;
 use Drewlabs\Core\Data\Exceptions\RepositoryException;
-use Drewlabs\Support\Traits\Overloadable;
-
 use function Drewlabs\Support\Proxy\Collection;
+
+use Drewlabs\Support\Traits\Overloadable;
 
 trait ModelRepository
 {
     use Overloadable;
+    use HasIocContainer;
 
     /**
      * Model instance variable.

@@ -20,6 +20,7 @@ use Drewlabs\Contracts\Data\Repository\ParseableRepository;
 use Drewlabs\Core\Data\Exceptions\RepositoryException;
 use Drewlabs\Packages\Database\Contracts\TransactionUtils;
 use Drewlabs\Packages\Database\DynamicCRUDQueryHandler;
+use Drewlabs\Packages\Database\Traits\HasIocContainer;
 use Drewlabs\Packages\Database\Traits\ModelRepository;
 use Drewlabs\Support\Immutable\ValueObject;
 use Psr\Container\ContainerInterface;
@@ -61,19 +62,13 @@ final class IlluminateModelRepository extends ValueObject implements ParseableRe
         ?TransactionUtils $transaction = null,
         ?ModelAttributeParser $modelAttributesParser = null
     ) {
-        $illuminateContainerClazz = 'Illuminate\\Container\\Container';
-        $container = $container ?? (class_exists($illuminateContainerClazz) ? forward_static_call([$illuminateContainerClazz, 'getInstance']) : null);
-        if (null === $container) {
-            throw new \RuntimeException(sprintf('Repository class required an instance of %s, Please install the illuminate/container package or, make sure the framework has a class that implements the psr4 container contract that is passed as dependency to the class constructor', ContainerInterface::class));
-        }
         // Call the parent constructor to initialize the class
         $attributes = [
             'container' => $container,
-            'transactionUtils' => $transaction ?? $container->get(\Drewlabs\Packages\Database\Contracts\TransactionUtils::class),
-            'attribute_parser' => $modelAttributesParser ?? $container->get(ModelAttributeParser::class),
+            'transactionUtils' => $transaction ?? $this->createResolver(TransactionUtils::class)($container),
+            'attribute_parser' => $modelAttributesParser ?? $this->createResolver(ModelAttributeParser::class)($container),
         ];
         $model_class = $modelClass;
-        $container = $container;
         if (null !== $model_class) {
             $model = $this->internalMakeModel($model_class, $container);
             if (!(\is_string($model_class)) || !($model instanceof Model)) {
@@ -157,10 +152,7 @@ final class IlluminateModelRepository extends ValueObject implements ParseableRe
         return drewlabs_core_create_attribute_getter(
             'attribute_parser',
             null
-        )($this) ?? (drewlabs_core_create_attribute_getter(
-            'container',
-            null
-        )($this))->get(ModelAttributeParser::class);
+        )($this) ?? $this->createResolver(ModelAttributeParser::class)();
     }
 
     /**
@@ -192,7 +184,6 @@ final class IlluminateModelRepository extends ValueObject implements ParseableRe
     private function resolveModel($clazz = null, ?ContainerInterface $container = null)
     {
         $model_class = $clazz ?? $this->getModel();
-        $container = $container ?? drewlabs_core_create_attribute_getter('container', null)($this);
         $model = $this->internalMakeModel($model_class, $container);
         if (!(\is_string($model_class)) || !($model instanceof Model)) {
             throw new RepositoryException('Constructor parameter must be an instance of string, must be a valid class that exists, and the class must be an instance of '.Model::class);
@@ -207,8 +198,6 @@ final class IlluminateModelRepository extends ValueObject implements ParseableRe
 
     private function internalMakeModel(string $clazz, ?ContainerInterface $container = null)
     {
-        $container = $container ?? drewlabs_core_create_attribute_getter('container', null)($this);
-
-        return $container ? $container->get($clazz) : new $clazz();
+        return $this->createResolver($clazz)($container);
     }
 }

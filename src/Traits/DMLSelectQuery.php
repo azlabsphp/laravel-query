@@ -13,15 +13,13 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Traits;
 
-use Drewlabs\Contracts\Data\DataProviderQueryResultInterface;
+use Drewlabs\Contracts\Data\EnumerableQueryResult as ContractsEnumerableQueryResult;
 use Drewlabs\Contracts\Data\Model\Relatable;
-use Drewlabs\Core\Data\DataProviderQueryResult;
+use Drewlabs\Core\Data\EnumerableQueryResult;
 use Drewlabs\Packages\Database\EloquentQueryBuilderMethodsEnum;
 use Drewlabs\Packages\Database\Extensions\CustomQueryCriteria;
 use Drewlabs\Packages\Database\Helpers\SelectQueryColumnsHelper;
 use function Drewlabs\Packages\Database\Proxy\SelectQueryResult;
-
-use Drewlabs\Support\Collections\SimpleCollection;
 
 use Illuminate\Contracts\Pagination\Paginator;
 
@@ -66,6 +64,7 @@ trait DMLSelectQuery
         $callback = $callback ?? static function ($value) {
             return $value;
         };
+
         return $callback(
             $this->selectV5(
                 [
@@ -103,7 +102,7 @@ trait DMLSelectQuery
     }
 
     /**
-     * @return DataProviderQueryResultInterface|mixed
+     * @return ContractsEnumerableQueryResult|mixed
      */
     public function selectV3(array $query, ?\Closure $callback = null)
     {
@@ -135,7 +134,7 @@ trait DMLSelectQuery
 
         return $callback(
             SelectQueryResult(
-                new DataProviderQueryResult(
+                new EnumerableQueryResult(
                     $this->proxy(
                         !empty($relations) ? $this->proxy(
                             $builder,
@@ -205,7 +204,7 @@ trait DMLSelectQuery
 
         return $callback(
             SelectQueryResult(
-                new DataProviderQueryResult(
+                new EnumerableQueryResult(
                     $this->proxy(
                         !empty($relations) ? $this->proxy(
                             $builder,

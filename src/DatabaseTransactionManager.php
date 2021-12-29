@@ -14,11 +14,14 @@ declare(strict_types=1);
 namespace Drewlabs\Packages\Database;
 
 use Drewlabs\Packages\Database\Contracts\TransactionUtils as ContractsTransactionUtils;
+use Drewlabs\Packages\Database\Traits\HasIocContainer;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Container\BindingResolutionException;
 
 class DatabaseTransactionManager implements ContractsTransactionUtils
 {
+    use HasIocContainer;
+
     /**
      * @var mixed
      */
@@ -35,7 +38,7 @@ class DatabaseTransactionManager implements ContractsTransactionUtils
      */
     public function __construct($db = null)
     {
-        $this->db = $db ?? Container::getInstance()->make('db');
+        $this->db = $db ?? $this->createResolver('db')();
     }
 
     /**
@@ -81,7 +84,7 @@ class DatabaseTransactionManager implements ContractsTransactionUtils
             });
         } catch (\Exception $e) {
             return $this->afterCancelTransaction(static function () use ($e) {
-                throw new \RuntimeException($e);
+                throw new \RuntimeException($e->getMessage(), $e->getCode(), $e);
             });
         }
     }

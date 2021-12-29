@@ -13,27 +13,27 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Helpers;
 
-use Drewlabs\Contracts\Data\DataProviderQueryResultInterface;
-use Drewlabs\Core\Data\DataProviderQueryResult;
+use Drewlabs\Contracts\Data\EnumerableQueryResult as ContractsEnumerableQueryResult;
+use Drewlabs\Core\Data\EnumerableQueryResult;
 use Illuminate\Contracts\Pagination\Paginator;
 
 class SelectQueryResult
 {
     /**
-     * @var Paginator|DataProviderQueryResultInterface
+     * @var Paginator|ContractsEnumerableQueryResult
      */
     private $value_;
 
     /**
      * Instance initializer.
      *
-     * @param Paginator|DataProviderQueryResultInterface $value
+     * @param Paginator|ContractsEnumerableQueryResult $value
      *
      * @return self
      */
     public function __construct($value)
     {
-        $this->value_ = $value ?? new DataProviderQueryResult();
+        $this->value_ = $value ?? new EnumerableQueryResult();
     }
 
     /**
@@ -43,7 +43,7 @@ class SelectQueryResult
      */
     public function each(callable $callback)
     {
-        $this->value_ = drewlabs_database_map_query_result($this->value_ ?? new DataProviderQueryResult(), $callback);
+        $this->value_ = drewlabs_database_map_query_result($this->value_ ?? new EnumerableQueryResult(), $callback);
 
         return $this;
     }
@@ -55,7 +55,7 @@ class SelectQueryResult
      */
     public function all(callable $callback)
     {
-        $this->value_ = drewlabs_database_apply($this->value_ ?? new DataProviderQueryResult(), $callback);
+        $this->value_ = drewlabs_database_apply($this->value_ ?? new EnumerableQueryResult(), $callback);
 
         return $this;
     }

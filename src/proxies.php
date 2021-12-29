@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Proxy;
 
-use Drewlabs\Contracts\Data\DataProviderQueryResultInterface;
+use Drewlabs\Contracts\Data\EnumerableQueryResult;
 use Drewlabs\Contracts\Data\ModelFiltersInterface;
 use Drewlabs\Packages\Database\EloquentDMLManager;
 use Drewlabs\Packages\Database\Extensions\CustomQueryCriteria;
@@ -21,7 +21,7 @@ use Drewlabs\Packages\Database\Helpers\SelectQueryResult;
 use Illuminate\Contracts\Pagination\Paginator;
 
 /**
- * @param Paginator|DataProviderQueryResultInterface $value
+ * @param Paginator|EnumerableQueryResult $value
  *
  * @return SelectQueryResult
  */

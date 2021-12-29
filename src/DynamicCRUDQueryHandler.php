@@ -15,9 +15,11 @@ namespace Drewlabs\Packages\Database;
 
 use Drewlabs\Contracts\Data\Repository\ModelRepository;
 use Drewlabs\Packages\Database\Contracts\TransactionUtils;
+use Drewlabs\Packages\Database\Traits\HasIocContainer;
 
 class DynamicCRUDQueryHandler
 {
+    use HasIocContainer;
     /**
      * @var TransactionUtils
      */
@@ -33,10 +35,7 @@ class DynamicCRUDQueryHandler
      */
     public function bindTransactionHandler(TransactionUtils $hanlder)
     {
-        $illuminateContainerClazz = 'Illuminate\\Container\\Container';
-        $hanlder = $hanlder ?? (class_exists($illuminateContainerClazz) ?
-            forward_static_call([$illuminateContainerClazz, 'getInstance'])
-            ->get(TransactionUtils::class) : null);
+        $hanlder = $hanlder ?? $this->createResolver(TransactionUtils::class)();
 
         return drewlabs_core_create_attribute_setter('transactionHandler', $hanlder)($this);
     }
@@ -195,7 +194,7 @@ class DynamicCRUDQueryHandler
             });
         } catch (\Exception $e) {
             return $this->afterCancelTransaction(static function () use ($e) {
-                throw new \RuntimeException($e);
+                throw new \RuntimeException($e->getMessage(), $e->getCode(), $e);
             });
         }
     }

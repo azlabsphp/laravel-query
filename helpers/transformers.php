@@ -11,13 +11,13 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-use Drewlabs\Contracts\Data\DataProviderQueryResultInterface;
-use Drewlabs\Core\Data\DataProviderQueryResult;
+use Drewlabs\Contracts\Data\EnumerableQueryResult as ContractsEnumerableQueryResult;
+use Drewlabs\Core\Data\EnumerableQueryResult;
 use function Drewlabs\Support\Proxy\Collection;
 use Illuminate\Container\Container;
-use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator as ContractsLengthAwarePaginator;
 use Illuminate\Contracts\Pagination\Paginator;
+use Illuminate\Http\Request;
 
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -27,30 +27,23 @@ if (!function_exists('drewlabs_database_paginator_apply_callback')) {
      *
      * @return Paginator
      */
-    function drewlabs_database_paginator_apply_callback(Paginator $item, callable $callback)
+    function drewlabs_database_paginator_apply_callback(Paginator $item, $callback)
     {
-        try {
-            /**
-             * @var \Illuminate\Http\Request
-             */
-            $request = Container::getInstance()->make('request');
-        } catch (BindingResolutionException $e) {
-            $request = null;
-        }
-        // TODO: Verify later if well implemented
-        $transformed = collect(
-            array_values(
-                array_filter(
-                    array_map($callback, $item->items()),
-                    static function ($v) {
-                        return isset($v);
-                    }
-                )
-            )
-        );
+        $request = class_exists(Request::class) ? Container::getInstance()->make('request') : null;
 
         return new LengthAwarePaginator(
-            $transformed,
+            iterator_to_array(
+                drewlabs_core_iter_filter(
+                    drewlabs_core_iter_map(
+                        new ArrayIterator($item->items()),
+                        $callback
+                    ),
+                    static function ($v) {
+                        return isset($v);
+                    },
+                    false
+                )
+            ),
             call_user_func([$item, 'total']),
             $item->perPage(),
             $item->currentPage(),
@@ -72,25 +65,10 @@ if (!function_exists('drewlabs_database_paginator_apply_to_all')) {
      */
     function drewlabs_database_paginator_apply_to_all(Paginator $item, callable $callback)
     {
-        $result = call_user_func_array($callback, [collect($item->items())]);
-        $result = $result ?
-            array_values(
-                is_array($result) ?
-                    $result :
-                    $result->all()
-            ) : $result;
-
-        try {
-            /**
-             * @var \Illuminate\Http\Request
-             */
-            $request = Container::getInstance()->make('request');
-        } catch (BindingResolutionException $e) {
-            $request = null;
-        }
+        $request = class_exists(Request::class) ? Container::getInstance()->make('request') : null;
 
         return new LengthAwarePaginator(
-            $result,
+            call_user_func($callback, collect($item->items())),
             $item instanceof ContractsLengthAwarePaginator ? $item->total() : count($transformed ?? []),
             $item->perPage(),
             $item->currentPage(),
@@ -108,24 +86,22 @@ if (!function_exists('drewlabs_database_map_query_result')) {
     /**
      * Apply transformation to response object on a get all request.
      *
-     * @param Paginator|DataProviderQueryResultInterface $item
+     * @param Paginator|ContractsEnumerableQueryResult $item
      *
      * @return mixed
      */
     function drewlabs_database_map_query_result($item, callable $callback)
     {
-        if ($item instanceof DataProviderQueryResultInterface) {
-            $item = $item->getCollection();
-        } elseif (is_array($item) || ($item instanceof \ArrayAccess)) {
-            $item = ($value = $item['data'] ?? null) ? $value : $item;
+        $item = $item instanceof ContractsEnumerableQueryResult ? $item->getCollection() : $item;
+        if (is_array($item)) {
+            $item = Collection($item['data'] ?? []);
         }
         if ($item instanceof Paginator) {
             return drewlabs_database_paginator_apply_callback($item, $callback);
         }
 
-        return new DataProviderQueryResult(
-            Collection($item)
-                ->map($callback)
+        return new EnumerableQueryResult(
+            $item->map($callback)
                 ->filter(static function ($current) {
                     return isset($current);
                 })
@@ -139,21 +115,20 @@ if (!function_exists('drewlabs_database_apply')) {
      *
      * @param Paginator|array|mixed $item
      *
-     * @return Paginator|DataProviderQueryResultInterface
+     * @return Paginator|ContractsEnumerableQueryResult
      */
     function drewlabs_database_apply($item, callable $callback)
     {
-        if ($item instanceof DataProviderQueryResultInterface) {
-            $item = $item->getCollection();
-        } elseif (is_array($item)) {
-            $item = ($value = $item['data'] ?? null) ? $value : $item;
+        $item = $item instanceof ContractsEnumerableQueryResult ? $item->getCollection() : $item;
+        if (is_array($item)) {
+            $item = Collection($item['data'] ?? []);
         }
         if ($item instanceof Paginator) {
             return drewlabs_database_paginator_apply_to_all($item, $callback);
         }
 
-        return new DataProviderQueryResult(
-            call_user_func($callback, null === $item ? Collection($item) : Collection())
+        return new EnumerableQueryResult(
+            call_user_func($callback, null === $item ? Collection($item) : $item)
         );
     }
 }
@@ -205,7 +180,7 @@ if (!function_exists('transform_query_result')) {
      *
      * @param Paginator|array|mixed $item
      *
-     * @return Paginator|DataProviderQueryResultInterface
+     * @return Paginator|ContractsEnumerableQueryResult
      */
     function transform_query_result($item, callable $callback)
     {

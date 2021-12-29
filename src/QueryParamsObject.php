@@ -13,11 +13,12 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database;
 
+use Drewlabs\Packages\Database\Traits\HasIocContainer;
 use Drewlabs\Support\Immutable\ValueObject;
-use Illuminate\Container\Container;
 
 class QueryParamsObject extends ValueObject
 {
+    use HasIocContainer;
     /**
      * {@inheritDoc}
      */
@@ -49,10 +50,8 @@ class QueryParamsObject extends ValueObject
      */
     public function toString()
     {
-        $model = \is_string($this->attributes['model']) ? (\function_exists('app') ?
-            Container::getInstance()->make(
-                $this->attributes['model']
-            )->getTable() : (new $this->attributes['model']())->getTable()) :
+        $model = \is_string($this->attributes['model']) ?
+            $this->createResolver($this->attributes['model'])()->getTable() :
             $this->attributes['model']->getTable();
 
         return trim(

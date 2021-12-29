@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace Drewlabs\Packages\Database\Traits;
 
 use Drewlabs\Contracts\Data\DataProviderHandlerParamsInterface;
-use Drewlabs\Core\Data\DataProviderQueryResult;
+use Drewlabs\Core\Data\EnumerableQueryResult;
 use Drewlabs\Packages\Database\Extensions\CustomQueryCriteria;
 
 trait DataProvider
@@ -69,7 +69,7 @@ trait DataProvider
         return $shouldPaginate ? $this->repository->resetScope()->pushFilter(
             (new CustomQueryCriteria())
                 ->setQueryFilters(null === $query ? [] : $query)
-        )->{$relationFn}($relationQuery)->paginate($limit) : new DataProviderQueryResult(
+        )->{$relationFn}($relationQuery)->paginate($limit) : new EnumerableQueryResult(
             $this->repository->resetScope()->pushFilter(
                 (new CustomQueryCriteria())->setQueryFilters($query)
             )->{$relationFn}($relationQuery)->find([], $columns)
