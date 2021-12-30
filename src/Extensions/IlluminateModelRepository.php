@@ -65,8 +65,8 @@ final class IlluminateModelRepository extends ValueObject implements ParseableRe
         // Call the parent constructor to initialize the class
         $attributes = [
             'container' => $container,
-            'transactionUtils' => $transaction ?? $this->createResolver(TransactionUtils::class)($container),
-            'attribute_parser' => $modelAttributesParser ?? $this->createResolver(ModelAttributeParser::class)($container),
+            'transactionUtils' => $transaction ?? self::createResolver(TransactionUtils::class)($container),
+            'attribute_parser' => $modelAttributesParser ?? self::createResolver(ModelAttributeParser::class)($container),
         ];
         $model_class = $modelClass;
         if (null !== $model_class) {
@@ -152,7 +152,7 @@ final class IlluminateModelRepository extends ValueObject implements ParseableRe
         return drewlabs_core_create_attribute_getter(
             'attribute_parser',
             null
-        )($this) ?? $this->createResolver(ModelAttributeParser::class)();
+        )($this) ?? self::createResolver(ModelAttributeParser::class)();
     }
 
     /**
@@ -198,6 +198,6 @@ final class IlluminateModelRepository extends ValueObject implements ParseableRe
 
     private function internalMakeModel(string $clazz, ?ContainerInterface $container = null)
     {
-        return $this->createResolver($clazz)($container);
+        return self::createResolver($clazz)($container);
     }
 }

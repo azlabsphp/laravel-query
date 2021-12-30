@@ -23,7 +23,7 @@ trait AttributesParser
      */
     private function parseAttributes(array $value)
     {
-        return $this->createResolver(
+        return self::createResolver(
             ModelAttributesParserContract::class
         )()->setModel(
             drewlabs_core_create_attribute_getter(

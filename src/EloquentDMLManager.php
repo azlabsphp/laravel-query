@@ -103,7 +103,7 @@ class EloquentDMLManager implements DMLProvider
         if (\is_string($clazz)) {
             $this->model_class = $clazz;
             // Create the model instance
-            $this->model = $this->createResolver($this->model_class)();
+            $this->model = self::createResolver($this->model_class)();
 
             return;
         }

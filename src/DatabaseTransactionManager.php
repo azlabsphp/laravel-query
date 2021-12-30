@@ -38,7 +38,7 @@ class DatabaseTransactionManager implements ContractsTransactionUtils
      */
     public function __construct($db = null)
     {
-        $this->db = $db ?? $this->createResolver('db')();
+        $this->db = $db ?? self::createResolver('db')();
     }
 
     /**

@@ -35,7 +35,7 @@ class DynamicCRUDQueryHandler
      */
     public function bindTransactionHandler(TransactionUtils $hanlder)
     {
-        $hanlder = $hanlder ?? $this->createResolver(TransactionUtils::class)();
+        $hanlder = $hanlder ?? self::createResolver(TransactionUtils::class)();
 
         return drewlabs_core_create_attribute_setter('transactionHandler', $hanlder)($this);
     }

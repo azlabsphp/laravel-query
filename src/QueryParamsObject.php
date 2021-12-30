@@ -51,7 +51,7 @@ class QueryParamsObject extends ValueObject
     public function toString()
     {
         $model = \is_string($this->attributes['model']) ?
-            $this->createResolver($this->attributes['model'])()->getTable() :
+            self::createResolver($this->attributes['model'])()->getTable() :
             $this->attributes['model']->getTable();
 
         return trim(

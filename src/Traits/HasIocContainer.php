@@ -13,16 +13,28 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Traits;
 
+use Closure;
 use Illuminate\Container\Container;
 use Psr\Container\ContainerInterface;
 
 trait HasIocContainer
 {
-    public function createResolver($abstract)
+    /**
+     * 
+     * @param mixed $abstract 
+     * @return Closure 
+     */
+    public static function createResolver($abstract = null)
     {
+        /**
+         * @return ContainerInterface|Container|mixed
+         */
         return static function ($container = null) use ($abstract) {
             if (null === $container) {
                 $container = forward_static_call([Container::class, 'getInstance']);
+            }
+            if (null === $abstract) {
+                return $container;
             }
             if ($container instanceof ContainerInterface) {
                 return $container->get($abstract);
