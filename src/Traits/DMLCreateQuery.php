@@ -13,8 +13,11 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Traits;
 
+use Closure;
 use Drewlabs\Contracts\Data\DataProviderHandlerParamsInterface;
 use Drewlabs\Packages\Database\EloquentQueryBuilderMethodsEnum;
+use InvalidArgumentException;
+use RuntimeException;
 
 trait DMLCreateQuery
 {
@@ -50,10 +53,15 @@ trait DMLCreateQuery
         );
     }
 
+
     /**
-     * @param array|DataProviderHandlerParamsInterface $params
      *
-     * @return Model
+     * @param array $attributes
+     * @param mixed $params
+     * @param null|Closure $callback
+     * @return mixed
+     * @throws InvalidArgumentException
+     * @throws RuntimeException
      */
     public function createV2(array $attributes, $params, ?\Closure $callback = null)
     {
@@ -102,7 +110,7 @@ trait DMLCreateQuery
                     drewlabs_core_create_attribute_getter('model', null)($this),
                     $upsert ? EloquentQueryBuilderMethodsEnum::UPSERT : EloquentQueryBuilderMethodsEnum::CREATE,
                     // if Upserting, pass the upsertion condition first else, pass in the attributes
-                    $upsert ? [$upsert_conditions, $attributes] : [$this->parseAttributes($attributes)]
+                    $upsert ? [$upsert_conditions, $this->parseAttributes($attributes)] : [$this->parseAttributes($attributes)]
                 ),
                 \array_slice(drewlabs_database_parse_dynamic_callback($method), 1),
                 $attributes,
@@ -113,7 +121,7 @@ trait DMLCreateQuery
                 drewlabs_core_create_attribute_getter('model', null)($this),
                 $method,
                 // if Upserting, pass the upsertion condition first else, pass in the attributes
-                $upsert ? [$upsert_conditions, $attributes] : [$this->parseAttributes($attributes)]
+                $upsert ? [$upsert_conditions, $this->parseAttributes($attributes)] : [$this->parseAttributes($attributes)]
             );
         }
 
