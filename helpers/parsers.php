@@ -40,9 +40,9 @@ if (!function_exists('drewlabs_database_parse_create_handler_params')) {
     function drewlabs_database_parse_create_handler_params($params)
     {
         $value = $params instanceof DataProviderHandlerParamsInterface ? $params->getParams() : (is_array($params) ? $params : []);
-        $upsert = isset($value['upsert']) && (bool) ($value['upsert']) ? true : false;
+        $upsert_conditions = isset($value['upsert_conditions']) && is_array($value['upsert_conditions']) ? $value['upsert_conditions'] : [];
+        $upsert = !empty($upsert_conditions) ? true : false;
         $method = isset($value['method']) && is_string($value['method']) ? $value['method'] : ($upsert ? EloquentQueryBuilderMethodsEnum::UPSERT : EloquentQueryBuilderMethodsEnum::CREATE);
-        $upsert_conditions = $upsert ? (isset($value['upsert_conditions']) && is_array($value['upsert_conditions']) ? $value['upsert_conditions'] : []) : [];
 
         return array_merge($value, [
             'method' => $method,
