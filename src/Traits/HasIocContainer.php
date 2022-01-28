@@ -36,16 +36,16 @@ trait HasIocContainer
             if (null === $abstract) {
                 return $container;
             }
-            if ($container instanceof ContainerInterface) {
-                return $container->get($abstract);
-            }
             if ($container instanceof \ArrayAccess) {
                 return $container[$abstract];
             }
-            if ($container instanceof Container) {
+            if (class_exists(Container::class) && ($container instanceof Container)) {
                 return $container->make($abstract);
             }
-            throw new \InvalidArgumentException(\get_class($container).' is not a '.ContainerInterface::class.' nor '.Container::class.' and is not array accessible');
+            if ($container instanceof ContainerInterface) {
+                return $container->get($abstract);
+            }
+            throw new \InvalidArgumentException(\get_class($container) . ' is not a ' . ContainerInterface::class . ' nor ' . Container::class . ' and is not array accessible');
         };
     }
 }
