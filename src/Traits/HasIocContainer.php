@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace Drewlabs\Packages\Database\Traits;
 
 use Closure;
-use Illuminate\Container\Container;
+use Exception;
 use Psr\Container\ContainerInterface;
 
 trait HasIocContainer
@@ -27,11 +27,12 @@ trait HasIocContainer
     public static function createResolver($abstract = null)
     {
         /**
-         * @return ContainerInterface|Container|mixed
+         * @return mixed
          */
         return static function ($container = null) use ($abstract) {
-            if (null === $container) {
-                $container = forward_static_call([Container::class, 'getInstance']);
+            $default = \Illuminate\Container\Container::class;
+            if (null === $container && class_exists($default)) {
+                $container = forward_static_call([$default, 'getInstance']);
             }
             if (null === $abstract) {
                 return $container;
@@ -39,13 +40,26 @@ trait HasIocContainer
             if ($container instanceof \ArrayAccess) {
                 return $container[$abstract];
             }
-            if (class_exists(Container::class) && ($container instanceof Container)) {
+            if (
+                class_exists($default) &&
+                $container instanceof \Illuminate\Container\Container
+            ) {
                 return $container->make($abstract);
             }
             if ($container instanceof ContainerInterface) {
                 return $container->get($abstract);
             }
-            throw new \InvalidArgumentException(\get_class($container) . ' is not a ' . ContainerInterface::class . ' nor ' . Container::class . ' and is not array accessible');
+            if (!is_object($container)) {
+                throw new Exception('A container instance is required to create a resolver');
+            }
+            throw new \InvalidArgumentException(
+                \get_class($container) .
+                    ' is not a ' .
+                    ContainerInterface::class .
+                    ' nor ' .
+                    $default .
+                    ' and is not array accessible'
+            );
         };
     }
 }
