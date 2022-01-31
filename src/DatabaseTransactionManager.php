@@ -15,8 +15,6 @@ namespace Drewlabs\Packages\Database;
 
 use Drewlabs\Packages\Database\Contracts\TransactionUtils as ContractsTransactionUtils;
 use Drewlabs\Packages\Database\Traits\HasIocContainer;
-use Illuminate\Container\Container;
-use Illuminate\Contracts\Container\BindingResolutionException;
 
 class DatabaseTransactionManager implements ContractsTransactionUtils
 {
@@ -32,7 +30,7 @@ class DatabaseTransactionManager implements ContractsTransactionUtils
      *
      * @param mixed|null $db
      *
-     * @throws BindingResolutionException
+     * @throws \Exception
      *
      * @return self
      */

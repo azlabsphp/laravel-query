@@ -21,8 +21,6 @@ use Drewlabs\Packages\Database\Extensions\CustomQueryCriteria;
 use Drewlabs\Packages\Database\Helpers\SelectQueryColumnsHelper;
 use function Drewlabs\Packages\Database\Proxy\SelectQueryResult;
 
-use Illuminate\Contracts\Pagination\Paginator;
-
 trait DMLSelectQuery
 {
     public function select(...$args)
@@ -164,23 +162,11 @@ trait DMLSelectQuery
         );
     }
 
-    /**
-     * Handle pagination functionality.
-     *
-     * @param int $page
-     *
-     * @return Paginator
-     */
     public function selectV6(array $query, int $per_page, ?int $page = null, ?\Closure $callback = null)
     {
         return $this->selectV8($query, $per_page, ['*'], $page, $callback);
     }
 
-    /**
-     * Handle pagination functionality.
-     *
-     * @return Paginator
-     */
     public function selectV8(array $query, int $per_page, array $columns, ?int $page = null, ?\Closure $callback = null)
     {
         $callback = $callback ?? static function ($value) {

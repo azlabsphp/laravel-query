@@ -18,10 +18,9 @@ use Drewlabs\Contracts\Data\ModelFiltersInterface;
 use Drewlabs\Packages\Database\EloquentDMLManager;
 use Drewlabs\Packages\Database\Extensions\CustomQueryCriteria;
 use Drewlabs\Packages\Database\Helpers\SelectQueryResult;
-use Illuminate\Contracts\Pagination\Paginator;
 
 /**
- * @param Paginator|EnumerableQueryResult $value
+ * @param EnumerableQueryResult|mixed $value
  *
  * @return SelectQueryResult
  */

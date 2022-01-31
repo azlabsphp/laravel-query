@@ -15,19 +15,18 @@ namespace Drewlabs\Packages\Database\Helpers;
 
 use Drewlabs\Contracts\Data\EnumerableQueryResult as ContractsEnumerableQueryResult;
 use Drewlabs\Core\Data\EnumerableQueryResult;
-use Illuminate\Contracts\Pagination\Paginator;
 
 class SelectQueryResult
 {
     /**
-     * @var Paginator|ContractsEnumerableQueryResult
+     * @var ContractsEnumerableQueryResult|mixed
      */
     private $value_;
 
     /**
      * Instance initializer.
      *
-     * @param Paginator|ContractsEnumerableQueryResult $value
+     * @param mixed $value
      *
      * @return self
      */

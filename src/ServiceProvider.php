@@ -19,7 +19,6 @@ use Drewlabs\Contracts\Hasher\IHasher;
 use Drewlabs\Core\Data\Services\ModelAttributesParser;
 use Drewlabs\Packages\Database\Contracts\TransactionUtils;
 use Drewlabs\Packages\Database\Extensions\CustomQueryCriteria;
-use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
 class ServiceProvider extends BaseServiceProvider
@@ -48,15 +47,7 @@ class ServiceProvider extends BaseServiceProvider
         $this->app->bind(FiltersInterface::class, CustomQueryCriteria::class);
 
         $this->app->bind(ModelAttributesParserContract::class, static function ($app) {
-            try {
-                $hasher = $app->make(IHasher::class);
-
-                return new ModelAttributesParser($hasher);
-            } catch (BindingResolutionException $e) {
-                $app['log']->info('IHasher interface not registered, please make sure the hasher interface is registered before proceeding!');
-
-                return new ModelAttributesParser();
-            }
+            return new ModelAttributesParser($app->bound(IHasher::class) ? $app[IHasher::class] : null);
         });
 
         // Register Nosql providers bindings

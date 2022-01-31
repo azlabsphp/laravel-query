@@ -17,18 +17,13 @@ use Drewlabs\Contracts\Data\DML\DMLProvider;
 use Drewlabs\Contracts\Data\Model\ActiveModel;
 use Drewlabs\Contracts\Data\Model\Model;
 use Drewlabs\Packages\Database\Extensions\CustomQueryCriteria;
-use Drewlabs\Packages\Database\Extensions\IlluminateModelRepository;
 use Drewlabs\Packages\Database\Traits\AttributesParser;
 use Drewlabs\Packages\Database\Traits\DMLCreateQuery;
 use Drewlabs\Packages\Database\Traits\DMLDeleteQuery;
 use Drewlabs\Packages\Database\Traits\DMLSelectQuery;
 use Drewlabs\Packages\Database\Traits\DMLUpdateQuery;
-use Drewlabs\Packages\Database\Traits\HasIocContainer;
 use Drewlabs\Support\Traits\MethodProxy;
 use Drewlabs\Support\Traits\Overloadable;
-use Illuminate\Container\Container;
-use Illuminate\Contracts\Container\BindingResolutionException;
-use Illuminate\Database\Eloquent\Model as Eloquent;
 
 /**
  * @method \Drewlabs\Contracts\Data\Model\Model|mixed           create(array $attributes, \Closure $callback = null)
@@ -45,8 +40,8 @@ use Illuminate\Database\Eloquent\Model as Eloquent;
  * @method \Drewlabs\Contracts\Data\Model\Model|mixed           select(int $id, \Closure $callback = null)
  * @method \Drewlabs\Contracts\Data\EnumerableQueryResult|mixed select(array $query, \Closure $callback = null)
  * @method \Drewlabs\Contracts\Data\EnumerableQueryResult|mixed select(array $query, array $columns, \Closure $callback = null)
- * @method \Illuminate\Contracts\Pagination\Paginator|mixed     select(array $query, int $per_page, int $page = null, \Closure $callback = null)
- * @method \Illuminate\Contracts\Pagination\Paginator|mixed     select(array $query, int $per_page, array $columns, int $page = null, \Closure $callback = null)
+ * @method mixed                                                select(array $query, int $per_page, int $page = null, \Closure $callback = null)
+ * @method mixed                                                select(array $query, int $per_page, array $columns, int $page = null, \Closure $callback = null)
  * @method int                                                  selectAggregate(array $query = [], string $aggregation = \Drewlabs\Packages\Database\DatabaseQueryBuilderAggregationMethodsEnum::COUNT)
  * @method int                                                  update(array $query, $attributes = [])
  * @method int                                                  update(array $query, $attributes = [], bool $bulkstatement)
@@ -81,14 +76,14 @@ class EloquentDMLManager implements DMLProvider
     private $model_class;
 
     /**
-     * @var Model|ActiveModel|Eloquent
+     * @var Model|ActiveModel|mixed
      */
     private $model;
 
     /**
      * @param Model|string $clazz
      *
-     * @throws BindingResolutionException
+     * @throws \Exception
      * @throws \InvalidArgumentException
      *
      * @return never
@@ -160,13 +155,5 @@ class EloquentDMLManager implements DMLProvider
             $aggregation,
             []
         );
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function createRepository()
-    {
-        return new IlluminateModelRepository($this->model_class);
     }
 }
