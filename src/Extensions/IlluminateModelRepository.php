@@ -20,7 +20,6 @@ use Drewlabs\Contracts\Data\Repository\ParseableRepository;
 use Drewlabs\Core\Data\Exceptions\RepositoryException;
 use Drewlabs\Packages\Database\Contracts\TransactionUtils;
 use Drewlabs\Packages\Database\DynamicCRUDQueryHandler;
-use Drewlabs\Packages\Database\Traits\HasIocContainer;
 use Drewlabs\Packages\Database\Traits\ModelRepository;
 use Drewlabs\Support\Immutable\ValueObject;
 use Psr\Container\ContainerInterface;
