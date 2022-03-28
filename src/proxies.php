@@ -18,6 +18,7 @@ use Drewlabs\Contracts\Data\ModelFiltersInterface;
 use Drewlabs\Packages\Database\EloquentDMLManager;
 use Drewlabs\Packages\Database\Extensions\CustomQueryCriteria;
 use Drewlabs\Packages\Database\Helpers\SelectQueryResult;
+use Drewlabs\Packages\Database\QueryParamsObject;
 
 /**
  * @param EnumerableQueryResult|mixed $value
@@ -49,4 +50,15 @@ function DMLManager($model)
 function ModelFiltersHandler(array $queries = [])
 {
     return new CustomQueryCriteria($queries ?? []);
+}
+
+/**
+ * Create a query parameter object
+ * 
+ * @param array $value 
+ * @return QueryParamsObject 
+ */
+function QueryParam(array $value = [])
+{
+    return new QueryParamsObject($value);
 }

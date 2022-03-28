@@ -15,6 +15,8 @@ namespace Drewlabs\Packages\Database;
 
 use Drewlabs\Contracts\Data\Parser\QueryParser;
 
+use function Drewlabs\Packages\Database\Proxy\QueryParam;
+
 class JoinQueryParamsParser implements QueryParser
 {
     /**
@@ -49,18 +51,18 @@ class JoinQueryParamsParser implements QueryParser
         $params = array_values($params);
         // Case the operator part if missing
         if (3 === \count($params)) {
-            $params[0] = (\is_string($params[0]) && !class_exists($params[0])) ? $params[0] : (string) (new QueryParamsObject(
+            $params[0] = (\is_string($params[0]) && !class_exists($params[0])) ? $params[0] : (string) (QueryParam(
                 \is_array($params[0]) ? $params[0] : ['model' => $params[0]]
             ));
-            $params[1] = \is_string($params[1]) ? $params[1] : (string) (new QueryParamsObject($params[1]));
-            $params[2] = \is_string($params[2]) ? $params[2] : (string) (new QueryParamsObject($params[2]));
+            $params[1] = \is_string($params[1]) ? $params[1] : (string) (QueryParam($params[1]));
+            $params[2] = \is_string($params[2]) ? $params[2] : (string) (QueryParam($params[2]));
             array_splice($params, 2, 1, ['=', $params[2]]);
         } else {
-            $params[0] = (\is_string($params[0]) && !class_exists($params[0])) ? $params[0] : (new QueryParamsObject(
+            $params[0] = (\is_string($params[0]) && !class_exists($params[0])) ? $params[0] : (QueryParam(
                 \is_array($params[0]) ? $params[0] : ['model' => $params[0]]
             ));
-            $params[1] = \is_string($params[1]) ? $params[1] : (string) (new QueryParamsObject($params[1]));
-            $params[3] = \is_string($params[3]) ? $params[3] : (string) (new QueryParamsObject($params[3]));
+            $params[1] = \is_string($params[1]) ? $params[1] : (string) (QueryParam($params[1]));
+            $params[3] = \is_string($params[3]) ? $params[3] : (string) (QueryParam($params[3]));
         }
 
         return $params;

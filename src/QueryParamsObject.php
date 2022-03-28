@@ -13,34 +13,53 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database;
 
-use Drewlabs\Packages\Database\Traits\HasIocContainer;
-use Drewlabs\Support\Immutable\ValueObject;
+use Drewlabs\Packages\Database\Traits\ContainerAware;
 
-class QueryParamsObject extends ValueObject
+/**
+ * @internal Required internally for parsing query parameter
+ *           The API is subject to change as the name can change as well
+ *           Therefore using it externally, may lead to breaking changes when internal decisions are made
+ * 
+ * @package Drewlabs\Packages\Database
+ */
+class QueryParamsObject
 {
-    use HasIocContainer;
+    use ContainerAware;
+
+    /**
+     * 
+     * @var string|object
+     */
+    private $model;
+
+    /**
+     * 
+     * @var string
+     */
+    private $column;
+
+    public function __construct($attributes = [])
+    {
+        $this->model = $attributes['model'] ?? null;
+        $this->column = $attributes['column'] ?? null;
+        $this->validateAttributes();
+    }
+
+
     /**
      * {@inheritDoc}
      */
     public function __toString()
     {
-        return $this->toString();
-    }
+        $model = \is_string($this->model) ?
+            self::createResolver($this->model)()->getTable() :
+            $this->model->getTable();
 
-    public function getJsonableAttributes()
-    {
-        return ['column', 'model'];
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function copyWith(array $attributes, $set_guarded = false)
-    {
-        parent::copyWith($attributes, $set_guarded);
-        $this->validateAttributes();
-
-        return $this;
+        $attributes = array_merge(
+            [$model],
+            $this->column ? [$this->column] : []
+        );
+        return trim(drewlabs_core_strings_concat('.', ...$attributes));
     }
 
     /**
@@ -50,23 +69,7 @@ class QueryParamsObject extends ValueObject
      */
     public function toString()
     {
-        $model = \is_string($this->attributes['model']) ?
-            self::createResolver($this->attributes['model'])()->getTable() :
-            $this->attributes['model']->getTable();
-
-        return trim(
-            drewlabs_core_strings_concat(
-                '.',
-                ...array_values(
-                    array_merge(
-                        [$model],
-                        isset($this->attributes['column']) ?
-                            [$this->attributes['column']] :
-                            []
-                    )
-                )
-            )
-        );
+        return $this->__toString();
     }
 
     private function validateAttributes()

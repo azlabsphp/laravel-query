@@ -13,12 +13,12 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database;
 
-use Drewlabs\Packages\Database\Contracts\TransactionUtils as ContractsTransactionUtils;
-use Drewlabs\Packages\Database\Traits\HasIocContainer;
+use Drewlabs\Packages\Database\Contracts\TransactionUtils;
+use Drewlabs\Packages\Database\Traits\ContainerAware;
 
-class DatabaseTransactionManager implements ContractsTransactionUtils
+class DatabaseTransactionManager implements TransactionUtils
 {
-    use HasIocContainer;
+    use ContainerAware;
 
     /**
      * @var mixed

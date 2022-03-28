@@ -22,10 +22,12 @@ use function Drewlabs\Support\Proxy\Collection;
 
 use Drewlabs\Support\Traits\Overloadable;
 
+/**
+ * @deprecated v2.0.x
+ */
 trait ModelRepository
 {
-    use Overloadable;
-    use HasIocContainer;
+    use Overloadable, ContainerAware;
 
     /**
      * Model instance variable.
@@ -214,7 +216,7 @@ trait ModelRepository
 
             return $result;
         }
-        throw new RepositoryException(__METHOD__.' requires an list of list items for insertion');
+        throw new RepositoryException(__METHOD__ . ' requires an list of list items for insertion');
     }
 
     /**

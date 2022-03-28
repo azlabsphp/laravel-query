@@ -165,7 +165,7 @@ trait DMLUpdateQuery
         $method = $params['method'];
         $upsert = $params['upsert'] ?? false;
 
-        return \is_string($method) && drewlabs_database_is_dynamic_update_method($method) ?
+        return \is_string($method) && ((null !== ($params['relations'] ?? null)) || drewlabs_database_is_dynamic_update_method($method)) ?
             $update_model_func(
                 $this,
                 $id,
@@ -173,11 +173,12 @@ trait DMLUpdateQuery
             )(static function (Model $model) use (
                 $attributes,
                 $upsert,
-                $method
+                $method,
+                $params
             ) {
                 return drewlabs_database_upsert_relations_after_create(
                     $model,
-                    \array_slice(drewlabs_database_parse_dynamic_callback($method), 1),
+                    $params['relations'] ?? \array_slice(drewlabs_database_parse_dynamic_callback($method), 1),
                     $attributes,
                     $upsert
                 );

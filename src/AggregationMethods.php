@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database;
 
-class DatabaseQueryBuilderAggregationMethodsEnum
+class AggregationMethods
 {
     /**
      * Method signature for count aggregation on query result.

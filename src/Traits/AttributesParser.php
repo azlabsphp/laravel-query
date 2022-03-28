@@ -17,7 +17,8 @@ use Drewlabs\Contracts\Data\Parser\ModelAttributeParser as ModelAttributesParser
 
 trait AttributesParser
 {
-    use HasIocContainer;
+    use ContainerAware;
+
     /**
      * @return array
      */

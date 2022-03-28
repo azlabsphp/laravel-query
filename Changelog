@@ -1,0 +1,9 @@
+# Changelogs
+
+## [2.1.0]
+
+- Deprecated CustomQueryCriteria class
+- Add a drop-in replacement of the CustomQueryCriteria class `EloquentBuilderQueryFilters::class`
+- Remove code duplicate from query filters implementations
+- Deprecated `HasIocContainer` trait in favor of `ContainerAware` trait
+- Added `EloquentBuilderQueryFilters::trait` to centralize query filters implementation

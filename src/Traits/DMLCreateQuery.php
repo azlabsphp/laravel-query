@@ -104,7 +104,7 @@ trait DMLCreateQuery
         $method = $params['method'] ?? EloquentQueryBuilderMethodsEnum::CREATE;
         $upsert_conditions = $params['upsert_conditions'] ?: [];
         $upsert = $params['upsert'] && !empty($upsert_conditions) ? true : false;
-        if (\is_string($method) && drewlabs_database_is_dynamic_create_method($method)) {
+        if (\is_string($method) && ((null !== ($params['relations'] ?? null)) || drewlabs_database_is_dynamic_create_method($method))) {
             $result = create_relations_after_create(
                 $this->proxy(
                     drewlabs_core_create_attribute_getter('model', null)($this),
@@ -112,7 +112,7 @@ trait DMLCreateQuery
                     // if Upserting, pass the upsertion condition first else, pass in the attributes
                     $upsert ? [$upsert_conditions, $this->parseAttributes($attributes)] : [$this->parseAttributes($attributes)]
                 ),
-                \array_slice(drewlabs_database_parse_dynamic_callback($method), 1),
+                $params['relations'] ?? \array_slice(drewlabs_database_parse_dynamic_callback($method), 1),
                 $attributes,
                 $batch
             );

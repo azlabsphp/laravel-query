@@ -17,6 +17,9 @@ use Drewlabs\Contracts\Data\DataProviderHandlerParamsInterface;
 use Drewlabs\Core\Data\EnumerableQueryResult;
 use Drewlabs\Packages\Database\Extensions\CustomQueryCriteria;
 
+/**
+ * @deprecated v2.0.x Not replacement provided
+ */
 trait DataProvider
 {
     /**

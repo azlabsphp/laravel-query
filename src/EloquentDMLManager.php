@@ -42,7 +42,7 @@ use Drewlabs\Support\Traits\Overloadable;
  * @method \Drewlabs\Contracts\Data\EnumerableQueryResult|mixed select(array $query, array $columns, \Closure $callback = null)
  * @method mixed                                                select(array $query, int $per_page, int $page = null, \Closure $callback = null)
  * @method mixed                                                select(array $query, int $per_page, array $columns, int $page = null, \Closure $callback = null)
- * @method int                                                  selectAggregate(array $query = [], string $aggregation = \Drewlabs\Packages\Database\DatabaseQueryBuilderAggregationMethodsEnum::COUNT)
+ * @method int                                                  selectAggregate(array $query = [], string $aggregation = \Drewlabs\Packages\Database\AggregationMethods::COUNT)
  * @method int                                                  update(array $query, $attributes = [])
  * @method int                                                  update(array $query, $attributes = [], bool $bulkstatement)
  * @method \Drewlabs\Contracts\Data\Model\Model|mixed           update(int $id, $attributes, \Closure $dto_transform_fn = null)
@@ -61,11 +61,11 @@ class EloquentDMLManager implements DMLProvider
     use Overloadable;
 
     public const AGGREGATE_METHODS = [
-        DatabaseQueryBuilderAggregationMethodsEnum::COUNT,
-        DatabaseQueryBuilderAggregationMethodsEnum::AVERAGE,
-        DatabaseQueryBuilderAggregationMethodsEnum::MAX,
-        DatabaseQueryBuilderAggregationMethodsEnum::MIN,
-        DatabaseQueryBuilderAggregationMethodsEnum::SUM,
+        AggregationMethods::COUNT,
+        AggregationMethods::AVERAGE,
+        AggregationMethods::MAX,
+        AggregationMethods::MIN,
+        AggregationMethods::SUM,
     ];
 
     /**
@@ -142,7 +142,7 @@ class EloquentDMLManager implements DMLProvider
      *
      * @return int|mixed
      */
-    public function selectAggregate(array $query = [], string $aggregation = DatabaseQueryBuilderAggregationMethodsEnum::COUNT)
+    public function selectAggregate(array $query = [], string $aggregation = AggregationMethods::COUNT)
     {
         if (!\in_array($aggregation, static::AGGREGATE_METHODS, true)) {
             throw new \InvalidArgumentException('The provided method is not part of the aggregation framework supported methods');

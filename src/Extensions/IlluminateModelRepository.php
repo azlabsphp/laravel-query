@@ -25,6 +25,8 @@ use Drewlabs\Support\Immutable\ValueObject;
 use Psr\Container\ContainerInterface;
 
 /**
+ * @deprecated v2.0.x Deprecated in favor of {@see EloquentDMLManager} implementation
+ * 
  * @method mixed                                       insert(array $values, bool $parse_inputs = false, $upsert = false, $conditions = array())
  * @method mixed                                       insert(array $values, array $conditions)
  * @method mixed                                       insert(array $values)

@@ -15,11 +15,11 @@ namespace Drewlabs\Packages\Database;
 
 use Drewlabs\Contracts\Data\Repository\ModelRepository;
 use Drewlabs\Packages\Database\Contracts\TransactionUtils;
-use Drewlabs\Packages\Database\Traits\HasIocContainer;
+use Drewlabs\Packages\Database\Traits\ContainerAware;
 
 class DynamicCRUDQueryHandler
 {
-    use HasIocContainer;
+    use ContainerAware;
     /**
      * @var TransactionUtils
      */
@@ -63,7 +63,7 @@ class DynamicCRUDQueryHandler
     public function create($relations, $values, $parse_inputs = false, $upsert = false, $conditions = [], $mass_insert = true)
     {
         if (null === $this->repository || !($this->repository instanceof ModelRepository)) {
-            throw new \RuntimeException('Calling '.__METHOD__.' requires binding the repository first. Call bindRepository($repository) method before calling this method');
+            throw new \RuntimeException('Calling ' . __METHOD__ . ' requires binding the repository first. Call bindRepository($repository) method before calling this method');
         }
 
         return $this->runTransaction(function () use ($relations, $values, $parse_inputs, $upsert, $conditions, $mass_insert) {
@@ -124,7 +124,7 @@ class DynamicCRUDQueryHandler
     public function update($relations, $id, $values, $parse_inputs = false, $upsert = true)
     {
         if (null === $this->repository || !($this->repository instanceof ModelRepository)) {
-            throw new \RuntimeException('Calling '.__METHOD__.' requires binding the repository first. Call bindRepository($repository) method before calling this method');
+            throw new \RuntimeException('Calling ' . __METHOD__ . ' requires binding the repository first. Call bindRepository($repository) method before calling this method');
         }
 
         return $this->runTransaction(function () use ($relations, $id, $values, $parse_inputs, $upsert) {

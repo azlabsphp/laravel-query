@@ -44,34 +44,16 @@ class ServiceProvider extends BaseServiceProvider
         $this->app->singleton(TransactionUtils::class, static function ($app) {
             return new DatabaseTransactionManager($app->make('db'));
         });
-        $this->app->bind(FiltersInterface::class, CustomQueryCriteria::class);
+        $this->app->bind(FiltersInterface::class, EloquentBuilderQueryFilters::class);
 
         $this->app->bind(ModelAttributesParserContract::class, static function ($app) {
             return new ModelAttributesParser($app->bound(IHasher::class) ? $app[IHasher::class] : null);
         });
-
-        // Register Nosql providers bindings
-        $this->noSqlBindings();
     }
 
     protected function bindings()
     {
         // Solve issue related to version of MySQL older than the 5.7.7 release or MariaDB older than the 10.2.2.
         $this->app['db']->connection()->getSchemaBuilder()->defaultStringLength(255);
-    }
-
-    /**
-     * Binding for Nosql Data providers.
-     *
-     * @return void
-     */
-    protected function noSqlBindings()
-    {
-        if (class_exists(\Drewlabs\Core\Database\NoSql\DatabaseManager::class)) {
-            $this->app->bind('nosqlDb', function () {
-                $manager_class = \Drewlabs\Core\Database\NoSql\DatabaseManager::class;
-                new $manager_class($this->app->make('config')->get('database.nosql_driver', 'mongo'));
-            });
-        }
     }
 }

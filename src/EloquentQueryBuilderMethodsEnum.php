@@ -13,6 +13,10 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database;
 
+/**
+ * @internal API could be subject to change using PHP enumeration class
+ * @package Drewlabs\Packages\Database
+ */
 class EloquentQueryBuilderMethodsEnum
 {
     /**
