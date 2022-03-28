@@ -15,8 +15,8 @@ namespace Drewlabs\Packages\Database\Proxy;
 
 use Drewlabs\Contracts\Data\EnumerableQueryResult;
 use Drewlabs\Contracts\Data\ModelFiltersInterface;
+use Drewlabs\Packages\Database\EloquentBuilderQueryFilters;
 use Drewlabs\Packages\Database\EloquentDMLManager;
-use Drewlabs\Packages\Database\Extensions\CustomQueryCriteria;
 use Drewlabs\Packages\Database\Helpers\SelectQueryResult;
 use Drewlabs\Packages\Database\QueryParamsObject;
 
@@ -49,7 +49,7 @@ function DMLManager($model)
  */
 function ModelFiltersHandler(array $queries = [])
 {
-    return new CustomQueryCriteria($queries ?? []);
+    return new EloquentBuilderQueryFilters($queries ?? []);
 }
 
 /**

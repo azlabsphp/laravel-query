@@ -103,7 +103,10 @@ $person = $dmlManager->create(
     ],
     // Parameter
     [
-        'method' => 'create__addresses__profile',
+        'relations' => [
+            'addresses',
+            'profile'
+        ]
     ]
 );
 ```
@@ -243,6 +246,7 @@ $modelClass = $repository->getModel();
 ```php
 
 use Drewlabs\Packages\Database\Extensions\IlluminateModelRepository;
+use Drewlabs\Packages\Database\EloquentBuilderQueryFilters;
 // Insert new item to the table
 /// Syntax:
 /// $repository->insert(Array <Data>, bool <ParseInput>, bool <Upsert>, Array <UpsertConditions>);
@@ -300,10 +304,10 @@ $result = $repository->delete($conditions, $mass_delete = true);
 $result = $repository->findById($id, $columns = ['*']);
 
 // Note the CustomFilter is your user provided class that implement {Drewlabs\Contracts\Data\IModelFilter} interface
-$result = $repository->pushFilter(new CustomFilters())->find([], $columns = ['*']);
+$result = $repository->pushFilter(new EloquentBuilderQueryFilters())->find([], $columns = ['*']);
 
 /// Pagination
-$result = $repository->pushFilter(new CustomFilters())->paginate($item_per_page = 20, $columns = ['*']);
+$result = $repository->pushFilter(new EloquentBuilderQueryFilters())->paginate($item_per_page = 20, $columns = ['*']);
 ```
 
 #### Query filters
