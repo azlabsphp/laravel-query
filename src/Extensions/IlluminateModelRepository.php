@@ -17,11 +17,11 @@ use Drewlabs\Contracts\Data\Model\Model;
 use Drewlabs\Contracts\Data\Parser\ModelAttributeParser;
 use Drewlabs\Contracts\Data\Repository\ModelRepository as ModelRepositoryInterface;
 use Drewlabs\Contracts\Data\Repository\ParseableRepository;
-use Drewlabs\Core\Data\Exceptions\RepositoryException;
 use Drewlabs\Packages\Database\Contracts\TransactionUtils;
 use Drewlabs\Packages\Database\DynamicCRUDQueryHandler;
 use Drewlabs\Packages\Database\Traits\ModelRepository;
 use Drewlabs\Support\Immutable\ValueObject;
+use Exception;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -73,7 +73,7 @@ final class IlluminateModelRepository extends ValueObject implements ParseableRe
         if (null !== $model_class) {
             $model = $this->internalMakeModel($model_class, $container);
             if (!(\is_string($model_class)) || !($model instanceof Model)) {
-                throw new RepositoryException('Constructor parameter must be an instance of string, must be a valid class that exists, and the class must be an instance of '.Model::class);
+                throw new Exception('Constructor parameter must be an instance of string, must be a valid class that exists, and the class must be an instance of '.Model::class);
             }
             $attributes = array_merge($attributes, [
                 'model_instance' => $model,
@@ -110,7 +110,7 @@ final class IlluminateModelRepository extends ValueObject implements ParseableRe
                     ->bindRepository($this)
                     ->update(\array_slice($items, 1), ...$parameters);
             }
-            throw new RepositoryException('Error . Undefined method '.$method.' on the model repository class');
+            throw new Exception('Error . Undefined method '.$method.' on the model repository class');
         }
     }
 
@@ -187,7 +187,7 @@ final class IlluminateModelRepository extends ValueObject implements ParseableRe
         $model_class = $clazz ?? $this->getModel();
         $model = $this->internalMakeModel($model_class, $container);
         if (!(\is_string($model_class)) || !($model instanceof Model)) {
-            throw new RepositoryException('Constructor parameter must be an instance of string, must be a valid class that exists, and the class must be an instance of '.Model::class);
+            throw new Exception('Constructor parameter must be an instance of string, must be a valid class that exists, and the class must be an instance of '.Model::class);
         }
         $self = $this->copyWith([
             'model_instance' => $model,

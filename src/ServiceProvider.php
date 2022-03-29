@@ -15,10 +15,7 @@ namespace Drewlabs\Packages\Database;
 
 use Drewlabs\Contracts\Data\Filters\FiltersInterface;
 use Drewlabs\Contracts\Data\Parser\ModelAttributeParser as ModelAttributesParserContract;
-use Drewlabs\Contracts\Hasher\IHasher;
-use Drewlabs\Core\Data\Services\ModelAttributesParser;
 use Drewlabs\Packages\Database\Contracts\TransactionUtils;
-use Drewlabs\Packages\Database\Extensions\CustomQueryCriteria;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
 class ServiceProvider extends BaseServiceProvider
@@ -46,9 +43,7 @@ class ServiceProvider extends BaseServiceProvider
         });
         $this->app->bind(FiltersInterface::class, EloquentBuilderQueryFilters::class);
 
-        $this->app->bind(ModelAttributesParserContract::class, static function ($app) {
-            return new ModelAttributesParser($app->bound(IHasher::class) ? $app[IHasher::class] : null);
-        });
+        $this->app->bind(ModelAttributesParserContract::class, ModelAttributesParser::class);
     }
 
     protected function bindings()

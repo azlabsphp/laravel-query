@@ -14,8 +14,8 @@ declare(strict_types=1);
 namespace Drewlabs\Packages\Database\Traits;
 
 use Drewlabs\Contracts\Data\Model\HasRelations;
-use Drewlabs\Core\Data\EnumerableQueryResult;
 use Drewlabs\Packages\Database\EloquentQueryBuilderMethods;
+use Drewlabs\Packages\Database\EnumerableQueryResult;
 use Drewlabs\Packages\Database\Helpers\SelectQueryColumnsHelper;
 
 use function Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;

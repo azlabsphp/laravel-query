@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace Drewlabs\Packages\Database\Helpers;
 
 use Drewlabs\Contracts\Data\EnumerableQueryResult as ContractsEnumerableQueryResult;
-use Drewlabs\Core\Data\EnumerableQueryResult;
+use Drewlabs\Packages\Database\EnumerableQueryResult;
 
 class SelectQueryResult
 {

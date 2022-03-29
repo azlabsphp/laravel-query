@@ -12,7 +12,8 @@ declare(strict_types=1);
  */
 
 use Drewlabs\Contracts\Data\EnumerableQueryResult as ContractsEnumerableQueryResult;
-use Drewlabs\Core\Data\EnumerableQueryResult;
+use Drewlabs\Packages\Database\EnumerableQueryResult;
+
 use function Drewlabs\Support\Proxy\Collection;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator as ContractsLengthAwarePaginator;

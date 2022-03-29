@@ -17,10 +17,10 @@ use Drewlabs\Contracts\Data\Filters\FiltersInterface;
 use Drewlabs\Contracts\Data\Model\Model;
 use Drewlabs\Contracts\Data\Model\Parseable;
 use Drewlabs\Contracts\Data\Model\HasRelations;
-use Drewlabs\Core\Data\Exceptions\RepositoryException;
 use function Drewlabs\Support\Proxy\Collection;
 
 use Drewlabs\Support\Traits\Overloadable;
+use Exception;
 
 /**
  * @deprecated v2.0.x
@@ -216,7 +216,7 @@ trait ModelRepository
 
             return $result;
         }
-        throw new RepositoryException(__METHOD__ . ' requires an list of list items for insertion');
+        throw new Exception(__METHOD__ . ' requires an list of list items for insertion');
     }
 
     /**

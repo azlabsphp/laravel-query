@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace Drewlabs\Packages\Database\Traits;
 
 use Drewlabs\Contracts\Data\DataProviderHandlerParamsInterface;
-use Drewlabs\Core\Data\EnumerableQueryResult;
+use Drewlabs\Packages\Database\EnumerableQueryResult;
 
 use function Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;
 
