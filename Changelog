@@ -7,3 +7,7 @@
 - Remove code duplicate from query filters implementations
 - Deprecated `HasIocContainer` trait in favor of `ContainerAware` trait
 - Added `EloquentBuilderQueryFilters::trait` to centralize query filters implementation
+
+## [2.1.1] 2022-03-29
+
+- Added DMLManager::selectOne method for selecting single value even when query matches multiple row in table
