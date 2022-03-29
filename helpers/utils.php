@@ -11,7 +11,7 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-use Drewlabs\Packages\Database\EloquentQueryBuilderMethodsEnum;
+use Drewlabs\Packages\Database\EloquentQueryBuilderMethods;
 use Illuminate\Database\Eloquent\Collection;
 
 if (!function_exists('create_relations_after_create')) {
@@ -166,8 +166,8 @@ if (!function_exists('drewlabs_database_is_dynamic_create_method')) {
         return in_array(
             $method,
             [
-                EloquentQueryBuilderMethodsEnum::CREATE,
-                EloquentQueryBuilderMethodsEnum::INSERT_MANY,
+                EloquentQueryBuilderMethods::CREATE,
+                EloquentQueryBuilderMethods::INSERT_MANY,
             ],
             true
         );
@@ -188,6 +188,6 @@ if (!function_exists('drewlabs_database_is_dynamic_update_method')) {
         }
         $method = drewlabs_core_strings_to_array($method, '__')[0];
 
-        return in_array($method, [EloquentQueryBuilderMethodsEnum::UPDATE], true);
+        return in_array($method, [EloquentQueryBuilderMethods::UPDATE], true);
     }
 }

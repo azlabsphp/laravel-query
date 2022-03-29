@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Extensions;
 
-use Drewlabs\Contracts\Data\ModelFiltersInterface;
+use Drewlabs\Contracts\Data\Filters\FiltersInterface;
 use Drewlabs\Contracts\Data\Parser\QueryParser;
 use Drewlabs\Packages\Database\JoinQueryParamsParser;
 use Drewlabs\Packages\Database\Traits\EloquentBuilderQueryFilters;
@@ -22,7 +22,7 @@ use Drewlabs\Packages\Database\Traits\EloquentBuilderQueryFilters;
  * @deprecated v2.0.x use {@see EloquentBuilderQueryFilters} implementation
  * @package Drewlabs\Packages\Database\Extensions
  */
-final class CustomQueryCriteria implements ModelFiltersInterface
+final class CustomQueryCriteria implements FiltersInterface
 {
     use EloquentBuilderQueryFilters;
 

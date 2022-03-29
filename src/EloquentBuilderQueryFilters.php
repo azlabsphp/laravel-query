@@ -10,7 +10,7 @@ use Drewlabs\Packages\Database\Traits\EloquentBuilderQueryFilters as QueryFilter
  * 
  * @package Drewlabs\Packages\Database
  */
-final class EloquentBuilderQueryFilters extends FiltersInterface
+final class EloquentBuilderQueryFilters implements FiltersInterface
 {
     use QueryFilters;
 

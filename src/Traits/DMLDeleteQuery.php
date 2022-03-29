@@ -13,8 +13,10 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Traits;
 
-use Drewlabs\Packages\Database\EloquentQueryBuilderMethodsEnum;
+use Drewlabs\Packages\Database\EloquentQueryBuilderMethods;
 use Drewlabs\Packages\Database\Extensions\CustomQueryCriteria;
+
+use function Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;
 
 trait DMLDeleteQuery
 {
@@ -78,11 +80,11 @@ trait DMLDeleteQuery
                         $query :
                         [$query],
                     static function ($model, $q) {
-                        return (new CustomQueryCriteria($q))->apply($model);
+                        return ModelFiltersHandler($q)->apply($model);
                     },
                     drewlabs_core_create_attribute_getter('model', null)($this)
                 ),
-                EloquentQueryBuilderMethodsEnum::DELETE,
+                EloquentQueryBuilderMethods::DELETE,
                 []
             );
         } else {
@@ -92,7 +94,7 @@ trait DMLDeleteQuery
                 function ($carry, $value) {
                     $this->proxy(
                         $value,
-                        EloquentQueryBuilderMethodsEnum::DELETE,
+                        EloquentQueryBuilderMethods::DELETE,
                         []
                     );
                     ++$carry;

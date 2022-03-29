@@ -16,7 +16,7 @@ namespace Drewlabs\Packages\Database\Traits;
 use Drewlabs\Contracts\Data\Filters\FiltersInterface;
 use Drewlabs\Contracts\Data\Model\Model;
 use Drewlabs\Contracts\Data\Model\Parseable;
-use Drewlabs\Contracts\Data\Model\Relatable;
+use Drewlabs\Contracts\Data\Model\HasRelations;
 use Drewlabs\Core\Data\Exceptions\RepositoryException;
 use function Drewlabs\Support\Proxy\Collection;
 
@@ -32,7 +32,7 @@ trait ModelRepository
     /**
      * Model instance variable.
      *
-     * @var Parseable|Model|Relatable
+     * @var Parseable|Model|HasRelations
      */
     protected $model;
 
@@ -575,11 +575,10 @@ trait ModelRepository
     {
         $self = $this;
         $model = $self->makeModel();
-        if (!(method_exists($model, 'getFillables')) && !($model instanceof Parseable)) {
+        if (!(method_exists($model, 'getFillable')) && !($model instanceof Parseable)) {
             return $values;
         }
         $values = $self->modelAttributesParser()->setModel($model)->setModelInputState($values)->getModelInputState();
-
         return $values;
     }
 

@@ -16,9 +16,7 @@ namespace Drewlabs\Packages\Database\Traits;
 trait Model
 {
     use AppendedAttributes;
-    use BooleanAttributes;
     use GuardedModel;
-    use HiddenAttributes;
     use RoutableModel;
 
     /**
@@ -30,7 +28,6 @@ trait Model
         if (!$isArrayList) {
             return $this->create($items);
         }
-
         return $this->insert($items);
     }
 
@@ -42,12 +39,11 @@ trait Model
         if ($relations) {
             return $this->with($this->getModelRelationLoadersNames())->get($columns);
         }
-
         return $this->get($columns);
     }
 
     /**
-     * {@inheritDoc}
+     * @deprecated v2.1.x
      */
     public function getFillables()
     {
@@ -101,8 +97,8 @@ trait Model
         // Get list of fillables
         return drewlabs_core_array_unique(
             array_merge(
-                $this->getFillables() ?? [],
-                $this->getGuardedAttributes() ?? [],
+                $this->getFillable() ?? [],
+                $this->getGuarded() ?? [],
                 $this->timestamps ? $timestamps : [],
                 $primaryKey ? [$primaryKey] : []
             )

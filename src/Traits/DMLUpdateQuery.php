@@ -14,8 +14,9 @@ declare(strict_types=1);
 namespace Drewlabs\Packages\Database\Traits;
 
 use Drewlabs\Contracts\Data\Model\Model;
-use Drewlabs\Packages\Database\EloquentQueryBuilderMethodsEnum;
-use Drewlabs\Packages\Database\Extensions\CustomQueryCriteria;
+use Drewlabs\Packages\Database\EloquentQueryBuilderMethods;
+
+use function Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;
 
 trait DMLUpdateQuery
 {
@@ -86,11 +87,11 @@ trait DMLUpdateQuery
                         $query :
                         [$query],
                     static function ($model, $q) {
-                        return (new CustomQueryCriteria($q))->apply($model);
+                        return ModelFiltersHandler($q)->apply($model);
                     },
                     drewlabs_core_create_attribute_getter('model', null)($this)
                 ),
-                EloquentQueryBuilderMethodsEnum::UPDATE,
+                EloquentQueryBuilderMethods::UPDATE,
                 [$this->parseAttributes(($attributes instanceof Model) ? $attributes->toArray() : $attributes)]
             );
         } else {
@@ -100,7 +101,7 @@ trait DMLUpdateQuery
                 function ($carry, $value) use ($attributes) {
                     $this->proxy(
                         $value,
-                        EloquentQueryBuilderMethodsEnum::UPDATE,
+                        EloquentQueryBuilderMethods::UPDATE,
                         [$this->parseAttributes(($attributes instanceof Model) ? $attributes->toArray() : $attributes)]
                     );
                     ++$carry;

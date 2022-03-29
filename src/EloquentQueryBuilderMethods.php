@@ -17,7 +17,7 @@ namespace Drewlabs\Packages\Database;
  * @internal API could be subject to change using PHP enumeration class
  * @package Drewlabs\Packages\Database
  */
-class EloquentQueryBuilderMethodsEnum
+class EloquentQueryBuilderMethods
 {
     /**
      * @var string
@@ -58,6 +58,11 @@ class EloquentQueryBuilderMethodsEnum
      * Method signature for select operation on the database.
      */
     public const SELECT = 'get';
+
+    /**
+     * Method signature for selecting one row operation on the database
+     */
+    public const SELECT_ONE = 'first';
 
     /**
      * Method signature for select operation with limit and skip clause on the database.

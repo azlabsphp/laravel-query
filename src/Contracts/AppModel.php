@@ -13,11 +13,13 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Contracts;
 
-use Drewlabs\Contracts\Data\Model\ActiveModel;
-use Drewlabs\Contracts\Data\Model\GuardedModel;
-use Drewlabs\Contracts\Data\Model\Parseable;
-use Drewlabs\Contracts\Data\Model\Relatable;
 
-interface AppModel extends ActiveModel, Parseable, Relatable, GuardedModel
+/**
+ * @deprecated v2.2.x Maintains just for compatibility reasons
+ *             Use {@see ORMModel} interface instead
+ * 
+ * @package Drewlabs\Packages\Database\Contracts
+ */
+interface AppModel extends ORMModel
 {
 }

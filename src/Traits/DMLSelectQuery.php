@@ -13,12 +13,12 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Traits;
 
-use Drewlabs\Contracts\Data\EnumerableQueryResult as ContractsEnumerableQueryResult;
-use Drewlabs\Contracts\Data\Model\Relatable;
+use Drewlabs\Contracts\Data\Model\HasRelations;
 use Drewlabs\Core\Data\EnumerableQueryResult;
-use Drewlabs\Packages\Database\EloquentQueryBuilderMethodsEnum;
-use Drewlabs\Packages\Database\Extensions\CustomQueryCriteria;
+use Drewlabs\Packages\Database\EloquentQueryBuilderMethods;
 use Drewlabs\Packages\Database\Helpers\SelectQueryColumnsHelper;
+
+use function Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;
 use function Drewlabs\Packages\Database\Proxy\SelectQueryResult;
 
 trait DMLSelectQuery
@@ -40,6 +40,74 @@ trait DMLSelectQuery
         });
     }
 
+    public function selectOne(...$args)
+    {
+        return $this->model->getConnection()->transaction(function () use ($args) {
+            return $this->overload(
+                $args,
+                [
+                    function (array $query, ?\Closure $callback = null) {
+                        $callback = $callback ?? static function ($value) {
+                            return $value;
+                        };
+                        return $callback(
+                            $this->createSelector(
+                                $query,
+                                ['*']
+                            )(function ($builder, $columns_) {
+                                return [
+                                    $this->proxy(
+                                        $builder,
+                                        EloquentQueryBuilderMethods::SELECT_ONE,
+                                        [$columns_]
+                                    )
+                                ];
+                            })->first()
+                        );
+                    },
+                    function (array $query, array $columns, ?\Closure $callback = null) {
+                        $callback = $callback ?? static function ($value) {
+                            return $value;
+                        };
+                        return $callback(
+                            $this->createSelector(
+                                $query,
+                                $columns
+                            )(function ($builder, $columns_) {
+                                return [
+                                    $this->proxy(
+                                        $builder,
+                                        EloquentQueryBuilderMethods::SELECT_ONE,
+                                        [$columns_]
+                                    )
+                                ];
+                            })->first()
+                        );
+                    },
+                    function (?\Closure $callback = null) {
+                        $callback = $callback ?? static function ($value) {
+                            return $value;
+                        };
+                        return $callback(
+                            $this->createSelector(
+                                [],
+                                ['*']
+                            )(function ($builder, $columns_) {
+                                return [
+                                    $this->proxy(
+                                        $builder,
+                                        EloquentQueryBuilderMethods::SELECT_ONE,
+                                        [$columns_]
+                                    )
+                                ];
+                            })->first()
+                        );
+                    },
+                ]
+            );
+        });
+    }
+
     /**
      * @return Model|mixed
      */
@@ -52,11 +120,6 @@ trait DMLSelectQuery
         return $callback($this->selectV3([]));
     }
 
-    /**
-     * @param \Closure $callback
-     *
-     * @return Model|mixed
-     */
     public function selectV1(string $id, array $columns, ?\Closure $callback = null)
     {
         $callback = $callback ?? static function ($value) {
@@ -64,159 +127,141 @@ trait DMLSelectQuery
         };
 
         return $callback(
-            $this->selectV5(
-                [
-                    'where' => [$this->model->getPrimaryKey(), $id],
-                ],
+            $this->createSelector(
+                ['where' => [$this->model->getPrimaryKey(), $id]],
                 $columns ?? ['*']
-            )->first()
+            )(function ($builder, $columns_) {
+                return $this->proxy(
+                    $builder,
+                    EloquentQueryBuilderMethods::SELECT,
+                    [$columns_]
+                );
+            })->first()
         );
     }
 
-    /**
-     * @param \Closure $callback
-     *
-     * @return Model|mixed
-     */
     public function selectV1_1(string $id, ?\Closure $callback = null)
     {
         return $this->selectV1($id, ['*'], $callback);
     }
 
-    /**
-     * @return Model|mixed
-     */
     public function selectV2(int $id, array $columns, ?\Closure $callback = null)
     {
         return $this->selectV1((string) $id, $columns, $callback);
     }
 
-    /**
-     * @return Model|mixed
-     */
     public function selectV2_1(int $id, ?\Closure $callback = null)
     {
         return $this->selectV1((string) $id, ['*'], $callback);
     }
 
-    /**
-     * @return ContractsEnumerableQueryResult|mixed
-     */
     public function selectV3(array $query, ?\Closure $callback = null)
     {
-        return $this->selectV5($query, ['*'], $callback);
+        return $this->createSelector(
+            $query,
+            ['*'],
+            $callback
+        )(function ($builder, $columns_) {
+            return $this->proxy(
+                $builder,
+                EloquentQueryBuilderMethods::SELECT,
+                [$columns_]
+            );
+        });
     }
 
-    /**
-     * @return mixed
-     */
     public function selectV5(array $query, array $columns, ?\Closure $callback = null)
     {
-        $callback = $callback ?? static function ($value) {
-            return $value;
-        };
-        $builder = array_reduce(
-            drewlabs_core_array_is_no_assoc_array_list($query) ? $query : [$query],
-            static function ($model, $q) {
-                return (new CustomQueryCriteria($q))->apply($model);
-            },
-            drewlabs_core_create_attribute_getter('model', null)($this)
-        );
-        $model_relations = method_exists($this->model, 'getModelRelationLoadersNames') || ($this->model instanceof Relatable) ? $this->model->getModelRelationLoadersNames() : [];
-        [$columns_, $relations] = SelectQueryColumnsHelper::asTuple(
+        return $this->createSelector(
+            $query,
             $columns,
-            $this->model->getDeclaredColumns(),
-            $model_relations
-        );
-        $primaryKey = $this->model->getPrimaryKey();
-
-        return $callback(
-            SelectQueryResult(
-                new EnumerableQueryResult(
-                    $this->proxy(
-                        !empty($relations) ? $this->proxy(
-                            $builder,
-                            'with',
-                            [$relations]
-                        ) : $builder,
-                        EloquentQueryBuilderMethodsEnum::SELECT,
-                        [empty($columns_) || !empty($relations) ? ['*'] : drewlabs_core_array_unique(array_merge($columns_ ?? [], [$primaryKey]))]
-                    )
-                )
-            )->each(static function ($value) use ($columns_, $relations, $primaryKey) {
-                if (!empty($relations)) {
-                    $columns = empty($columns_) ? $value->getHidden() :
-                        array_diff(
-                            // Filter out the primary key in order to include it no matter what
-                            drewlabs_core_array_except($value->getDeclaredColumns(), [$primaryKey]) ?? [],
-                            array_filter($columns_ ?? [], static function ($key) {
-                                return (null !== $key) && ('*' !== $key);
-                            })
-                        );
-
-                    return $value->setHidden($columns);
-                }
-
-                return $value;
-            })->value(),
-        );
+            $callback
+        )(function ($builder, $columns_) {
+            return $this->proxy(
+                $builder,
+                EloquentQueryBuilderMethods::SELECT,
+                [$columns_]
+            );
+        });
     }
 
     public function selectV6(array $query, int $per_page, ?int $page = null, ?\Closure $callback = null)
     {
-        return $this->selectV8($query, $per_page, ['*'], $page, $callback);
+        return $this->createSelector(
+            $query,
+            ['*'],
+            $callback
+        )(function ($builder, $columns_) use ($per_page, $page) {
+            return $this->proxy(
+                $builder,
+                EloquentQueryBuilderMethods::PAGINATE,
+                [$per_page, $columns_, null, $page ?? 1]
+            );
+        });
     }
 
     public function selectV8(array $query, int $per_page, array $columns, ?int $page = null, ?\Closure $callback = null)
     {
-        $callback = $callback ?? static function ($value) {
-            return $value;
-        };
-        $builder = array_reduce(
-            drewlabs_core_array_is_no_assoc_array_list($query) ? $query : [$query],
-            static function ($model, $q) {
-                return (new CustomQueryCriteria($q))->apply($model);
-            },
-            drewlabs_core_create_attribute_getter('model', null)($this)
-        );
-        // TODO : Get model relations
-        $model_relations = method_exists($this->model, 'getModelRelationLoadersNames') || ($this->model instanceof Relatable) ? $this->model->getModelRelationLoadersNames() : [];
-        [$columns_, $relations] = SelectQueryColumnsHelper::asTuple(
+        return $this->createSelector(
+            $query,
             $columns,
-            $this->model->getDeclaredColumns(),
-            $model_relations
-        );
-        $primaryKey = $this->model->getPrimaryKey();
+            $callback
+        )(function ($builder, $columns_) use ($per_page, $page) {
+            return $this->proxy(
+                $builder,
+                EloquentQueryBuilderMethods::PAGINATE,
+                [$per_page, $columns_, null, $page ?? 1]
+            );
+        });
+    }
 
-        return $callback(
-            SelectQueryResult(
-                new EnumerableQueryResult(
-                    $this->proxy(
-                        !empty($relations) ? $this->proxy(
-                            $builder,
-                            'with',
-                            [$relations]
-                        ) : $builder,
-                        EloquentQueryBuilderMethodsEnum::PAGINATE,
-                        [$per_page, empty($columns_) || !empty($relations) ? ['*'] : drewlabs_core_array_unique(array_merge($columns_ ?? [], [$primaryKey])), null, $page ?? 1]
-                    )
-                )
-            )->each(static function ($value) use ($columns_, $relations, $primaryKey) {
-                if (!empty($relations)) {
-                    $columns = empty($columns_) ? $value->getHidden() :
-                        array_diff(
-                            // Filter out the primary key in order to include it no matter what
-                            drewlabs_core_array_except($value->getDeclaredColumns(), [$primaryKey]) ?? [],
-                            array_filter($columns_ ?? [], static function ($key) {
-                                return (null !== $key) && ('*' !== $key);
-                            })
-                        );
-
-                    return $value->setHidden($columns);
-                }
-
+    private function createSelector(array $query, array $columns, ?\Closure $callback = null)
+    {
+        return function (\Closure $selector) use ($query, $columns, $callback) {
+            $callback = $callback ?? static function ($value) {
                 return $value;
-            })->value()
-        );
+            };
+            $model_relations = method_exists($this->model, 'getModelRelationLoadersNames') || ($this->model instanceof HasRelations) ? $this->model->getModelRelationLoadersNames() : [];
+            [$columns_, $relations] = SelectQueryColumnsHelper::asTuple(
+                $columns,
+                $this->model->getDeclaredColumns(),
+                $model_relations
+            );
+            $primaryKey = $this->model->getPrimaryKey();
+            $builder = array_reduce(
+                drewlabs_core_array_is_no_assoc_array_list($query) ? $query : [$query],
+                static function ($model, $q) {
+                    return ModelFiltersHandler($q)->apply($model);
+                },
+                drewlabs_core_create_attribute_getter('model', null)($this)
+            );
+            if (!empty($relations)) {
+                $builder = $this->proxy($builder, 'with', [$relations]);
+            }
+            return $callback(
+                SelectQueryResult(
+                    new EnumerableQueryResult(
+                        $selector(
+                            $builder,
+                            empty($columns_) || !empty($relations) ? ['*'] : drewlabs_core_array_unique(array_merge($columns_ ?? [], [$primaryKey]))
+                        )
+                    )
+                )->each(static function ($value) use ($columns_, $relations, $primaryKey) {
+                    if (!empty($relations)) {
+                        $columns = empty($columns_) ? $value->getHidden() :
+                            array_diff(
+                                // Filter out the primary key in order to include it no matter what
+                                drewlabs_core_array_except($value->getDeclaredColumns(), [$primaryKey]) ?? [],
+                                array_filter($columns_ ?? [], static function ($key) {
+                                    return (null !== $key) && ('*' !== $key);
+                                })
+                            );
+
+                        return $value->setHidden($columns);
+                    }
+                    return $value;
+                })->value(),
+            );
+        };
     }
 }

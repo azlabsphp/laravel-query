@@ -15,7 +15,8 @@ namespace Drewlabs\Packages\Database\Traits;
 
 use Drewlabs\Contracts\Data\DataProviderHandlerParamsInterface;
 use Drewlabs\Core\Data\EnumerableQueryResult;
-use Drewlabs\Packages\Database\Extensions\CustomQueryCriteria;
+
+use function Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;
 
 /**
  * @deprecated v2.0.x Not replacement provided
@@ -44,7 +45,7 @@ trait DataProvider
     {
         if (\is_array($query)) {
             return $this->repository->resetScope()->pushFilter(
-                (new CustomQueryCriteria())->setQueryFilters(
+                ModelFiltersHandler()->setQueryFilters(
                     $query
                 )
             )->delete([], $batch);
@@ -70,11 +71,11 @@ trait DataProvider
         }
 
         return $shouldPaginate ? $this->repository->resetScope()->pushFilter(
-            (new CustomQueryCriteria())
+            ModelFiltersHandler()
                 ->setQueryFilters(null === $query ? [] : $query)
         )->{$relationFn}($relationQuery)->paginate($limit) : new EnumerableQueryResult(
             $this->repository->resetScope()->pushFilter(
-                (new CustomQueryCriteria())->setQueryFilters($query)
+                ModelFiltersHandler()->setQueryFilters($query)
             )->{$relationFn}($relationQuery)->find([], $columns)
         );
     }
@@ -101,7 +102,7 @@ trait DataProvider
         $params = $this->parseProviderUpdateHandlerParams($params);
         if (\is_array($query)) {
             return $this->repository->resetScope()->pushFilter(
-                (new CustomQueryCriteria())->setQueryFilters($query)
+                ModelFiltersHandler()->setQueryFilters($query)
             )->update($attributes, [], true, $params['should_mass_update']);
         }
 

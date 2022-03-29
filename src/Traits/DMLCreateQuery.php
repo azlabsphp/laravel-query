@@ -15,7 +15,7 @@ namespace Drewlabs\Packages\Database\Traits;
 
 use Closure;
 use Drewlabs\Contracts\Data\DataProviderHandlerParamsInterface;
-use Drewlabs\Packages\Database\EloquentQueryBuilderMethodsEnum;
+use Drewlabs\Packages\Database\EloquentQueryBuilderMethods;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -101,14 +101,14 @@ trait DMLCreateQuery
         $callback = $callback ?: static function ($param) {
             return $param;
         };
-        $method = $params['method'] ?? EloquentQueryBuilderMethodsEnum::CREATE;
+        $method = $params['method'] ?? EloquentQueryBuilderMethods::CREATE;
         $upsert_conditions = $params['upsert_conditions'] ?: [];
         $upsert = $params['upsert'] && !empty($upsert_conditions) ? true : false;
         if (\is_string($method) && ((null !== ($params['relations'] ?? null)) || drewlabs_database_is_dynamic_create_method($method))) {
             $result = create_relations_after_create(
                 $this->proxy(
                     drewlabs_core_create_attribute_getter('model', null)($this),
-                    $upsert ? EloquentQueryBuilderMethodsEnum::UPSERT : EloquentQueryBuilderMethodsEnum::CREATE,
+                    $upsert ? EloquentQueryBuilderMethods::UPSERT : EloquentQueryBuilderMethods::CREATE,
                     // if Upserting, pass the upsertion condition first else, pass in the attributes
                     $upsert ? [$upsert_conditions, $this->parseAttributes($attributes)] : [$this->parseAttributes($attributes)]
                 ),

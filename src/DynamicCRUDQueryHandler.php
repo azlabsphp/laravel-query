@@ -17,6 +17,10 @@ use Drewlabs\Contracts\Data\Repository\ModelRepository;
 use Drewlabs\Packages\Database\Contracts\TransactionUtils;
 use Drewlabs\Packages\Database\Traits\ContainerAware;
 
+/**
+ * @deprecated v2.1.x
+ * @package Drewlabs\Packages\Database
+ */
 class DynamicCRUDQueryHandler
 {
     use ContainerAware;

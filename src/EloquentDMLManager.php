@@ -25,6 +25,8 @@ use Drewlabs\Packages\Database\Traits\DMLUpdateQuery;
 use Drewlabs\Support\Traits\MethodProxy;
 use Drewlabs\Support\Traits\Overloadable;
 
+use function Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;
+
 /**
  * @method \Drewlabs\Contracts\Data\Model\Model|mixed           create(array $attributes, \Closure $callback = null)
  * @method \Drewlabs\Contracts\Data\Model\Model|mixed           create(array $attributes, $params, bool $batch, \Closure $callback = null)
@@ -122,7 +124,7 @@ class EloquentDMLManager implements DMLProvider
 
         return $this->proxy(
             drewlabs_core_create_attribute_getter('model', null)($this),
-            EloquentQueryBuilderMethodsEnum::INSERT_MANY,
+            EloquentQueryBuilderMethods::INSERT_MANY,
             [
                 array_map(function ($value) {
                     return array_merge(
@@ -150,7 +152,7 @@ class EloquentDMLManager implements DMLProvider
 
         return $this->proxy(
             array_reduce(drewlabs_core_array_is_no_assoc_array_list($query) ? $query : [$query], static function ($model, $q) {
-                return (new CustomQueryCriteria($q))->apply($model);
+                return ModelFiltersHandler($q)->apply($model);
             }, drewlabs_core_create_attribute_getter('model', null)($this)),
             $aggregation,
             []
