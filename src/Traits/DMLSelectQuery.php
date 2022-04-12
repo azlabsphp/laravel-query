@@ -221,7 +221,7 @@ trait DMLSelectQuery
             $callback = $callback ?? static function ($value) {
                 return $value;
             };
-            $model_relations = method_exists($this->model, 'getModelRelationLoadersNames') || ($this->model instanceof HasRelations) ? $this->model->getModelRelationLoadersNames() : [];
+            $model_relations = method_exists($this->model, 'getDeclaredRelations') || ($this->model instanceof HasRelations) ? $this->model->getDeclaredRelations() : [];
             [$columns_, $relations] = SelectQueryColumnsHelper::asTuple(
                 $columns,
                 $this->model->getDeclaredColumns(),

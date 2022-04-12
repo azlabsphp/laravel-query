@@ -15,7 +15,7 @@ namespace Drewlabs\Packages\Database\Traits;
 
 use Illuminate\Support\Facades\URL;
 
-trait RoutableModel
+trait LinkAttributeAware
 {
     /**
      * [[link]] attribute getter.

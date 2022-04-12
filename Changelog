@@ -14,3 +14,7 @@
 - Removes dependencies to core package
 - Add local implementation of `Drewlabs\Contracts\Data\Parser\ModelAttributeParser::interface` a.k.a `Drewlabs\Packages\Database\ModelAttributesParser::class`
 - Add local implementation of `Drewlabs\Contracts\Data\EnumerableQueryResult::interface` a.k.a `Drewlabs\Packages\Database\EnumerableQueryResult::class`
+
+## [2.2.0] 2022-04-12
+
+- Add replace for Model::getModelRelationLoadersNames `Model::getDeclaredRelations()`

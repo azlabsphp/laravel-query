@@ -17,7 +17,7 @@ trait Model
 {
     use AppendedAttributes;
     use GuardedModel;
-    use RoutableModel;
+    use LinkAttributeAware;
 
     /**
      * {@inheritDoc}
@@ -37,7 +37,7 @@ trait Model
     public function getAll(bool $relations = false, array $columns = ['*'])
     {
         if ($relations) {
-            return $this->with($this->getModelRelationLoadersNames())->get($columns);
+            return $this->with($this->getDeclaredRelations())->get($columns);
         }
         return $this->get($columns);
     }
@@ -74,9 +74,14 @@ trait Model
     }
 
     /**
-     * {@inheritDoc}
+     * @deprecated v2.x.0 use {@see getDeclaredRelations()} instead
      */
     public function getModelRelationLoadersNames()
+    {
+        return $this->getDeclaredRelations();
+    }
+
+    public function getDeclaredRelations()
     {
         return $this->relation_methods ?? [];
     }

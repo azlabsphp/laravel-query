@@ -245,8 +245,8 @@ trait ModelRepository
             $that = $that->loadWith(
                 method_exists(
                     $model,
-                    'getModelRelationLoadersNames'
-                ) ? \call_user_func([$model, 'getModelRelationLoadersNames']) : []
+                    'getDeclaredRelations'
+                ) ? $model->getDeclaredRelations() : []
             );
         }
         $list = \call_user_func_array(
@@ -304,8 +304,8 @@ trait ModelRepository
             null
         )(($query_model_relation ? $that->loadWith(method_exists(
             $model,
-            'getModelRelationLoadersNames'
-        ) ? \call_user_func([$model, 'getModelRelationLoadersNames']) : []) : clone $that)->applyWhereQuery($conditions))->get($columns);
+            'getDeclaredRelations'
+        ) ? $model->getDeclaredRelations() : []) : clone $that)->applyWhereQuery($conditions))->get($columns);
     }
 
     public function findFromFilters(array $columns = ['*'])
@@ -318,10 +318,12 @@ trait ModelRepository
         return drewlabs_core_create_attribute_getter(
             'model_instance',
             null
-        )($query_model_relation ? $that->loadWith(method_exists(
-            $model,
-            'getModelRelationLoadersNames'
-        ) ? \call_user_func([$model, 'getModelRelationLoadersNames']) : []) : clone $that)->get($columns);
+        )($query_model_relation ? $that->loadWith(
+            method_exists(
+                $model,
+                'getDeclaredRelations'
+            ) ? $model->getDeclaredRelations() : []
+        ) : clone $that)->get($columns);
     }
 
     /**
