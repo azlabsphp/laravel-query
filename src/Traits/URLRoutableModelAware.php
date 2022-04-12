@@ -15,6 +15,7 @@ namespace Drewlabs\Packages\Database\Traits;
 
 trait URLRoutableModelAware
 {
+    use ContainerAware;
 
     public function getRouteKey()
     {
@@ -66,7 +67,7 @@ trait URLRoutableModelAware
     }
 
     /**
-     * @return \Illuminate\Contracts\Routing\UrlRoutable|null
+     * @return \Illuminate\Contracts\Routing\UrlRoutable|null|mixed
      */
     protected function getInstance()
     {
