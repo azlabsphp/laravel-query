@@ -13,11 +13,8 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Traits;
 
-use Closure;
 use Drewlabs\Contracts\Data\DataProviderHandlerParamsInterface;
 use Drewlabs\Packages\Database\EloquentQueryBuilderMethods;
-use InvalidArgumentException;
-use RuntimeException;
 
 trait DMLCreateQuery
 {
@@ -53,15 +50,13 @@ trait DMLCreateQuery
         );
     }
 
-
     /**
-     *
-     * @param array $attributes
      * @param mixed $params
-     * @param null|Closure $callback
+     *
+     * @throws \InvalidArgumentException
+     * @throws \RuntimeException
+     *
      * @return mixed
-     * @throws InvalidArgumentException
-     * @throws RuntimeException
      */
     public function createV2(array $attributes, $params, ?\Closure $callback = null)
     {

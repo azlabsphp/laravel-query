@@ -35,6 +35,7 @@ trait AppendedAttributes
         if ($this->withoutAppends) {
             return null !== $route && \is_string($route) ? ['_link'] : [];
         }
+
         return array_merge(parent::getArrayableAppends(), isset($route) && \is_string($route) ? ['_link'] : []);
     }
 }

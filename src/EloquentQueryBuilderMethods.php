@@ -15,7 +15,6 @@ namespace Drewlabs\Packages\Database;
 
 /**
  * @internal API could be subject to change using PHP enumeration class
- * @package Drewlabs\Packages\Database
  */
 class EloquentQueryBuilderMethods
 {
@@ -60,7 +59,7 @@ class EloquentQueryBuilderMethods
     public const SELECT = 'get';
 
     /**
-     * Method signature for selecting one row operation on the database
+     * Method signature for selecting one row operation on the database.
      */
     public const SELECT_ONE = 'first';
 

@@ -134,7 +134,7 @@ if (!function_exists('drewlabs_database_apply')) {
     }
 }
 
-//#region Compatibility global functions
+// #region Compatibility global functions
 if (!function_exists('apply_callback_to_paginator_data')) {
     /**
      * Apply data transformation algorithm provided by the callback to each item of the paginator data.
@@ -188,4 +188,4 @@ if (!function_exists('transform_query_result')) {
         return drewlabs_database_apply($item, $callback);
     }
 }
-//#endregion Compatibility global functions
+// #endregion Compatibility global functions

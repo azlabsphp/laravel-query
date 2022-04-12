@@ -19,21 +19,17 @@ use Drewlabs\Packages\Database\Traits\ContainerAware;
  * @internal Required internally for parsing query parameter
  *           The API is subject to change as the name can change as well
  *           Therefore using it externally, may lead to breaking changes when internal decisions are made
- * 
- * @package Drewlabs\Packages\Database
  */
 class QueryParamsObject
 {
     use ContainerAware;
 
     /**
-     * 
      * @var string|object
      */
     private $model;
 
     /**
-     * 
      * @var string
      */
     private $column;
@@ -44,7 +40,6 @@ class QueryParamsObject
         $this->column = $attributes['column'] ?? null;
         $this->validateAttributes();
     }
-
 
     /**
      * {@inheritDoc}
@@ -59,6 +54,7 @@ class QueryParamsObject
             [$model],
             $this->column ? [$this->column] : []
         );
+
         return trim(drewlabs_core_strings_concat('.', ...$attributes));
     }
 

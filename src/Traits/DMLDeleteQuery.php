@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Drewlabs\Packages\Database\Traits;
 
 use Drewlabs\Packages\Database\EloquentQueryBuilderMethods;
-use Drewlabs\Packages\Database\Extensions\CustomQueryCriteria;
 
 use function Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;
 

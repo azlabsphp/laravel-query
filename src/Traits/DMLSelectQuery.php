@@ -50,6 +50,7 @@ trait DMLSelectQuery
                         $callback = $callback ?? static function ($value) {
                             return $value;
                         };
+
                         return $callback(
                             $this->createSelector(
                                 $query,
@@ -60,7 +61,7 @@ trait DMLSelectQuery
                                         $builder,
                                         EloquentQueryBuilderMethods::SELECT_ONE,
                                         [$columns_]
-                                    )
+                                    ),
                                 ];
                             })->first()
                         );
@@ -69,6 +70,7 @@ trait DMLSelectQuery
                         $callback = $callback ?? static function ($value) {
                             return $value;
                         };
+
                         return $callback(
                             $this->createSelector(
                                 $query,
@@ -79,7 +81,7 @@ trait DMLSelectQuery
                                         $builder,
                                         EloquentQueryBuilderMethods::SELECT_ONE,
                                         [$columns_]
-                                    )
+                                    ),
                                 ];
                             })->first()
                         );
@@ -88,6 +90,7 @@ trait DMLSelectQuery
                         $callback = $callback ?? static function ($value) {
                             return $value;
                         };
+
                         return $callback(
                             $this->createSelector(
                                 [],
@@ -98,7 +101,7 @@ trait DMLSelectQuery
                                         $builder,
                                         EloquentQueryBuilderMethods::SELECT_ONE,
                                         [$columns_]
-                                    )
+                                    ),
                                 ];
                             })->first()
                         );
@@ -238,6 +241,7 @@ trait DMLSelectQuery
             if (!empty($relations)) {
                 $builder = $this->proxy($builder, 'with', [$relations]);
             }
+
             return $callback(
                 SelectQueryResult(
                     new EnumerableQueryResult(
@@ -259,6 +263,7 @@ trait DMLSelectQuery
 
                         return $value->setHidden($columns);
                     }
+
                     return $value;
                 })->value(),
             );

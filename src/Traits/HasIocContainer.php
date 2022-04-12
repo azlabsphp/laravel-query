@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Traits;
 
-
 /**
  * @deprecated uses {@see ContainerAware} trait instead
  */

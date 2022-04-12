@@ -13,15 +13,13 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database;
 
-use BadMethodCallException;
 use Drewlabs\Contracts\Data\EnumerableQueryResult as ContractsEnumerableQueryResult;
-use Drewlabs\Support\Traits\MethodProxy;
-
 use function Drewlabs\Support\Proxy\Collection;
+
+use Drewlabs\Support\Traits\MethodProxy;
 
 class EnumerableQueryResult implements ContractsEnumerableQueryResult, \JsonSerializable
 {
-
     use MethodProxy;
 
     /**
@@ -37,6 +35,18 @@ class EnumerableQueryResult implements ContractsEnumerableQueryResult, \JsonSeri
         $this->setCollection($items);
     }
 
+    public function __call($name, $arguments)
+    {
+        if (method_exists($this, $name)) {
+            return $this->{$name}(...$arguments);
+        }
+        if (!\is_object($this->getCollection())) {
+            throw new \BadMethodCallException('Method does not exists on class '.__CLASS__);
+        }
+
+        return $this->proxy($this->getCollection(), $name, $arguments);
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -46,8 +56,7 @@ class EnumerableQueryResult implements ContractsEnumerableQueryResult, \JsonSeri
     }
 
     /**
-     * 
-     * @return array|mixed 
+     * @return array|mixed
      */
     public function items()
     {
@@ -59,10 +68,11 @@ class EnumerableQueryResult implements ContractsEnumerableQueryResult, \JsonSeri
      */
     public function setCollection($items)
     {
-        if (is_array($items)) {
+        if (\is_array($items)) {
             $items = Collection($items);
         }
         $this->offsetSet('data', $items);
+
         return $this;
     }
 
@@ -102,21 +112,9 @@ class EnumerableQueryResult implements ContractsEnumerableQueryResult, \JsonSeri
         unset($this->items_[$offset]);
     }
 
-
     #[\ReturnTypeWillChange]
     public function jsonSerialize()
     {
         return $this->items_;
-    }
-
-    public function __call($name, $arguments)
-    {
-        if (method_exists($this, $name)) {
-            return $this->{$name}(...$arguments);
-        }
-        if (!is_object($this->getCollection())) {
-            throw new BadMethodCallException("Method does not exists on class " . __CLASS__);
-        }
-        return $this->proxy($this->getCollection(), $name, $arguments);
     }
 }

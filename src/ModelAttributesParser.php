@@ -20,7 +20,6 @@ use Drewlabs\Packages\Database\Exceptions\ModelTypeException;
 
 class ModelAttributesParser implements ModelAttributeParser
 {
-
     /**
      * @var Model|Parseable
      */
@@ -44,6 +43,7 @@ class ModelAttributesParser implements ModelAttributeParser
     public function setModel($model)
     {
         $this->model = clone $model;
+
         return $this;
     }
 
@@ -66,6 +66,7 @@ class ModelAttributesParser implements ModelAttributeParser
             throw new ModelTypeException([Model::class, Parseable::class], ' or must at least contains mthods getFillable()');
         }
         $this->attributes = $this->buildAttributes($inputs);
+
         return $this;
     }
 
@@ -88,7 +89,7 @@ class ModelAttributesParser implements ModelAttributeParser
         $fillable = $this->model->getFillable() ?? [];
 
         // We assume that if developper do not provide fillable properties
-        // the input from request should be passed to 
+        // the input from request should be passed to
         if (empty($fillable)) {
             return $inputs;
         }
@@ -98,6 +99,7 @@ class ModelAttributesParser implements ModelAttributeParser
                 $attributes[$value] = $inputs[$value];
             }
         }
+
         return $attributes;
     }
 }

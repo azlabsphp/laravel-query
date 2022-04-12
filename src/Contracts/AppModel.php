@@ -13,12 +13,9 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Contracts;
 
-
 /**
  * @deprecated v2.2.x Maintains just for compatibility reasons
  *             Use {@see ORMModel} interface instead
- * 
- * @package Drewlabs\Packages\Database\Contracts
  */
 interface AppModel extends ORMModel
 {

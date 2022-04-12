@@ -27,7 +27,6 @@ class ServiceProvider extends BaseServiceProvider
      */
     public function boot()
     {
-
         $this->bindings();
     }
 

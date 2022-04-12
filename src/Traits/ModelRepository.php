@@ -14,20 +14,20 @@ declare(strict_types=1);
 namespace Drewlabs\Packages\Database\Traits;
 
 use Drewlabs\Contracts\Data\Filters\FiltersInterface;
+use Drewlabs\Contracts\Data\Model\HasRelations;
 use Drewlabs\Contracts\Data\Model\Model;
 use Drewlabs\Contracts\Data\Model\Parseable;
-use Drewlabs\Contracts\Data\Model\HasRelations;
 use function Drewlabs\Support\Proxy\Collection;
 
 use Drewlabs\Support\Traits\Overloadable;
-use Exception;
 
 /**
  * @deprecated v2.0.x
  */
 trait ModelRepository
 {
-    use Overloadable, ContainerAware;
+    use ContainerAware;
+    use Overloadable;
 
     /**
      * Model instance variable.
@@ -216,7 +216,7 @@ trait ModelRepository
 
             return $result;
         }
-        throw new Exception(__METHOD__ . ' requires an list of list items for insertion');
+        throw new \Exception(__METHOD__.' requires an list of list items for insertion');
     }
 
     /**
@@ -581,6 +581,7 @@ trait ModelRepository
             return $values;
         }
         $values = $self->modelAttributesParser()->setModel($model)->setModelInputState($values)->getModelInputState();
+
         return $values;
     }
 

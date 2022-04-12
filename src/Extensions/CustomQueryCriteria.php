@@ -20,7 +20,6 @@ use Drewlabs\Packages\Database\Traits\EloquentBuilderQueryFilters;
 
 /**
  * @deprecated v2.0.x use {@see EloquentBuilderQueryFilters} implementation
- * @package Drewlabs\Packages\Database\Extensions
  */
 final class CustomQueryCriteria implements FiltersInterface
 {

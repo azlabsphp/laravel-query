@@ -16,16 +16,15 @@ namespace Drewlabs\Packages\Database;
 use Drewlabs\Contracts\Data\DML\DMLProvider;
 use Drewlabs\Contracts\Data\Model\ActiveModel;
 use Drewlabs\Contracts\Data\Model\Model;
-use Drewlabs\Packages\Database\Extensions\CustomQueryCriteria;
+use function Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;
 use Drewlabs\Packages\Database\Traits\AttributesParser;
 use Drewlabs\Packages\Database\Traits\DMLCreateQuery;
 use Drewlabs\Packages\Database\Traits\DMLDeleteQuery;
 use Drewlabs\Packages\Database\Traits\DMLSelectQuery;
 use Drewlabs\Packages\Database\Traits\DMLUpdateQuery;
 use Drewlabs\Support\Traits\MethodProxy;
-use Drewlabs\Support\Traits\Overloadable;
 
-use function Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;
+use Drewlabs\Support\Traits\Overloadable;
 
 /**
  * @method \Drewlabs\Contracts\Data\Model\Model|mixed           create(array $attributes, \Closure $callback = null)

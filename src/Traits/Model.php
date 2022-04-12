@@ -28,6 +28,7 @@ trait Model
         if (!$isArrayList) {
             return $this->create($items);
         }
+
         return $this->insert($items);
     }
 
@@ -39,6 +40,7 @@ trait Model
         if ($relations) {
             return $this->with($this->getDeclaredRelations())->get($columns);
         }
+
         return $this->get($columns);
     }
 

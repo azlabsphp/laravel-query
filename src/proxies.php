@@ -53,10 +53,9 @@ function ModelFiltersHandler(array $queries = [])
 }
 
 /**
- * Create a query parameter object
- * 
- * @param array $value 
- * @return QueryParamsObject 
+ * Create a query parameter object.
+ *
+ * @return QueryParamsObject
  */
 function QueryParam(array $value = [])
 {

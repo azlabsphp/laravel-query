@@ -1,5 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
+/*
+ * This file is part of the Drewlabs package.
+ *
+ * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Drewlabs\Packages\Database\Traits;
 
 use Drewlabs\Packages\Database\FilterQueryParamsParser;
@@ -22,17 +33,19 @@ trait EloquentBuilderQueryFilters
     {
         $clone = clone $model;
         foreach ($this->filters ?? [] as $key => $value) {
-            $method = 'apply' . ucfirst($key);
+            $method = 'apply'.ucfirst($key);
             if ((null !== $value) && method_exists($this, $method)) {
                 $clone = $this->{$method}($clone, $value);
             }
         }
+
         return $clone;
     }
 
     public function setQueryFilters(array $list)
     {
         $this->filters = $list;
+
         return $this;
     }
 
@@ -59,11 +72,13 @@ trait EloquentBuilderQueryFilters
                 if (drewlabs_core_array_is_no_assoc_array_list($query)) {
                     return $model->where($query);
                 }
+
                 return $model->where(...$query);
             }, $model);
         } else {
             $model = $model->where(...$filter);
         }
+
         return $model;
     }
 
@@ -81,6 +96,7 @@ trait EloquentBuilderQueryFilters
         foreach ($filter as $value) {
             $model = $model->whereHas($value[0], $value[1]);
         }
+
         return $model;
     }
 
@@ -98,6 +114,7 @@ trait EloquentBuilderQueryFilters
         foreach ($filter as $value) {
             $model = $model->whereDoesntHave(...$value);
         }
+
         return $model;
     }
 
@@ -115,6 +132,7 @@ trait EloquentBuilderQueryFilters
         foreach ($filter as $value) {
             $model = $model->whereDate(...$value);
         }
+
         return $model;
     }
 
@@ -136,6 +154,7 @@ trait EloquentBuilderQueryFilters
                 $model = $model->has($value);
             }
         }
+
         return $model;
     }
 
@@ -157,6 +176,7 @@ trait EloquentBuilderQueryFilters
                 $model = $model->doesntHave($value);
             }
         }
+
         return $model;
     }
 
@@ -172,6 +192,7 @@ trait EloquentBuilderQueryFilters
     {
         if ($filter instanceof \Closure) {
             $model = $model->where($filter);
+
             return $model;
         }
         $parser = new FilterQueryParamsParser();
@@ -182,11 +203,13 @@ trait EloquentBuilderQueryFilters
                 if (drewlabs_core_array_is_no_assoc_array_list($query)) {
                     return $model->orWhere($query);
                 }
+
                 return $model->orWhere(...$query);
             }, $model);
         } else {
             $model = $model->orWhere(...$filter);
         }
+
         return $model;
     }
 
@@ -200,6 +223,7 @@ trait EloquentBuilderQueryFilters
     private function applyWhereIn($model, array $filter)
     {
         $filter = array_filter($filter, 'is_array') === $filter ? $filter : [$filter];
+
         return array_reduce($filter, static function ($carry, $curr) {
             return \count($curr) >= 2 ? $carry->whereIn($curr[0], $curr[1]) : $carry;
         }, $model);
@@ -227,6 +251,7 @@ trait EloquentBuilderQueryFilters
     private function applyWhereNotIn($model, array $filter)
     {
         $filter = array_filter($filter, 'is_array') === $filter ? $filter : [$filter];
+
         return array_reduce($filter, static function ($carry, $curr) {
             return \count($curr) >= 2 ? $carry->whereNotIn($curr[0], $curr[1]) : $carry;
         }, $model);
@@ -303,6 +328,7 @@ trait EloquentBuilderQueryFilters
         foreach ($result as $value) {
             $model = $model->{$method}(...$value);
         }
+
         return $model;
     }
 
@@ -317,6 +343,7 @@ trait EloquentBuilderQueryFilters
     private function applyWhereNull($model, $filter)
     {
         $filter = \is_array($filter) ? $filter : [$filter];
+
         return array_reduce($filter, static function ($carry, $current) {
             return $carry->whereNull($current);
         }, $model);
@@ -333,6 +360,7 @@ trait EloquentBuilderQueryFilters
     private function applyWhereNotNull($model, $filter)
     {
         $filter = \is_array($filter) ? $filter : [$filter];
+
         return array_reduce($filter, static function ($carry, $current) {
             return $carry->whereNotNull($current);
         }, $model);
@@ -349,6 +377,7 @@ trait EloquentBuilderQueryFilters
     private function applyOrWhereNull($model, $filter)
     {
         $filter = \is_array($filter) ? $filter : [$filter];
+
         return array_reduce($filter, static function ($carry, $current) {
             return $carry->orWhereNull($current);
         }, $model);
@@ -365,6 +394,7 @@ trait EloquentBuilderQueryFilters
     private function applyOrWhereNotNull($model, $filter)
     {
         $filter = \is_array($filter) ? $filter : [$filter];
+
         return array_reduce($filter, static function ($carry, $current) {
             return $carry->orWhereNotNull($current);
         }, $model);

@@ -123,7 +123,7 @@ trait DMLUpdateQuery
             return $value;
         };
         // $that = $this;
-        //region Update Handler func
+        // region Update Handler func
         // TODO : Add an update handler func that update the model
         // The Call the callback passed if one passed in
         $update_model_func = function (

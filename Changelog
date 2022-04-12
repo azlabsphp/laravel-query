@@ -17,4 +17,5 @@
 
 ## [2.2.0] 2022-04-12
 
-- Add replace for Model::getModelRelationLoadersNames `Model::getDeclaredRelations()`
+- Add replace for Model::getModelRelationLoadersNames Model::getDeclaredRelations()
+- Added URLRoutableModelAware as URLRoutableModel wrapper trait method

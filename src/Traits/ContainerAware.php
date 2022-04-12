@@ -13,20 +13,18 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Traits;
 
-use Closure;
-use Exception;
 use Psr\Container\ContainerInterface;
 
 trait ContainerAware
 {
     /**
-     * 
-     * @param mixed $abstract 
-     * @return Closure 
+     * @param mixed $abstract
+     *
+     * @return \Closure
      */
     public static function createResolver($abstract = null)
     {
-        /**
+        /*
          * @return mixed
          */
         return static function ($container = null) use ($abstract) {
@@ -49,15 +47,15 @@ trait ContainerAware
             if ($container instanceof ContainerInterface) {
                 return $container->get($abstract);
             }
-            if (!is_object($container)) {
-                throw new Exception('A container instance is required to create a resolver');
+            if (!\is_object($container)) {
+                throw new \Exception('A container instance is required to create a resolver');
             }
             throw new \InvalidArgumentException(
-                \get_class($container) .
-                    ' is not a ' .
-                    ContainerInterface::class .
-                    ' nor ' .
-                    $default .
+                \get_class($container).
+                    ' is not a '.
+                    ContainerInterface::class.
+                    ' nor '.
+                    $default.
                     ' and is not array accessible'
             );
         };
