@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Proxy;
 
+use Closure;
 use Drewlabs\Contracts\Data\EnumerableQueryResult;
 use Drewlabs\Contracts\Data\ModelFiltersInterface;
 use Drewlabs\Packages\Database\EloquentBuilderQueryFilters;
@@ -60,4 +61,19 @@ function ModelFiltersHandler(array $queries = [])
 function QueryParam(array $value = [])
 {
     return new QueryParamsObject($value);
+}
+
+
+/**
+ * High order function to apply $closure to each item of an
+ * {@see \Drewlabs\Contracts\Data\EnumerableQueryResult} instance
+ * 
+ * @param Closure $closure 
+ * @return Closure 
+ */
+function useMapQueryResult(\Closure $closure)
+{
+    return function ($items)  use ($closure) {
+        return drewlabs_database_map_query_result($items, $closure);
+    };
 }

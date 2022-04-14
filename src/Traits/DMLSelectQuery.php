@@ -16,7 +16,7 @@ namespace Drewlabs\Packages\Database\Traits;
 use Drewlabs\Contracts\Data\Model\HasRelations;
 use Drewlabs\Packages\Database\EloquentQueryBuilderMethods;
 use Drewlabs\Packages\Database\EnumerableQueryResult;
-use Drewlabs\Packages\Database\Helpers\SelectQueryColumnsHelper;
+use Drewlabs\Packages\Database\Helpers\QueryColumns;
 
 use function Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;
 use function Drewlabs\Packages\Database\Proxy\SelectQueryResult;
@@ -42,73 +42,71 @@ trait DMLSelectQuery
 
     public function selectOne(...$args)
     {
-        return $this->model->getConnection()->transaction(function () use ($args) {
-            return $this->overload(
-                $args,
-                [
-                    function (array $query, ?\Closure $callback = null) {
-                        $callback = $callback ?? static function ($value) {
-                            return $value;
-                        };
+        return $this->overload(
+            $args,
+            [
+                function (array $query, ?\Closure $callback = null) {
+                    $callback = $callback ?? static function ($value) {
+                        return $value;
+                    };
 
-                        return $callback(
-                            $this->createSelector(
-                                $query,
-                                ['*']
-                            )(function ($builder, $columns_) {
-                                return [
-                                    $this->proxy(
-                                        $builder,
-                                        EloquentQueryBuilderMethods::SELECT_ONE,
-                                        [$columns_]
-                                    ),
-                                ];
-                            })->first()
-                        );
-                    },
-                    function (array $query, array $columns, ?\Closure $callback = null) {
-                        $callback = $callback ?? static function ($value) {
-                            return $value;
-                        };
+                    return $callback(
+                        $this->createSelector(
+                            $query,
+                            ['*']
+                        )(function ($builder, $columns_) {
+                            return [
+                                $this->proxy(
+                                    $builder,
+                                    EloquentQueryBuilderMethods::SELECT_ONE,
+                                    [$columns_]
+                                ),
+                            ];
+                        })->first()
+                    );
+                },
+                function (array $query, array $columns, ?\Closure $callback = null) {
+                    $callback = $callback ?? static function ($value) {
+                        return $value;
+                    };
 
-                        return $callback(
-                            $this->createSelector(
-                                $query,
-                                $columns
-                            )(function ($builder, $columns_) {
-                                return [
-                                    $this->proxy(
-                                        $builder,
-                                        EloquentQueryBuilderMethods::SELECT_ONE,
-                                        [$columns_]
-                                    ),
-                                ];
-                            })->first()
-                        );
-                    },
-                    function (?\Closure $callback = null) {
-                        $callback = $callback ?? static function ($value) {
-                            return $value;
-                        };
+                    return $callback(
+                        $this->createSelector(
+                            $query,
+                            $columns
+                        )(function ($builder, $columns_) {
+                            return [
+                                $this->proxy(
+                                    $builder,
+                                    EloquentQueryBuilderMethods::SELECT_ONE,
+                                    [$columns_]
+                                ),
+                            ];
+                        })->first()
+                    );
+                },
+                function (?\Closure $callback = null) {
+                    $callback = $callback ?? static function ($value) {
+                        return $value;
+                    };
 
-                        return $callback(
-                            $this->createSelector(
-                                [],
-                                ['*']
-                            )(function ($builder, $columns_) {
-                                return [
-                                    $this->proxy(
-                                        $builder,
-                                        EloquentQueryBuilderMethods::SELECT_ONE,
-                                        [$columns_]
-                                    ),
-                                ];
-                            })->first()
-                        );
-                    },
-                ]
-            );
-        });
+                    return $callback(
+                        $this->createSelector(
+                            [],
+                            ['*']
+                        )(function ($builder, $columns_) {
+                            return [
+                                $this->proxy(
+                                    $builder,
+                                    EloquentQueryBuilderMethods::SELECT_ONE,
+                                    [$columns_]
+                                ),
+                            ];
+                        })->first()
+                    );
+                },
+            ]
+        );
     }
 
     /**
@@ -225,7 +223,7 @@ trait DMLSelectQuery
                 return $value;
             };
             $model_relations = method_exists($this->model, 'getDeclaredRelations') || ($this->model instanceof HasRelations) ? $this->model->getDeclaredRelations() : [];
-            [$columns_, $relations] = SelectQueryColumnsHelper::asTuple(
+            [$columns_, $relations] = QueryColumns::asTuple(
                 $columns,
                 $this->model->getDeclaredColumns(),
                 $model_relations
@@ -250,7 +248,7 @@ trait DMLSelectQuery
                             empty($columns_) || !empty($relations) ? ['*'] : drewlabs_core_array_unique(array_merge($columns_ ?? [], [$primaryKey]))
                         )
                     )
-                )->each(static function ($value) use ($columns_, $relations, $primaryKey) {
+                )->map(static function ($value) use ($columns_, $relations, $primaryKey) {
                     if (!empty($relations)) {
                         $columns = empty($columns_) ? $value->getHidden() :
                             array_diff(

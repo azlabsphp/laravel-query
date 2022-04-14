@@ -40,9 +40,12 @@ class SelectQueryResult
      *
      * @return self
      */
-    public function each(callable $callback)
+    public function map(callable $callback)
     {
-        $this->value_ = drewlabs_database_map_query_result($this->value_ ?? new EnumerableQueryResult(), $callback);
+        $this->value_ = drewlabs_database_map_query_result(
+            $this->value_ ?? new EnumerableQueryResult(),
+            $callback
+        );
 
         return $this;
     }
@@ -54,7 +57,10 @@ class SelectQueryResult
      */
     public function all(callable $callback)
     {
-        $this->value_ = drewlabs_database_apply($this->value_ ?? new EnumerableQueryResult(), $callback);
+        $this->value_ = drewlabs_database_apply(
+            $this->value_ ?? new EnumerableQueryResult(),
+            $callback
+        );
 
         return $this;
     }

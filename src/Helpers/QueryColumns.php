@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Helpers;
 
-class SelectQueryColumnsHelper
+class QueryColumns
 {
     /**
      * Convert user provided selectable columns in a tuple of $columns and $relations to load.
