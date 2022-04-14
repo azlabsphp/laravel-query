@@ -19,3 +19,7 @@
 
 - Add replace for Model::getModelRelationLoadersNames Model::getDeclaredRelations()
 - Added URLRoutableModelAware as URLRoutableModel wrapper trait method
+
+## [2.2.2] 2022-04-14
+
+Added a useMapQueryResult transformation function to Drewlabs\Packages\Database\Proxy namespace
