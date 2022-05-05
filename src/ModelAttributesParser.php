@@ -18,23 +18,23 @@ use Drewlabs\Contracts\Data\Model\Parseable;
 use Drewlabs\Contracts\Data\Parser\ModelAttributeParser;
 use Drewlabs\Packages\Database\Exceptions\ModelTypeException;
 
-class ModelAttributesParser implements ModelAttributeParser
+final class ModelAttributesParser implements ModelAttributeParser
 {
     /**
      * @var Model|Parseable
      */
-    protected $model;
+    private $model;
 
     /**
      * Dictionnary of key value pairs of the data to be inserted.
      *
      * @var array
      */
-    protected $attributes;
+    private $attributes;
 
     public function __destruct()
     {
-        unset($this->hasher, $this->model, $this->columns_map);
+        unset($this->model);
     }
 
     /**

@@ -32,7 +32,7 @@ if (!function_exists('create_relations_after_create')) {
                 $createMany = static function ($model, $relation) use ($keyValue, $batch) {
                     $handlBatch = static function ($model, $relation) use ($keyValue) {
                         // There is no need to set the inserted related inputs
-                        $model->{$relation}()->createMany(array_map(
+                        $model->$relation()->createMany(array_map(
                             static function ($value) {
                                 return array_merge(
                                     $value,
@@ -53,10 +53,10 @@ if (!function_exists('create_relations_after_create')) {
                                 // When looping through relation values, if the element is an array list
                                 // update or create the relation
                                 if (drewlabs_core_array_is_no_assoc_array_list($k)) {
-                                    return drewlabs_database_update_or_create($model->{$relation}(), $k);
+                                    return drewlabs_database_update_or_create($model->$relation(), $k);
                                 }
                                 // else, simply create the entry
-                                return $model->{$relation}()->create($k);
+                                return $model->$relation()->create($k);
                             }, $keyValue)
                         ));
                     };
@@ -67,7 +67,7 @@ if (!function_exists('create_relations_after_create')) {
                     return call_user_func(
                         [$model, 'setRelation'],
                         $relation,
-                        $model->{$relation}()->create($keyValue)
+                        $model->$relation()->create($keyValue)
                     );
                 };
 
@@ -99,17 +99,16 @@ if (!function_exists('drewlabs_database_upsert_relations_after_create')) {
                     drewlabs_core_array_is_no_assoc_array_list($keyValue[0] ?? []) ?
                         (static function ($model, string $relation) use ($keyValue) {
                             foreach ($keyValue as $v) {
-                                drewlabs_database_update_or_create($model->{$relation}(), $v);
+                                drewlabs_database_update_or_create($model->$relation(), $v);
                             }
                         })($model, $relation) : (static function ($model, string $relation) use ($keyValue) {
-                            return drewlabs_database_update_or_create($model->{$relation}(), $keyValue);
+                            return drewlabs_database_update_or_create($model->$relation(), $keyValue);
                         })($model, $relation);
                 } else {
                     drewlabs_core_array_is_no_assoc_array_list($keyValue) ?
                         (static function ($model, $relation) use ($keyValue) {
-                            $model->{$relation}()->delete();
-                            // Create many after deleting the all the related
-                            $model->{$relation}()->createMany(
+                            $model->$relation()->delete();
+                            $model->$relation()->createMany(
                                 array_map(static function ($value) {
                                     return array_merge(
                                         $value,
@@ -121,8 +120,8 @@ if (!function_exists('drewlabs_database_upsert_relations_after_create')) {
                                 }, $keyValue)
                             );
                         })($model, $relation) : (static function ($model, $relation) use ($keyValue) {
-                            $model->{$relation}()->delete();
-                            $model->{$relation}()->create($keyValue);
+                            $model->$relation()->delete();
+                            $model->$relation()->create($keyValue);
                         })($model, $relation);
                 }
             }

@@ -22,4 +22,8 @@
 
 ## [2.2.2] 2022-04-14
 
-Added a useMapQueryResult transformation function to Drewlabs\Packages\Database\Proxy namespace
+- Added a useMapQueryResult transformation function to Drewlabs\Packages\Database\Proxy namespace
+
+## [2.3.0] 2022-05-05
+
+- Add support for Laravel ^9.0

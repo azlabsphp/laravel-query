@@ -35,7 +35,7 @@ if (!function_exists('drewlabs_databse_parse_client_request_query_params')) {
         }
         foreach ($params_bag->all() as $key => $value) {
             // code...
-            $searchable = array_merge($model->getFillables(), $model->getGuardedAttributes());
+            $searchable = array_merge($model->getFillable(), $model->getGuarded());
             if (!empty($value)) {
                 if (in_array($key, $searchable, true)) {
                     $operator = is_numeric($value) || is_bool($value) || is_int($value) ? '=' : 'like';
