@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Traits;
 
+use Drewlabs\Core\Helpers\Arr;
 use Drewlabs\Packages\Database\FilterQueryParamsParser;
 
 trait EloquentBuilderQueryFilters
@@ -264,9 +265,15 @@ trait EloquentBuilderQueryFilters
      *
      * @return mixed
      */
-    private function applyOrderBy($model, array $filter)
+    private function applyOrderBy($model, array $filters)
     {
-        return $model->orderBy($filter['by'], $filter['order']);
+        // TODO: In future release, valide the filters inputs
+        if (!Arr::isassoc($filters)) {
+            return array_reduce($filters, function($model, $current) {
+                return $model->orderBy($current['by'], $current['order']);
+            }, $model);
+        }
+        return $model->orderBy($filters['by'], $filters['order']);
     }
 
     /**

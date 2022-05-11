@@ -14,6 +14,7 @@ declare(strict_types=1);
 use Drewlabs\Contracts\Data\Model\GuardedModel;
 use Drewlabs\Contracts\Data\Model\Model;
 use Drewlabs\Contracts\Data\Model\Parseable;
+use Drewlabs\Packages\Database\QueryFiltersBuilder;
 
 if (!function_exists('drewlabs_databse_parse_client_request_query_params')) {
 
@@ -26,57 +27,11 @@ if (!function_exists('drewlabs_databse_parse_client_request_query_params')) {
      * @throws \InvalidArgumentException
      *
      * @return array|mixed
+     * @deprecated v2.3.x Will be remove in future releases.
      */
     function drewlabs_databse_parse_client_request_query_params($model, $params_bag)
     {
-        $filters = [];
-        if ($params_bag->has($model->getPrimaryKey()) && null !== $params_bag->get($model->getPrimaryKey())) {
-            $filters['where'][] = [$model->getPrimaryKey(), $params_bag->get($model->getPrimaryKey())];
-        }
-        foreach ($params_bag->all() as $key => $value) {
-            // code...
-            $searchable = array_merge($model->getFillable(), $model->getGuarded());
-            if (!empty($value)) {
-                if (in_array($key, $searchable, true)) {
-                    $operator = is_numeric($value) || is_bool($value) || is_int($value) ? '=' : 'like';
-                    $value = is_numeric($value) || is_bool($value) || is_int($value) ? $value : '%'.$value.'%';
-                    $filters['orWhere'][] = [$key, $operator, $value];
-                } elseif (drewlabs_core_strings_contains($key, ['__'])) {
-                    [$relation, $column] = explode('__', $key);
-                    $relation = drewlabs_core_strings_replace([':', '%'], '.', $relation ?? '');
-                    $model_method = drewlabs_core_strings_contains($relation, '.') ? drewlabs_core_strings_before('.', $relation) : $relation;
-                    if (method_exists($model, $model_method) && null !== $column) {
-                        $filters['whereHas'][] = [$relation, static function ($query) use ($value, $column) {
-                            if (is_array($value)) {
-                                $query->whereIn($column, $value);
-                            } else {
-                                $operator = is_numeric($value) || is_bool($value) ? '=' : 'like';
-                                $value = is_numeric($value) ? $value : '%'.$value.'%';
-                                $query->where($column, $operator, $value);
-                            }
-                        }];
-                    }
-                }
-            }
-        }
-        // order this query method in the order of where -> whereHas -> orWhere
-        // Write a better algorithm for soring
-        uksort($filters, static function ($prev, $curr) {
-            if ('where' === $prev) {
-                return -1;
-            }
-            if (('whereHas' === $prev) && ('where' === $curr)) {
-                return 1;
-            }
-            if (('whereHas' === $prev) && ('orWhere' === $curr)) {
-                return -1;
-            }
-            if ('orWhere' === $prev) {
-                return 1;
-            }
-        });
-
-        return $filters;
+        return QueryFiltersBuilder::filtersFromQueryParameters($model, $params_bag);
     }
 }
 
@@ -91,35 +46,11 @@ if (!function_exists('drewlabs_databse_parse_client_request_query_input')) {
      * @throws InvalidArgumentException
      *
      * @return array
+     * @deprecated v2.3.x Will be remove in future releases.
      */
     function drewlabs_databse_parse_client_request_query_input($params_bag, $in = [])
     {
-        $filters = $in ?? [];
-        if ($params_bag->has('_query')) {
-            $query = $params_bag->get('_query');
-            $query = drewlabs_core_strings_is_str($query) ? json_decode($query, true) : $query;
-            if (!drewlabs_core_array_is_arrayable($query) || !drewlabs_core_array_is_assoc($query)) {
-                return $filters;
-            }
-            $queryMethods = drewlabs_database_supported_query_methods();
-            foreach ($queryMethods as $method) {
-                // code...
-                if (!array_key_exists($method, $query)) {
-                    continue;
-                }
-                $parsed_value = drewlabs_database_parse_query_method_params($method, $query[$method]);
-                if (empty($parsed_value)) {
-                    continue;
-                }
-                if (!drewlabs_core_array_is_arrayable($parsed_value)) {
-                    $filters[$method] = $parsed_value;
-                    continue;
-                }
-                $filters[$method] = array_merge($filters[$method] ?? [], $parsed_value);
-            }
-        }
-
-        return $filters;
+        return QueryFiltersBuilder::filterFrom__Query($params_bag, $in);
     }
 }
 
@@ -136,14 +67,7 @@ if (!function_exists('drewlabs_databse_parse_client_request_query')) {
      */
     function drewlabs_databse_parse_client_request_query($model, $params_bag)
     {
-        return drewlabs_core_fn_compose(
-            static function ($param) use ($params_bag) {
-                return drewlabs_databse_parse_client_request_query_params($param, $params_bag);
-            },
-            static function ($filters) use ($params_bag) {
-                return drewlabs_databse_parse_client_request_query_input($params_bag, $filters);
-            }
-        )(drewlabs_core_strings_is_str($model) ? new $model() : $model);
+        return QueryFiltersBuilder::for($model)->build($params_bag);
     }
 }
 
@@ -158,6 +82,7 @@ if (!function_exists('drewlabs_database_parse_query_method_params')) {
      * @throws \InvalidArgumentException
      *
      * @return \Closure|array<string, mixed>
+     * @deprecated v2.3.x Will be remove in future releases.
      */
     function drewlabs_database_parse_query_method_params($method, $params)
     {
@@ -205,6 +130,7 @@ if (!function_exists('drewlabs_database_parse_where_null_query')) {
      * @throws \InvalidArgumentException
      *
      * @return string
+     * @deprecated v2.3.x Will be remove in future releases.
      */
     function drewlabs_database_parse_where_null_query($params)
     {
@@ -298,6 +224,7 @@ if (!function_exists('drewlabs_database_parse_order_by_query')) {
      * @throws \InvalidArgumentException
      *
      * @return array<string, string>
+     * @deprecated v2.3.x Will be remove in future releases.
      */
     function drewlabs_database_parse_order_by_query(array $params)
     {
@@ -318,6 +245,7 @@ if (!function_exists('drewlabs_database_parse_in_query')) {
      * @throws \InvalidArgumentException
      *
      * @return array<mixed, mixed>
+     * @deprecated v2.3.x Will be remove in future releases.
      */
     function drewlabs_database_parse_in_query(array $query)
     {
@@ -353,6 +281,7 @@ if (!function_exists('drewlabs_database_parse_client_where_query')) {
      * @throws \InvalidArgumentException
      *
      * @return array
+     * @deprecated v2.3.x Will be remove in future releases.
      */
     function drewlabs_database_parse_client_where_query(array $query)
     {
@@ -379,6 +308,7 @@ if (!function_exists('drewlabs_database_validate_query_object')) {
      * @throws \InvalidArgumentException
      *
      * @return void
+     * @deprecated v2.3.x Will be remove in future releases.
      */
     function drewlabs_database_validate_query_object(array $params)
     {
@@ -396,6 +326,7 @@ if (!function_exists('drewlabs_database_build_inner_query')) {
      * @throws \InvalidArgumentException
      *
      * @return \Closure
+     * @deprecated v2.3.x Will be remove in future releases.
      */
     function drewlabs_database_build_inner_query(array $query)
     {
@@ -423,6 +354,7 @@ if (!function_exists('drewlabs_database_client_parse_subquery')) {
      * @throws \InvalidArgumentException
      *
      * @return array<string, \Closure>
+     * @deprecated v2.3.x Will be remove in future releases.
      */
     function drewlabs_database_client_parse_subquery(array $query)
     {
@@ -447,35 +379,10 @@ if (!function_exists('drewlabs_core_supported_query_methods')) {
      * Returns the list of query methods supported by the database package.
      *
      * @return array
+     * @deprecated v2.3.x Will be remove in future releases.
      */
     function drewlabs_database_supported_query_methods()
     {
-        // Returns the supported query method in most valuable to the the less valuable order
-        return [
-            'where',
-            'whereHas',
-            'whereDoesntHave',
-            'whereDate',
-            'has',
-            'doesntHave',
-            'whereIn',
-            'whereNotIn',
-            // Added where between query
-            'whereBetween',
-            'orWhere',
-            'orderBy',
-            'groupBy',
-            'skip',
-            'take',
-            // Supporting joins queries
-            'join',
-            'rightJoin',
-            'leftJoin',
-            // Supporting whereNull and whereNotNull queries
-            'whereNull',
-            'orWhereNull',
-            'whereNotNull',
-            'orWhereNotNull',
-        ];
+       return QueryFiltersBuilder::getSupportedQueryMethods();
     }
 }

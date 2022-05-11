@@ -77,3 +77,16 @@ function useMapQueryResult(\Closure $closure)
         return drewlabs_database_map_query_result($items, $closure);
     };
 }
+
+/**
+ * High order function to apply a closure to a collection or list of type
+ * {@see \Drewlabs\Contracts\Data\EnumerableQueryResult[]}
+ * 
+ * @param Closure $closure 
+ * @return Closure 
+ */
+function useApplyToQueryResult(\Closure $closure) {
+    return function ($items) use ($closure) {
+        return drewlabs_database_apply($items, $closure);
+    };
+}
