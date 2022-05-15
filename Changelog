@@ -36,3 +36,7 @@
 ## [2.3.2] 2022-05-15
 
 - Fixed bug with add method being called on the model instead of create method
+
+## [2.3.3] 2022-05-15
+
+- Bug fix for when $callback is passed as single value to select DMLManager method
