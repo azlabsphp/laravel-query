@@ -44,7 +44,7 @@ trait DMLCreateQuery
         return $callback(
             $this->proxy(
                 drewlabs_core_create_attribute_getter('model', null)($this),
-                'add',
+                EloquentQueryBuilderMethods::CREATE,
                 [$this->parseAttributes($attributes)]
             )
         );

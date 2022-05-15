@@ -83,7 +83,7 @@ class DynamicCRUDQueryHandler
                 $insertAllFunc = static function () use ($model, $i, $values, $mass_insert) {
                     $batchInsertFunc = static function () use ($model, $i, $values) {
                         // TODO : Delete existing model relations and create new ones
-                        $model->{$i}()->createMany(array_map(static function ($value) {
+                        $model->$i()->createMany(array_map(static function ($value) {
                             return array_merge(
                                 $value,
                                 [
@@ -157,9 +157,9 @@ class DynamicCRUDQueryHandler
                 $insertFunc = static function () use ($i, $values, $model) {
                     $isArrayList = isset($values[$i]) && array_filter($values[$i], 'is_array') === $values[$i];
                     $insertArrayAllFunc = static function () use ($i, $values, $model) {
-                        $model->{$i}()->delete();
+                        $model->$i()->delete();
                         // Create many after deleting the all the related
-                        $model->{$i}()->createMany(array_map(static function ($value) {
+                        $model->$i()->createMany(array_map(static function ($value) {
                             return array_merge(
                                 $value,
                                 [

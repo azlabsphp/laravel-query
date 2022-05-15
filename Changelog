@@ -31,4 +31,8 @@
 ## [2.3.1] 2022-05-11
 
 - Moves query filters builder to a dedicated class and deprecated query filter builders global function
-- Add support for multiple orderBy column 
+- Add support for multiple orderBy column
+
+## [2.3.2] 2022-05-15
+
+- Fixed bug with add method being called on the model instead of create method
