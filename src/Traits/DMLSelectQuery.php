@@ -112,7 +112,7 @@ trait DMLSelectQuery
     /**
      * @return Model|mixed
      */
-    public function selectV0()
+    public function selectV0(?\Closure $callback = null)
     {
         $callback = $callback ?? static function ($value) {
             return $value;
