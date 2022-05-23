@@ -17,6 +17,8 @@ use Drewlabs\Contracts\Data\Filters\FiltersInterface;
 use Drewlabs\Contracts\Data\Model\HasRelations;
 use Drewlabs\Contracts\Data\Model\Model;
 use Drewlabs\Contracts\Data\Model\Parseable;
+use Drewlabs\Core\Helpers\Arr;
+
 use function Drewlabs\Support\Proxy\Collection;
 
 use Drewlabs\Support\Traits\Overloadable;
@@ -216,7 +218,7 @@ trait ModelRepository
 
             return $result;
         }
-        throw new \Exception(__METHOD__.' requires an list of list items for insertion');
+        throw new \Exception(__METHOD__ . ' requires an list of list items for insertion');
     }
 
     /**
@@ -590,7 +592,7 @@ trait ModelRepository
         $self = $this;
         if (empty($conditions)) {
             $that = $self->applyFilter();
-        } elseif (drewlabs_core_array_is_no_assoc_array_list($conditions)) {
+        } elseif (Arr::isnotassoclist($conditions)) {
             $that = drewlabs_core_create_attribute_setter(
                 'model_instance',
                 drewlabs_core_create_attribute_getter(

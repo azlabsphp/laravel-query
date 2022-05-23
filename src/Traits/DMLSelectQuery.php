@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Drewlabs\Packages\Database\Traits;
 
 use Drewlabs\Contracts\Data\Model\HasRelations;
+use Drewlabs\Core\Helpers\Arr;
 use Drewlabs\Packages\Database\EloquentQueryBuilderMethods;
 use Drewlabs\Packages\Database\EnumerableQueryResult;
 use Drewlabs\Packages\Database\Helpers\QueryColumns;
@@ -230,7 +231,7 @@ trait DMLSelectQuery
             );
             $primaryKey = $this->model->getPrimaryKey();
             $builder = array_reduce(
-                drewlabs_core_array_is_no_assoc_array_list($query) ? $query : [$query],
+                Arr::isnotassoclist($query) ? $query : [$query],
                 static function ($model, $q) {
                     return ModelFiltersHandler($q)->apply($model);
                 },

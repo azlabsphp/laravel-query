@@ -11,6 +11,7 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
+use Drewlabs\Core\Helpers\Arr;
 use Drewlabs\Packages\Database\EloquentQueryBuilderMethods;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -27,10 +28,10 @@ if (!function_exists('create_relations_after_create')) {
     function create_relations_after_create($model, array $relations, array $attributes, $batch = false)
     {
         return array_reduce($relations, static function ($model, $relation) use ($attributes, $batch) {
-            $keyValue = $attributes[$relation] ?? [];
-            if (method_exists($model, $relation) && !empty($keyValue)) {
-                $createMany = static function ($model, $relation) use ($keyValue, $batch) {
-                    $handlBatch = static function ($model, $relation) use ($keyValue) {
+            $inputs = $attributes[$relation] ?? [];
+            if (method_exists($model, $relation) && !empty($inputs)) {
+                $createMany = static function ($model, $relation, $attributes) use ($batch) {
+                    $handleBatch = static function ($model, $relation) use ($attributes) {
                         // There is no need to set the inserted related inputs
                         $model->$relation()->createMany(array_map(
                             static function ($value) {
@@ -42,38 +43,35 @@ if (!function_exists('create_relations_after_create')) {
                                     ]
                                 );
                             },
-                            $keyValue
+                            $attributes
                         ));
 
                         return $model;
                     };
-                    $handleMap = static function ($model, string $relation) use ($keyValue) {
+                    $handleMap = static function ($model, string $relation) use ($attributes) {
                         return call_user_func([$model, 'setRelation'], $relation, new Collection(
-                            array_map(static function ($k) use ($model, $relation) {
+                            array_map(static function ($current) use ($model, $relation) {
                                 // When looping through relation values, if the element is an array list
                                 // update or create the relation
-                                if (drewlabs_core_array_is_no_assoc_array_list($k)) {
-                                    return drewlabs_database_update_or_create($model->$relation(), $k);
+                                if (drewlabs_core_array_is_no_assoc_array_list($current)) {
+                                    return drewlabs_database_update_or_create($model->$relation(), $current);
                                 }
                                 // else, simply create the entry
-                                return $model->$relation()->create($k);
-                            }, $keyValue)
+                                return $model->$relation()->create($current);
+                            }, $attributes)
                         ));
                     };
 
-                    return $batch ? $handlBatch($model, $relation) : $handleMap($model, $relation);
+                    return $batch ? $handleBatch($model, $relation) : $handleMap($model, $relation);
                 };
-                $createOne = static function ($model, $relation) use ($keyValue) {
+                $createOne = static function ($model, $relation, $attributes) {
                     return call_user_func(
                         [$model, 'setRelation'],
                         $relation,
-                        $model->$relation()->create($keyValue)
+                        $model->$relation()->create($attributes)
                     );
                 };
-
-                return drewlabs_core_array_is_no_assoc_array_list($keyValue) ?
-                    $createMany($model, $relation) :
-                    $createOne($model, $relation);
+                return Arr::isnotassoclist($inputs) ? $createMany($model, $relation, $inputs) : $createOne($model, $relation, $inputs);
             }
 
             return $model;

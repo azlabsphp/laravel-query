@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Drewlabs\Packages\Database\Traits;
 
 use Drewlabs\Contracts\Data\Model\Model;
+use Drewlabs\Core\Helpers\Arr;
 use Drewlabs\Packages\Database\EloquentQueryBuilderMethods;
 
 use function Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;
@@ -83,7 +84,7 @@ trait DMLUpdateQuery
         if ($batch) {
             return $this->proxy(
                 array_reduce(
-                    drewlabs_core_array_is_no_assoc_array_list($query) ?
+                    Arr::isnotassoclist($query) ?
                         $query :
                         [$query],
                     static function ($model, $q) {

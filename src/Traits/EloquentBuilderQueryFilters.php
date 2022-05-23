@@ -66,18 +66,12 @@ trait EloquentBuilderQueryFilters
             return $model;
         }
         $parser = new FilterQueryParamsParser();
-        $result = $parser->parse($filter);
-        $is_list = array_filter($result, 'is_array') === $result;
-        if ($is_list) {
-            $model = array_reduce($filter, static function ($model, array $query) {
-                if (drewlabs_core_array_is_no_assoc_array_list($query)) {
-                    return $model->where($query);
-                }
-
-                return $model->where(...$query);
+        if (Arr::isList($result = $parser->parse($filter))) {
+            $model = array_reduce($result, static function ($model, array $query) {
+                return $model->where(...array_values($query));
             }, $model);
         } else {
-            $model = $model->where(...$filter);
+            $model = $model->where(...$result);
         }
 
         return $model;
@@ -197,18 +191,12 @@ trait EloquentBuilderQueryFilters
             return $model;
         }
         $parser = new FilterQueryParamsParser();
-        $result = $parser->parse($filter);
-        $isList = array_filter($result, 'is_array') === $result;
-        if ($isList) {
-            $model = array_reduce($filter, static function ($model, array $query) {
-                if (drewlabs_core_array_is_no_assoc_array_list($query)) {
-                    return $model->orWhere($query);
-                }
-
-                return $model->orWhere(...$query);
+        if (Arr::isList($result = $parser->parse($filter))) {
+            $model = array_reduce($result, static function ($model, array $query) {
+                return $model->orWhere(...array_values($query));
             }, $model);
         } else {
-            $model = $model->orWhere(...$filter);
+            $model = $model->orWhere(...$result);
         }
 
         return $model;
@@ -331,7 +319,7 @@ trait EloquentBuilderQueryFilters
     private function sqlApplyJoinQueries($model, $filter, $method = 'join')
     {
         $result = $this->joinQueryParser->parse($filter);
-        $result = array_filter($result, 'is_array') === $result ? $result : [$result];
+        $result = Arr::isList($result) ? $result : [$result];
         foreach ($result as $value) {
             $model = $model->{$method}(...$value);
         }

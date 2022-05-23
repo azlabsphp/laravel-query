@@ -16,6 +16,8 @@ namespace Drewlabs\Packages\Database;
 use Drewlabs\Contracts\Data\DML\DMLProvider;
 use Drewlabs\Contracts\Data\Model\ActiveModel;
 use Drewlabs\Contracts\Data\Model\Model;
+use Drewlabs\Core\Helpers\Arr;
+
 use function Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;
 use Drewlabs\Packages\Database\Traits\AttributesParser;
 use Drewlabs\Packages\Database\Traits\DMLCreateQuery;
@@ -150,7 +152,7 @@ class EloquentDMLManager implements DMLProvider
         }
 
         return $this->proxy(
-            array_reduce(drewlabs_core_array_is_no_assoc_array_list($query) ? $query : [$query], static function ($model, $q) {
+            array_reduce(Arr::isnotassoclist($query) ? $query : [$query], static function ($model, $q) {
                 return ModelFiltersHandler($q)->apply($model);
             }, drewlabs_core_create_attribute_getter('model', null)($this)),
             $aggregation,

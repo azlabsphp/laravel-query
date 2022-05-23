@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Traits;
 
+use Drewlabs\Core\Helpers\Arr;
+
 trait Model
 {
     use AppendedAttributes;
@@ -24,8 +26,8 @@ trait Model
      */
     public function add(array $items)
     {
-        $isArrayList = drewlabs_core_array_is_no_assoc_array_list($items);
-        if (!$isArrayList) {
+        $isList = Arr::isnotassoclist($items);
+        if (!$isList) {
             return $this->create($items);
         }
 
