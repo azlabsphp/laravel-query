@@ -79,7 +79,7 @@ if (!function_exists('create_relations_after_create')) {
     }
 }
 
-if (!function_exists('drewlabs_database_upsert_relations_after_create')) {
+if (!function_exists('upsert_relations_after_update')) {
 
     /**
      * Update or create Eloquent model after it was updated.
@@ -88,25 +88,25 @@ if (!function_exists('drewlabs_database_upsert_relations_after_create')) {
      *
      * @return void
      */
-    function drewlabs_database_upsert_relations_after_create($model, array $relations, array $attributes, bool $upsert)
+    function upsert_relations_after_update($model, array $relations, array $attributes, bool $upsert)
     {
         return array_reduce($relations, static function ($model, $relation) use ($attributes, $upsert) {
             $keyValue = $attributes[$relation] ?? [];
             if (method_exists($model, $relation) && !empty($keyValue)) {
                 if ($upsert) {
-                    drewlabs_core_array_is_no_assoc_array_list($keyValue[0] ?? []) ?
-                        (static function ($model, string $relation) use ($keyValue) {
+                    Arr::isnotassoclist($keyValue[0] ?? []) ?
+                        (static function ($value, string $relation) use ($keyValue) {
                             foreach ($keyValue as $v) {
-                                drewlabs_database_update_or_create($model->$relation(), $v);
+                                drewlabs_database_update_or_create($value->$relation(), $v);
                             }
-                        })($model, $relation) : (static function ($model, string $relation) use ($keyValue) {
-                            return drewlabs_database_update_or_create($model->$relation(), $keyValue);
+                        })($model, $relation) : (static function ($value, string $relation) use ($keyValue) {
+                            return drewlabs_database_update_or_create($value->$relation(), $keyValue);
                         })($model, $relation);
                 } else {
-                    drewlabs_core_array_is_no_assoc_array_list($keyValue) ?
-                        (static function ($model, $relation) use ($keyValue) {
-                            $model->$relation()->delete();
-                            $model->$relation()->createMany(
+                    Arr::isnotassoclist($keyValue) ?
+                        (static function ($value, $relation) use ($keyValue) {
+                            $value->$relation()->delete();
+                            $value->$relation()->createMany(
                                 array_map(static function ($value) {
                                     return array_merge(
                                         $value,
@@ -117,12 +117,13 @@ if (!function_exists('drewlabs_database_upsert_relations_after_create')) {
                                     );
                                 }, $keyValue)
                             );
-                        })($model, $relation) : (static function ($model, $relation) use ($keyValue) {
-                            $model->$relation()->delete();
-                            $model->$relation()->create($keyValue);
+                        })($model, $relation) : (static function ($value, $relation) use ($keyValue) {
+                            $value->$relation()->delete();
+                            $value->$relation()->create($keyValue);
                         })($model, $relation);
                 }
             }
+            return $model;
         }, $model);
     }
 }

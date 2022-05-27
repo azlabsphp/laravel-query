@@ -40,3 +40,7 @@
 ## [2.3.3] 2022-05-15
 
 - Bug fix for when $callback is passed as single value to select DMLManager method
+
+## [2.3.3] 2022-05-27
+
+- Bug fix when setting/modifying model multiple relations at once

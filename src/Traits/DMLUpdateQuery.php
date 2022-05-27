@@ -178,7 +178,7 @@ trait DMLUpdateQuery
                 $method,
                 $params
             ) {
-                return drewlabs_database_upsert_relations_after_create(
+                return upsert_relations_after_update(
                     $model,
                     $params['relations'] ?? \array_slice(drewlabs_database_parse_dynamic_callback($method), 1),
                     $attributes,
