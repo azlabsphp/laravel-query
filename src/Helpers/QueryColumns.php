@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Helpers;
 
+use Drewlabs\Core\Helpers\Str;
+
 class QueryColumns
 {
     /**
@@ -28,8 +30,8 @@ class QueryColumns
         $values = $values ?? [];
         // Add top level relations in the list of relations that can be loaded
         foreach ($model_relations ?? [] as $key => $value) {
-            if (drewlabs_core_strings_contains($value, '.')) {
-                $relations_[$key] = drewlabs_core_strings_before('.', $value);
+            if (Str::contains($value, '.')) {
+                $relations_[$key] = Str::before('.', $value);
             }
         }
         // TODO: Get list of relations to be loaded

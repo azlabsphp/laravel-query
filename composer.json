@@ -3,12 +3,10 @@
     "description": "Provides functionnalities for accessing and working with databases using laravel Eloquent, or NoSQL Datatabase providers",
     "type": "library",
     "license": "MIT",
-    "authors": [
-        {
-            "name": "azandrew-sidoine",
-            "email": "asmyns.platonnas29@gmail.com"
-        }
-    ],
+    "authors": [{
+        "name": "azandrew-sidoine",
+        "email": "asmyns.platonnas29@gmail.com"
+    }],
     "minimum-stability": "stable",
     "require": {
         "php": ">=7.2",
@@ -16,10 +14,10 @@
         "illuminate/database": "^7.0|^8.0|^9.0",
         "illuminate/support": "^7.0|^8.0|^9.0",
         "illuminate/pagination": "^7.0|^8.0|^9.0",
-        "drewlabs/contracts": "^2.0.20",
-        "drewlabs/core-helpers": "^2.0",
-        "doctrine/dbal": "^3.1",
-        "drewlabs/support": "^2.0"
+        "drewlabs/contracts": "^2.5",
+        "drewlabs/core-helpers": "^2.3",
+        "doctrine/dbal": "^2.0|^3.1",
+        "drewlabs/support": "^2.3"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.0",
@@ -42,8 +40,7 @@
             "Drewlabs\\Packages\\Database\\Tests\\": "tests/"
         }
     },
-    "repositories": [
-        {
+    "repositories": [{
             "type": "vcs",
             "url": "git@github.com:liksoft/drewlabs-php-contracts.git"
         },

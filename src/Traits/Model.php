@@ -104,14 +104,12 @@ trait Model
                 ['updated_at']
         );
         // Get list of fillables
-        return drewlabs_core_array_unique(
-            array_merge(
-                $this->getFillable() ?? [],
-                $this->getGuarded() ?? [],
-                $this->timestamps ? $timestamps : [],
-                $primaryKey ? [$primaryKey] : []
-            )
-        );
+        return Arr::unique(array_merge(
+            $this->getFillable() ?? [],
+            $this->getGuarded() ?? [],
+            $this->timestamps ? $timestamps : [],
+            $primaryKey ? [$primaryKey] : []
+        ));
     }
 
     /**

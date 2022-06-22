@@ -17,6 +17,7 @@ use Drewlabs\Contracts\Data\Model\Model;
 use Drewlabs\Contracts\Data\Parser\ModelAttributeParser;
 use Drewlabs\Contracts\Data\Repository\ModelRepository as ModelRepositoryInterface;
 use Drewlabs\Contracts\Data\Repository\ParseableRepository;
+use Drewlabs\Core\Helpers\Str;
 use Drewlabs\Packages\Database\Contracts\TransactionUtils;
 use Drewlabs\Packages\Database\DynamicCRUDQueryHandler;
 use Drewlabs\Packages\Database\Traits\ModelRepository;
@@ -92,8 +93,8 @@ final class IlluminateModelRepository extends ValueObject implements ParseableRe
      */
     public function __call($method, $parameters)
     {
-        if (\is_string($method) && drewlabs_core_strings_contains($method, '__')) {
-            $method = drewlabs_core_strings_contains($method, '::') ? explode('::', $method)[1] : $method;
+        if (\is_string($method) && Str::contains($method, '__')) {
+            $method = Str::contains($method, '::') ? explode('::', $method)[1] : $method;
             $items = explode('__', $method);
             // To be used to call the insert or update method on the model
             if ('insert' === $items[0]) {

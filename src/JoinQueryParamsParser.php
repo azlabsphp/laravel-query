@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Drewlabs\Packages\Database;
 
 use Drewlabs\Contracts\Data\Parser\QueryParser;
+use Drewlabs\Core\Helpers\Iter;
 
 use function Drewlabs\Packages\Database\Proxy\QueryParam;
 
@@ -27,7 +28,7 @@ class JoinQueryParamsParser implements QueryParser
         $isArrayList = array_filter($params, 'is_array') === $params;
 
         return $isArrayList ? iterator_to_array(
-            drewlabs_core_iter_map(
+            Iter::map(
                 new \ArrayIterator($params),
                 function ($item) {
                     return $this->parseList($item);

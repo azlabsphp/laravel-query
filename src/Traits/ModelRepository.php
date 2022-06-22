@@ -51,7 +51,7 @@ trait ModelRepository
      */
     public function loadWith($relations)
     {
-        $relations = !drewlabs_core_array_is_arrayable($relations) || null === $relations ? [] : $relations;
+        $relations = !Arr::isArrayable($relations) || null === $relations ? [] : $relations;
 
         return drewlabs_core_create_attribute_setter(
             'model_instance',

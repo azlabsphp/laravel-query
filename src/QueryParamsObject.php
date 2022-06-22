@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database;
 
+use Drewlabs\Core\Helpers\Str;
 use Drewlabs\Packages\Database\Traits\ContainerAware;
 
 /**
@@ -55,7 +56,7 @@ class QueryParamsObject
             $this->column ? [$this->column] : []
         );
 
-        return trim(drewlabs_core_strings_concat('.', ...$attributes));
+        return trim(Str::concat('.', ...$attributes));
     }
 
     /**

@@ -246,7 +246,7 @@ trait DMLSelectQuery
                     new EnumerableQueryResult(
                         $selector(
                             $builder,
-                            empty($columns_) || !empty($relations) ? ['*'] : drewlabs_core_array_unique(array_merge($columns_ ?? [], [$primaryKey]))
+                            empty($columns_) || !empty($relations) ? ['*'] : Arr::unique(array_merge($columns_ ?? [], [$primaryKey]))
                         )
                     )
                 )->map(static function ($value) use ($columns_, $relations, $primaryKey) {
@@ -254,7 +254,7 @@ trait DMLSelectQuery
                         $columns = empty($columns_) ? $value->getHidden() :
                             array_diff(
                                 // Filter out the primary key in order to include it no matter what
-                                drewlabs_core_array_except($value->getDeclaredColumns(), [$primaryKey]) ?? [],
+                                Arr::except($value->getDeclaredColumns(), [$primaryKey]) ?? [],
                                 array_filter($columns_ ?? [], static function ($key) {
                                     return (null !== $key) && ('*' !== $key);
                                 })
