@@ -26,21 +26,16 @@ class QueryColumns
      */
     public static function asTuple($values = ['*'], array $declared_columns = [], array $model_relations = [])
     {
-        $relations_ = [];
         $values = $values ?? [];
-        // Add top level relations in the list of relations that can be loaded
-        foreach ($model_relations ?? [] as $key => $value) {
-            if (Str::contains($value, '.')) {
-                $relations_[$key] = Str::before('.', $value);
+        $top_level_relations = array_map(function ($relation) {
+            return Str::contains($relation, '.') ? Str::before('.', $relation) : $relation;
+        }, $model_relations ?? []);
+        $relations = array_filter($values, function($relation) use ($top_level_relations, $model_relations) {
+            if (Str::contains($relation, '.')) {
+                return in_array(Str::before('.', $relation), $top_level_relations) || in_array($relation, $model_relations);
             }
-        }
-        // TODO: Get list of relations to be loaded
-        $relations = array_filter(
-            array_merge($model_relations, $relations_),
-            static function ($relation) use ($values) {
-                return \in_array($relation, $values, true);
-            }
-        );
+            return in_array($relation, $top_level_relations);
+        });
         // TODO : Filter $columns removing relations
         $columns_ = array_intersect($values, $declared_columns);
         if (\in_array('*', $values, true)) {
@@ -48,7 +43,6 @@ class QueryColumns
         } else {
             $columns_ = empty($value = array_diff($columns_, $relations)) ? [null] : $value;
         }
-
         return [$columns_, $relations];
     }
 }
