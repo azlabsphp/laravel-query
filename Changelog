@@ -45,6 +45,10 @@
 
 - Bug fix when setting/modifying model multiple relations at once
 
-## [2.3.6]
+## [2.3.6] 2022-06-22
 
 - Bug fix in QueryColumns::asTuple() implementation for nested relations
+
+## [2.3.7] 2022-06-23
+
+- Bug fix for nested column for select query, optimize selector function

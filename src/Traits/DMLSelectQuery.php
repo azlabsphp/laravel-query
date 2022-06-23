@@ -223,47 +223,41 @@ trait DMLSelectQuery
             $callback = $callback ?? static function ($value) {
                 return $value;
             };
-            $model_relations = method_exists($this->model, 'getDeclaredRelations') || ($this->model instanceof HasRelations) ? $this->model->getDeclaredRelations() : [];
+            // We initialize filtering attributes for optimization instead of querying them on each
+            // model instance returned after the query
+            $model = drewlabs_core_create_attribute_getter('model', null)($this);
+            $model_relations = method_exists($model, 'getDeclaredRelations') || ($model instanceof HasRelations) ? $model->getDeclaredRelations() : [];
+            $declared_columns = $model->getDeclaredColumns();
+            $primaryKey = $model->getPrimaryKey();
+            $hidden_columns = $model->getHidden();
             [$columns_, $relations] = QueryColumns::asTuple(
                 $columns,
-                $this->model->getDeclaredColumns(),
+                $declared_columns,
                 $model_relations
             );
-            $primaryKey = $this->model->getPrimaryKey();
-            $builder = array_reduce(
-                Arr::isnotassoclist($query) ? $query : [$query],
-                static function ($model, $q) {
-                    return ModelFiltersHandler($q)->apply($model);
-                },
-                drewlabs_core_create_attribute_getter('model', null)($this)
-            );
+            // Apply user contructed query on the model instance to create query builder object
+            $builder = array_reduce(Arr::isnotassoclist($query) ? $query : [$query], static function ($model, $q) {
+                return ModelFiltersHandler($q)->apply($model);
+            }, $model);
             if (!empty($relations)) {
                 $builder = $this->proxy($builder, 'with', [$relations]);
             }
-
+            // Create set columns that must not be included in the output result
+            $except_columns = array_unique((!empty($columns_) && !in_array('*', $columns_)) ?
+                array_merge($hidden_columns, array_diff(Arr::filter($declared_columns, function ($column) use ($primaryKey) {
+                    return $column !== $primaryKey;
+                }), [...$columns_, '*'])) :
+                $hidden_columns);
             return $callback(
                 SelectQueryResult(
                     new EnumerableQueryResult(
                         $selector(
                             $builder,
-                            empty($columns_) || !empty($relations) ? ['*'] : Arr::unique(array_merge($columns_ ?? [], [$primaryKey]))
+                            empty($columns_) || !empty($relations) ? ['*'] : array_unique(array_merge($columns_ ?? [], [$primaryKey]))
                         )
                     )
-                )->map(static function ($value) use ($columns_, $relations, $primaryKey) {
-                    if (!empty($relations)) {
-                        $columns = empty($columns_) ? $value->getHidden() :
-                            array_diff(
-                                // Filter out the primary key in order to include it no matter what
-                                Arr::except($value->getDeclaredColumns(), [$primaryKey]) ?? [],
-                                array_filter($columns_ ?? [], static function ($key) {
-                                    return (null !== $key) && ('*' !== $key);
-                                })
-                            );
-
-                        return $value->setHidden($columns);
-                    }
-
-                    return $value;
+                )->map(static function ($value) use ($except_columns) {
+                    return $value->setHidden($except_columns);
                 })->value(),
             );
         };
