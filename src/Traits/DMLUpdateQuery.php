@@ -15,6 +15,7 @@ namespace Drewlabs\Packages\Database\Traits;
 
 use Drewlabs\Contracts\Data\Model\Model;
 use Drewlabs\Core\Helpers\Arr;
+use Drewlabs\Core\Helpers\Str;
 use Drewlabs\Packages\Database\EloquentQueryBuilderMethods;
 use Drewlabs\Packages\Database\TouchedModelRelationsHandler;
 
@@ -160,8 +161,10 @@ trait DMLUpdateQuery
         $params = drewlabs_database_parse_update_handler_params($params);
         $method = $params['method'];
         $upsert = $params['upsert'] ?? true;
+        $isComposedMethod = Str::contains($method, '__') && in_array(Str::split($method, '__')[0], [EloquentQueryBuilderMethods::UPDATE], true);
 
-        return \is_string($method) && ((null !== ($params['relations'] ?? null)) || drewlabs_database_is_dynamic_update_method($method)) ?
+        //
+        return \is_string($method) && ((null !== ($params['relations'] ?? null)) || $isComposedMethod) ?
             $update_model_func(
                 $this,
                 $id,

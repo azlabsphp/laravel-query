@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Drewlabs\Packages\Database\Traits;
 
 use Drewlabs\Contracts\Data\DataProviderHandlerParamsInterface;
+use Drewlabs\Core\Helpers\Str;
 use Drewlabs\Packages\Database\EloquentQueryBuilderMethods;
 use Drewlabs\Packages\Database\TouchedModelRelationsHandler;
 
@@ -100,7 +101,15 @@ trait DMLCreateQuery
         $method = $params['method'] ?? EloquentQueryBuilderMethods::CREATE;
         $upsert_conditions = $params['upsert_conditions'] ?: [];
         $upsert = $params['upsert'] && !empty($upsert_conditions) ? true : false;
-        if (\is_string($method) && ((null !== ($params['relations'] ?? null)) || drewlabs_database_is_dynamic_create_method($method))) {
+        $isComposedMethod = Str::contains($method, '__') && in_array(
+            Str::split($method, '__')[0],
+            [
+                EloquentQueryBuilderMethods::CREATE,
+                EloquentQueryBuilderMethods::INSERT_MANY,
+            ],
+            true
+        );
+        if (\is_string($method) && ((null !== ($params['relations'] ?? null)) || $isComposedMethod)) {
             $relations = $params['relations'] ?? \array_slice(drewlabs_database_parse_dynamic_callback($method), 1) ?? [];
             $instance = $this->proxy(
                 drewlabs_core_create_attribute_getter('model', null)($this),

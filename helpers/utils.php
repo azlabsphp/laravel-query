@@ -12,6 +12,7 @@ declare(strict_types=1);
  */
 
 use Drewlabs\Core\Helpers\Arr;
+use Drewlabs\Core\Helpers\Str;
 use Drewlabs\Packages\Database\EloquentQueryBuilderMethods;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -137,6 +138,7 @@ if (!function_exists('drewlabs_database_update_or_create')) {
     /**
      * @param \Illuminate\Database\Eloquent\Model $relation
      * @param array                               $value
+     * @deprecated v2.3.x
      *
      * @return mixed
      */
@@ -155,18 +157,14 @@ if (!function_exists('drewlabs_database_is_dynamic_create_method')) {
 
     /**
      * Check if a provided method name is a dynamic method starting with [create] or [insert].
-     *
+     * @deprecated v2.3.x
      * @return bool
      */
     function drewlabs_database_is_dynamic_create_method(string $method)
     {
-        if (!drewlabs_core_strings_contains($method, '__')) {
-            return false;
-        }
-        $method = drewlabs_core_strings_to_array($method, '__')[0];
         // TODO : In future release insert must not be supported
-        return in_array(
-            $method,
+        return Str::contains($method, '__') && in_array(
+            Str::split($method, '__')[0],
             [
                 EloquentQueryBuilderMethods::CREATE,
                 EloquentQueryBuilderMethods::INSERT_MANY,
@@ -180,16 +178,11 @@ if (!function_exists('drewlabs_database_is_dynamic_update_method')) {
 
     /**
      * Check if a provided method name is a dynamic method starting with [update].
-     *
+     * @deprecated v2.3.x
      * @return bool
      */
     function drewlabs_database_is_dynamic_update_method(string $method)
     {
-        if (!drewlabs_core_strings_contains($method, '__')) {
-            return false;
-        }
-        $method = drewlabs_core_strings_to_array($method, '__')[0];
-
-        return in_array($method, [EloquentQueryBuilderMethods::UPDATE], true);
+        return Str::contains($method, '__') && in_array(Str::split($method, '__')[0], [EloquentQueryBuilderMethods::UPDATE], true);
     }
 }
