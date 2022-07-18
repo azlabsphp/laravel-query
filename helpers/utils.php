@@ -19,6 +19,8 @@ if (!function_exists('create_relations_after_create')) {
 
     /**
      * Call Eloquent model relation {create}/{updateOrCreate} method after the model is inserted.
+     * 
+     * @deprecated v2.3.x
      *
      * @param mixed $model
      * @param bool  $batch
@@ -83,6 +85,8 @@ if (!function_exists('upsert_relations_after_update')) {
 
     /**
      * Update or create Eloquent model after it was updated.
+     * 
+     * @deprecated v2.3.x
      *
      * @param \Illuminate\Database\Eloquent\Model $model
      *

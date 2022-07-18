@@ -23,10 +23,8 @@ if (!function_exists('drewlabs_database_parse_update_handler_params')) {
     function drewlabs_database_parse_update_handler_params($params)
     {
         $value = $params instanceof DataProviderHandlerParamsInterface ? $params->getParams() : (is_array($params) ? $params : []);
-        $value['upsert'] = isset($value['upsert']) && (bool) ($value['upsert']) ? true : false;
+        $value['upsert'] = boolval($value['upsert'] ?? true);
         $value['method'] = isset($value['method']) && is_string($value['method']) ? $value['method'] : EloquentQueryBuilderMethods::UPDATE;
-        $value['should_mass_update'] = !isset($value['should_mass_update']) ? false : (!is_bool($value['should_mass_update']) ? false : $value['should_mass_update']);
-
         return $value;
     }
 }

@@ -16,6 +16,7 @@ namespace Drewlabs\Packages\Database\Traits;
 use Drewlabs\Contracts\Data\Model\Model;
 use Drewlabs\Core\Helpers\Arr;
 use Drewlabs\Packages\Database\EloquentQueryBuilderMethods;
+use Drewlabs\Packages\Database\TouchedModelRelationsHandler;
 
 use function Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;
 
@@ -139,17 +140,10 @@ trait DMLUpdateQuery
                 $callback
             ) {
                 $model = drewlabs_core_create_attribute_getter('model', null)($self);
-                $this->updateByQuery(
-                    [
-                        'where' => [
-                            $model->getPrimaryKey(), $key,
-                        ],
-                    ],
-                    $values
-                );
+                $this->updateByQuery(['where' => [$model->getPrimaryKey(), $key]], $values);
                 // Select the updated model
                 $model_ = $this->select($key);
-                // If their is a callable, call the callable, passing in updated model first and the other
+                // If there is a callable, call the callable, passing in updated model first and the other
                 // params later
                 if ($callable) {
                     $params_ = (\array_slice(\func_get_args(), 1));
@@ -165,7 +159,7 @@ trait DMLUpdateQuery
         // Parse the params in order to get the method and upsert value
         $params = drewlabs_database_parse_update_handler_params($params);
         $method = $params['method'];
-        $upsert = $params['upsert'] ?? false;
+        $upsert = $params['upsert'] ?? true;
 
         return \is_string($method) && ((null !== ($params['relations'] ?? null)) || drewlabs_database_is_dynamic_update_method($method)) ?
             $update_model_func(
@@ -178,12 +172,15 @@ trait DMLUpdateQuery
                 $method,
                 $params
             ) {
-                return upsert_relations_after_update(
-                    $model,
-                    $params['relations'] ?? \array_slice(drewlabs_database_parse_dynamic_callback($method), 1),
-                    $attributes,
-                    $upsert
-                );
+                return $upsert ? TouchedModelRelationsHandler::new($model)
+                    ->update(
+                        $params['relations'] ?? \array_slice(drewlabs_database_parse_dynamic_callback($method), 1),
+                        $attributes,
+                    ) : TouchedModelRelationsHandler::new($model)
+                    ->refresh(
+                        $params['relations'] ?? \array_slice(drewlabs_database_parse_dynamic_callback($method), 1),
+                        $attributes,
+                    );
             }) : $update_model_func($this, $id, $attributes)();
     }
 }
