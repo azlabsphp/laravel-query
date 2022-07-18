@@ -18,6 +18,8 @@ if (!function_exists('drewlabs_database_parse_update_handler_params')) {
     /**
      * @param array|DataProviderHandlerParamsInterface $params
      *
+     * @deprecated v2.3.x
+     * 
      * @return array
      */
     function drewlabs_database_parse_update_handler_params($params)
@@ -33,6 +35,8 @@ if (!function_exists('drewlabs_database_parse_create_handler_params')) {
     /**
      * @param array|DataProviderHandlerParamsInterface $params
      *
+     * @deprecated v2.3.x
+     * 
      * @return array
      */
     function drewlabs_database_parse_create_handler_params($params)
@@ -55,6 +59,8 @@ if (!function_exists('drewlabs_database_validate_dynamic_callback')) {
     /**
      * Generate a list of relations method from the provided in the dynamic callback.
      *
+     * @deprecated v2.3.x
+     * 
      * @return array
      */
     function drewlabs_database_parse_dynamic_callback(string $callback, string $method = 'insert')
