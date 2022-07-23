@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Drewlabs\Packages\Database;
 
 use Drewlabs\Contracts\Data\Filters\FiltersInterface;
-use Drewlabs\Contracts\Data\Parser\ModelAttributeParser as ModelAttributesParserContract;
 use Drewlabs\Packages\Database\Contracts\TransactionUtils;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
@@ -42,7 +41,7 @@ class ServiceProvider extends BaseServiceProvider
         });
         $this->app->bind(FiltersInterface::class, EloquentBuilderQueryFilters::class);
 
-        $this->app->bind(ModelAttributesParserContract::class, ModelAttributesParser::class);
+        $this->app->bind(\Drewlabs\Contracts\Data\Parser\ModelAttributeParser::class, ModelAttributesParser::class);
     }
 
     protected function bindings()

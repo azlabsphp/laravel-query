@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Traits;
 
-trait GuardedModel
+trait Guarded
 {
     /**
      * {@inheritDoc}

@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Traits;
 
-trait AppendedAttributes
+trait HasAppendedAttributes
 {
     /**
      * Set the value of the withoutAppends property.

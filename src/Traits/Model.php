@@ -17,8 +17,8 @@ use Drewlabs\Core\Helpers\Arr;
 
 trait Model
 {
-    use AppendedAttributes;
-    use GuardedModel;
+    use HasAppendedAttributes;
+    use Guarded;
     use LinkAttributeAware;
 
     /**
