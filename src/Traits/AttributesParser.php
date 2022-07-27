@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Traits;
 
+use Drewlabs\Packages\Database\ModelAttributesParser;
+
 trait AttributesParser
 {
     use ContainerAware;
@@ -22,11 +24,11 @@ trait AttributesParser
      */
     private function parseAttributes(array $value)
     {
-        return self::createResolver(
-            \Drewlabs\Contracts\Data\Parser\ModelAttributeParser::class
-        )()->setModel(
-            drewlabs_core_create_attribute_getter('model', null)($this)
-        )->setModelInputState($value)
-            ->getModelInputState();
+        return ModelAttributesParser::new(
+            drewlabs_core_create_attribute_getter(
+                'model',
+                null
+            )($this)
+        )->build($value);
     }
 }
