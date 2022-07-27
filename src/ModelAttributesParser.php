@@ -13,15 +13,13 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database;
 
-use Drewlabs\Contracts\Data\Model\Model;
-use Drewlabs\Contracts\Data\Model\Parseable;
 use Drewlabs\Contracts\Data\Parser\ModelAttributeParser;
 use Drewlabs\Packages\Database\Exceptions\ModelTypeException;
 
 final class ModelAttributesParser implements ModelAttributeParser
 {
     /**
-     * @var Model|Parseable
+     * @var \Drewlabs\Contracts\Data\Model\Parseable|mixed
      */
     private $model;
 
@@ -32,50 +30,36 @@ final class ModelAttributesParser implements ModelAttributeParser
      */
     private $attributes;
 
+    /**
+     * Creates an attribute builder instance from the model parameter
+     * 
+     * @param string|object $model 
+     * @return static 
+     */
+    public static function new($model)
+    {
+        $static =  new static;
+        $static->model = is_string($model) ? new $model : $model;
+        return $static;
+    }
+
+    /**
+     * Build Model attributest from a dirty attributes provided by the library user
+     * 
+     * @param array $dirty 
+     * @return array 
+     */
+    public function build(array $dirty)
+    {
+        if (!(method_exists($this->model, 'getFillable'))) {
+            throw new ModelTypeException([Model::class, Parseable::class], ' or must at least contains mthods getFillable()');
+        }
+        return $this->buildAttributes($dirty);
+    }
+
     public function __destruct()
     {
         unset($this->model);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setModel($model)
-    {
-        $this->model = clone $model;
-
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getModel()
-    {
-        return clone $this->model;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function setModelInputState(array $inputs)
-    {
-        if ((!$this->model instanceof Parseable) &&
-            !(method_exists($this->model, 'getFillable'))
-        ) {
-            throw new ModelTypeException([Model::class, Parseable::class], ' or must at least contains mthods getFillable()');
-        }
-        $this->attributes = $this->buildAttributes($inputs);
-
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getModelInputState()
-    {
-        return $this->attributes;
     }
 
     /**
@@ -99,7 +83,51 @@ final class ModelAttributesParser implements ModelAttributeParser
                 $attributes[$value] = $inputs[$value];
             }
         }
-
         return $attributes;
     }
+
+    //#region Deprecation
+    /**
+     * {@inheritDoc}
+     * 
+     * @deprecated v2.4.x
+     */
+    public function setModel($model)
+    {
+        $this->model = clone $model;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @deprecated v2.4.x
+     */
+    public function getModel()
+    {
+        return clone $this->model;
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @deprecated v2.4.x
+     */
+    public function setModelInputState(array $inputs)
+    {
+        $this->attributes = $this->build($inputs);
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     * 
+     * @deprecated v2.4.x
+     */
+    public function getModelInputState()
+    {
+        return $this->attributes;
+    }
+    //#endregion Deprecation
 }

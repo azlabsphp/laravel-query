@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Drewlabs\Packages\Database\Traits;
 
 use Drewlabs\Contracts\Data\Parser\ModelAttributeParser as ModelAttributesParserContract;
+use Drewlabs\Packages\Database\ModelAttributesParser;
 
 trait AttributesParser
 {
@@ -24,14 +25,11 @@ trait AttributesParser
      */
     private function parseAttributes(array $value)
     {
-        return self::createResolver(
-            ModelAttributesParserContract::class
-        )()->setModel(
+        return ModelAttributesParser::new(
             drewlabs_core_create_attribute_getter(
                 'model',
                 null
             )($this)
-        )->setModelInputState($value)
-            ->getModelInputState();
+        )->build($value);
     }
 }
