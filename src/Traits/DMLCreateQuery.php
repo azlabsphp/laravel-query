@@ -98,13 +98,13 @@ trait DMLCreateQuery
 
     /**
      * Base method that provides create implementation of the DML manager class
-     * 
-     * @param array $attributes 
-     * @param array $params 
-     * @param bool $batch 
-     * @param null|Closure $callback 
-     * @return mixed 
-     * @throws RuntimeException 
+     *
+     * @param array $attributes
+     * @param array $params
+     * @param bool $batch
+     * @param null|Closure $callback
+     * @return mixed
+     * @throws RuntimeException
      */
     private function handleCreateStatement(array $attributes, array $params, bool $batch = false, ?\Closure $callback = null)
     {
@@ -157,13 +157,13 @@ trait DMLCreateQuery
     /**
      * Implements a clause that insert model parent attributes and set the foreign
      * key back on the model attributes.
-     * 
+     *
      * It acts like a before create model event listener
-     * 
-     * @param mixed $instance 
-     * @param array $attributes 
-     * @param array $relations 
-     * @return array 
+     *
+     * @param mixed $instance
+     * @param array $attributes
+     * @param array $relations
+     * @return array
      */
     private function createParentIfExists($instance, array $attributes, array &$relations)
     {
@@ -183,12 +183,22 @@ trait DMLCreateQuery
             $foreignKey = $result->getForeignKeyName();
             // We continue the loop if the Belongs to method call does not return
             // a valid belongs to class for the related model
-            if ((null === $parent )|| (null === $foreignKey)) {
+            if ((null === $parent) || (null === $foreignKey)) {
                 continue;
             }
-            $createdInstance = DMLManager($parent)->create($attributes[$value]);
+            $embededRelations = [];
+            foreach ($relations as $rel) {
+                # code...
+                if (Str::startsWith($rel, "$value.")) {
+                    $embededRelations[] = Str::after("$value.", $rel);
+                    unset($relations[$rel]);
+                }
+            }
+            $createdInstance = DMLManager($parent)->create($attributes[$value], [
+                'relations' => $embededRelations
+            ]);
             // Once the create query of the parent model is executed, we add the foreign
-            // key to the current instance attributes 
+            // key to the current instance attributes
             $attributes[$foreignKey] = $createdInstance->getKey();
             // Remove the relation from the list of relations to create after model
             // gets created
