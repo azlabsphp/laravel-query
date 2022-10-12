@@ -18,16 +18,17 @@ use Drewlabs\Packages\Database\QueryFiltersBuilder;
 trait CreatesFilters
 {
 
-
     /**
      * Creates a list of filters based on view model input & query
      * parameters 
      * 
+     * @param array $defaults Default filters can be passed in by developpers that are merged with
+     *                        query filters from builded from view model
      * @return array<string, mixed>
      */
-    public function makeFilters()
+    public function makeFilters(array $defaults = [])
     {
-        return QueryFiltersBuilder::for($this->resolveModel())->build($this);
+        return QueryFiltersBuilder::for($this->resolveModel())->build($this, $defaults ?? []);
     }
 
     /**
