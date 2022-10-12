@@ -42,35 +42,37 @@ class QueryFiltersBuilder
      * an instance of {@see \Drewlabs\Contracts\Validator\ViewModel}|Laravel Http
      * request
      * 
-     * @param mixed $source 
-     * @return mixed 
+     * @param mixed $parametersBag 
+     * @param array $defaults 
+     * @return array<string, mixed>
      */
-    public function build($source)
+    public function build($parametersBag, array $defaults = [])
     {
         return Functional::compose(
-            static function ($param) use ($source) {
-                return static::filtersFromQueryParameters($param, $source);
+            static function ($param) use ($parametersBag, $defaults) {
+                return static::filtersFromQueryParameters($param, $parametersBag, $defaults);
             },
-            static function ($filters) use ($source) {
-                return static::filterFrom__Query($source, $filters);
+            static function ($filters) use ($parametersBag) {
+                return static::filterFrom__Query($parametersBag, $filters);
             }
         )($this->model);
     }
 
-
     /**
+     * Build filters from parameter bags
      * 
-     * @param mixed $model 
-     * @param mixed $source 
-     * @return array 
+     * @param object $model 
+     * @param object $parametersBag 
+     * @param array $defaults 
+     * @return array<string, mixed>
      */
-    public static function filtersFromQueryParameters($model, $source)
+    public static function filtersFromQueryParameters($model, $parametersBag, $defaults = [])
     {
-        $filters = [];
-        if ($source->has($model->getPrimaryKey()) && null !== $source->get($model->getPrimaryKey())) {
-            $filters['where'][] = [$model->getPrimaryKey(), $source->get($model->getPrimaryKey())];
+        $filters = $defaults ?? [];
+        if ($parametersBag->has($model->getPrimaryKey()) && null !== $parametersBag->get($model->getPrimaryKey())) {
+            $filters['where'][] = [$model->getPrimaryKey(), $parametersBag->get($model->getPrimaryKey())];
         }
-        foreach ($source->all() as $key => $value) {
+        foreach ($parametersBag->all() as $key => $value) {
             $searchable = array_merge($model->getFillable(), $model->getGuarded());
             if (!empty($value)) {
                 if (in_array($key, $searchable, true)) {
@@ -115,16 +117,16 @@ class QueryFiltersBuilder
 
     /**
      * 
-     * @param mixed $params_bag 
+     * @param mixed $parametersBag 
      * @param array $in 
      * @return array 
      * @throws InvalidArgumentException 
      */
-    public static function filterFrom__Query($params_bag, $in = [])
+    public static function filterFrom__Query($parametersBag, $in = [])
     {
         $filters = $in ?? [];
-        if ($params_bag->has('_query')) {
-            $query = $params_bag->get('_query');
+        if ($parametersBag->has('_query')) {
+            $query = $parametersBag->get('_query');
             $query = Str::isStr($query) ? json_decode($query, true) : $query;
             if (!Arr::isArrayable($query) || !Arr::isassoc($query)) {
                 return $filters;
