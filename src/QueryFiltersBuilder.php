@@ -69,7 +69,10 @@ class QueryFiltersBuilder
     public static function filtersFromQueryParameters($model, $parametersBag, $defaults = [])
     {
         $filters = Arr::map($defaults ?? [], function($filter) {
-            return Arr::isList($filter) ? $filter : [$filter];
+            // We check first if the filter is an array. If the filter is an array,
+            // we then we check if the array is an array of arrays (1). If case (1) resolves
+            // to true, we return the filter, else we wrap the filter in an array
+            return is_array($filter) && Arr::isList($filter) ? $filter : [$filter];
         });
         if ($parametersBag->has($model->getPrimaryKey()) && null !== $parametersBag->get($model->getPrimaryKey())) {
             $filters['where'][] = [$model->getPrimaryKey(), $parametersBag->get($model->getPrimaryKey())];
