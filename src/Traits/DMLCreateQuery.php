@@ -123,25 +123,26 @@ trait DMLCreateQuery
             true
         );
         if (\is_string($method) && ((null !== ($params['relations'] ?? null)) || $isComposedMethod)) {
-            $relations = $params['relations'] ?? \array_slice(drewlabs_database_parse_dynamic_callback($method), 1) ?? [];
+            $keys = $params['relations'] ?? \array_slice(drewlabs_database_parse_dynamic_callback($method), 1) ?? [];
+            // Creates a copy of the relation in order to maintain the state of the keys unchanged
+            // accross changes that happen during execution
+            $relations = [...$keys];
             // TODO: If the current model contains parent relations, create the parent relation
             $instance = drewlabs_core_create_attribute_getter('model', null)($this);
             $attributes = $this->createParentIfExists($instance, $attributes, $relations);
             // To avoid key index issues, we reset the relations array keys if any unset() call
             // was made on the relations variable
-            $relations = array_values($relations);
             $instance = $this->proxy(
                 $instance,
                 $upsert ? EloquentQueryBuilderMethods::UPSERT : EloquentQueryBuilderMethods::CREATE,
                 // if Upserting, pass the upsertion condition first else, pass in the attributes
                 $upsert ? [$upsert_conditions, $this->parseAttributes($attributes)] : [$this->parseAttributes($attributes)]
             );
-            TouchedModelRelationsHandler::new($instance)->create(
-                $relations,
-                $attributes,
-                $batch
-            );
-            $result = $this->select($instance->getKey(), ['*', ...$relations]);
+            // For the touched model, we create the attached relations provided by the library user
+            if (!empty($relations = array_values($relations))) {
+                TouchedModelRelationsHandler::new($instance)->create($relations, $attributes, $batch);
+            }
+            $result = $this->select($instance->getKey(), ['*', ...$keys]);
         } else {
             $result = $this->proxy(
                 drewlabs_core_create_attribute_getter('model', null)($this),
@@ -203,6 +204,7 @@ trait DMLCreateQuery
             // Remove the relation from the list of relations to create after model
             // gets created
             unset($relations[$i]);
+            unset($attributes[$value]);
         }
 
         return $attributes;

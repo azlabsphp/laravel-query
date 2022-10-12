@@ -418,31 +418,43 @@ class QueryFiltersBuilder
         return $isAssociative && Arr::isList($items);
     }
 
+    /**
+     * 
+     * @param string $value 
+     * @return array 
+     */
     private static function operatorValue($value)
     {
-        // TODO : Add support for and/or switch
-        // TODO : Add more operators support
         // We use == to represent = db comparison operator
-        $operators = ['>=', '<>', '<=', '=like', '=='];
-        foreach ($operators as $op) {
-            if (Str::startsWith($value, $op)) {
-                $value = Str::after($op, $value);
-                // If the operator is a like operator, we removes any % from start and end of value
-                // And append our own. We also make sure the operator is like instead of =like
-                if ($op === '=like') {
-                    $value = '%' . trim($value, '%') . '%';
-                    $op = 'like';
-                } elseif ($op === '==') {
-                    $op = '=';
-                }
-                return [$op, $value, null];
+        [$method, $operators, $operator] = ['orWhere', ['>=', '<>', '<=', '=like', '=='], null];
+        foreach ($operators as $current) {
+            // By default we apply the query with or where clause. But in case the developper pass a query string
+            // with &&: or and: operator we query using the where clause
+            if (Str::startsWith($value, "and:$current:")) {
+                [$method, $value, $operator] =  ['where', Str::after("and:$current:", $value), $current];
+                break;
+            } else if (Str::startsWith($value, "&&:$current:")) {
+                [$method, $value, $operator] =  ['where', Str::after("&&:$current:", $value), $current];
+                break;
+            } else if (Str::startsWith($value, "$current:")) {
+                [$value, $operator] = [Str::after("$current:", $value), $current];
+                break;
             }
         }
-        $op = is_numeric($value) || is_bool($value) ? '=' : 'like';
-        if ($op === 'like') {
-            $value = '%' . trim($value, '%') . '%';
+        if (Str::startsWith($value, "and:")) {
+            [$method, $value] =  ['where', Str::after("and:", $value)];
+        } else if (Str::startsWith($value, "&&:")) {
+            [$method, $value] =  ['where', Str::after("&&:", $value)];
         }
-        return [$op, $value, null];
+        $operator = $operator ?? (is_numeric($value) || is_bool($value) ? '=' : 'like');
+        // If the operator is a like operator, we removes any % from start and end of value
+        // And append our own. We also make sure the operator is like instead of =like
+        if (($operator === '=like') || ($operator === 'like')) {
+            [$value, $operator] = ['%' . trim($value, '%') . '%', 'like'];
+        } elseif ($operator === '==') {
+            $operator = '=';
+        }
+        return [$operator, $value, $method];
     }
 
     /**
