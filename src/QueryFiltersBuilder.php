@@ -13,7 +13,6 @@ use InvalidArgumentException;
 
 class QueryFiltersBuilder
 {
-    // &&:>=:2022-10-10|&&:<=2022-10-10
     use ContainerAware;
 
     /**
