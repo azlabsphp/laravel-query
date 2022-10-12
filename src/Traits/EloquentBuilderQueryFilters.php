@@ -26,10 +26,15 @@ trait EloquentBuilderQueryFilters
     private $filters = [];
 
     /**
-     * @var mixed
+     * ORM Model instance
+     * 
+     * @var object
      */
     private $model;
 
+    /**
+     * {@inheritDoc}
+     */
     public function apply($model)
     {
         $clone = clone $model;
@@ -122,6 +127,24 @@ trait EloquentBuilderQueryFilters
      * @return mixed
      */
     private function applyWhereDate($model, $filter)
+    {
+        $filter = array_filter($filter, 'is_array') === $filter ? $filter : [$filter];
+        foreach ($filter as $value) {
+            $model = $model->whereDate(...$value);
+        }
+
+        return $model;
+    }
+
+    /**
+     * apply a orWhereDate query to the model.
+     *
+     * @param mixed $model
+     * @param array $filter
+     *
+     * @return mixed
+     */
+    private function applyOrWhereDate($model, $filter)
     {
         $filter = array_filter($filter, 'is_array') === $filter ? $filter : [$filter];
         foreach ($filter as $value) {

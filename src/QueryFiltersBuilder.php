@@ -13,7 +13,15 @@ use InvalidArgumentException;
 
 class QueryFiltersBuilder
 {
+    // &&:>=:2022-10-10|&&:<=2022-10-10
     use ContainerAware;
+
+    /**
+     * List of query operator supported by the Query Filters handler
+     * 
+     * @var string[]
+     */
+    private const QUERY_OPERATORS = ['>=', '<=', '<', '>', '<>', '=like', '=='];
 
     /**
      * 
@@ -21,12 +29,19 @@ class QueryFiltersBuilder
      */
     private $model;
 
+    /**
+     * Creates a new instance of QueryFiltersBuilder
+     * 
+     * @param mixed $model 
+     * @return void 
+     */
     private function __construct($model)
     {
         $this->model = $model;
     }
 
     /**
+     * Create an instance of QueryFiltersBuilder from an ORM model
      * 
      * @param mixed $model 
      * @return self 
@@ -68,7 +83,7 @@ class QueryFiltersBuilder
      */
     public static function filtersFromQueryParameters($model, $parametersBag, $defaults = [])
     {
-        $filters = Arr::map($defaults ?? [], function($filter) {
+        $filters = Arr::map($defaults ?? [], function ($filter) {
             // We check first if the filter is an array. If the filter is an array,
             // we then we check if the array is an array of arrays (1). If case (1) resolves
             // to true, we return the filter, else we wrap the filter in an array
@@ -78,26 +93,19 @@ class QueryFiltersBuilder
             $filters['where'][] = [$model->getPrimaryKey(), $parametersBag->get($model->getPrimaryKey())];
         }
         foreach ($parametersBag->all() as $key => $value) {
-            $searchable = array_merge($model->getFillable(), $model->getGuarded());
-            if (!empty($value)) {
-                if (in_array($key, $searchable, true)) {
-                    [$operator, $value, $method] = static::operatorValue($value);
-                    $filters[$method ?? 'orWhere'][] = [$key, $operator, $value];
-                } elseif (Str::contains($key, ['__'])) {
-                    [$relation, $column] = explode('__', $key);
-                    $relation = Str::replace([':', '%'], '.', $relation ?? '');
-                    $model_method = Str::contains($relation, '.') ? Str::before('.', $relation) : $relation;
-                    if (method_exists($model, $model_method) && null !== $column) {
-                        $filters['whereHas'][] = [$relation, static function ($query) use ($value, $column) {
-                            if (is_array($value)) {
-                                $query->whereIn($column, $value);
-                            } else {
-                                [$operator, $value, $method] = static::operatorValue($value);
-                                $query->{$method ?? 'where'}($column, $operator, $value);
-                            }
-                        }];
-                    }
+            $list = array_merge($model->getFillable(), $model->getGuarded());
+            if (is_string($value) && Str::contains($value, '|')) {
+                // For composed value, if the value is a string and contains | character we split the value using
+                // the | character and foreach item in the splitted list we add a filter
+                $items = is_string($value) && Str::contains($value, '|') ? Str::split($value, '|') : $value;
+                foreach ($items as $item) {
+                    $filters = static::buildFiltersArray($filters, $key, $item, $list, $model);
                 }
+                continue;
+            }
+            if (!empty($value)) {
+                $filters = static::buildFiltersArray($filters, $key, $value, $list, $model);
+                continue;
             }
         }
         // order this query method in the order of where -> whereHas -> orWhere
@@ -121,6 +129,7 @@ class QueryFiltersBuilder
     }
 
     /**
+     * Build query filters using '_query' property of the parameter bag
      * 
      * @param mixed $parametersBag 
      * @param array $in 
@@ -168,36 +177,63 @@ class QueryFiltersBuilder
 
     /**
      * 
-     * @param mixed $method 
-     * @param mixed $params 
+     * @param array $filters 
+     * @param string $key 
+     * @param mixed $value 
+     * @param array $list 
+     * @param object $model 
+     * @return array 
+     */
+    private static function buildFiltersArray(array $filters, $key, $value, array $list, $model)
+    {
+        if (in_array($key, $list, true)) {
+            [$operator, $value, $method] = static::operatorValue($value);
+            $filters[$method ?? 'orWhere'][] = [$key, $operator, $value];
+        } elseif (Str::contains($key, ['__'])) {
+            [$relation, $column] = explode('__', $key);
+            $relation = Str::replace([':', '%'], '.', $relation ?? '');
+            $model_method = Str::contains($relation, '.') ? Str::before('.', $relation) : $relation;
+            if (method_exists($model, $model_method) && null !== $column) {
+                $filters['whereHas'][] = [$relation, static function ($query) use ($value, $column) {
+                    if (is_array($value)) {
+                        $query->whereIn($column, $value);
+                    } else {
+                        [$operator, $value, $method] = static::operatorValue($value);
+                        $query->{$method ?? 'where'}($column, $operator, $value);
+                    }
+                }];
+            }
+        }
+        return $filters;
+    }
+
+    /**
+     * Build queries based on list of query parameters
+     * 
+     * @param string $method 
+     * @param array $params 
      * @return mixed 
      * @throws InvalidArgumentException 
      */
-    private static function buildParameters($method, $params)
+    private static function buildParameters(string $method, $params)
     {
         switch ($method) {
             case 'where':
-                return static::whereQueryParameters($params);
             case 'whereDate':
-                return static::whereQueryParameters($params);
-            case 'whereHas':
-                return static::buildSubQuery($params);
-            case 'whereDoesntHave':
-                return static::buildSubQuery($params);
+            case 'orWhereDate':
             case 'orWhere':
                 return static::whereQueryParameters($params);
+            case 'whereHas':
+            case 'whereDoesntHave':
+                return static::buildSubQuery($params);
             case 'whereIn':
-                return static::buildWhereInQuery($params);
             case 'whereNotIn':
                 return static::buildWhereInQuery($params);
             case 'orderBy':
                 return static::buildOrderByQuery($params);
             case 'whereNull':
-                return static::buildWhereNullQuery($params);
             case 'orWhereNull':
-                return static::buildWhereNullQuery($params);
             case 'whereNotNull':
-                return static::buildWhereNullQuery($params);
             case 'orWhereNotNull':
                 return static::buildWhereNullQuery($params);
             case 'doesntHave':
@@ -210,6 +246,7 @@ class QueryFiltersBuilder
     }
 
     /**
+     * Build a where null query based on params
      * 
      * @param array|string $params 
      * @return array 
@@ -221,8 +258,8 @@ class QueryFiltersBuilder
             if (Str::isStr($value)) {
                 return $value;
             }
-            $is_assoc = Arr::isassoc($value);
-            if (!$is_assoc) {
+            $isassoc = Arr::isassoc($value);
+            if (!$isassoc) {
                 return array_reduce(
                     $value,
                     static function ($carry, $current) use (&$assocParserFn) {
@@ -243,7 +280,7 @@ class QueryFiltersBuilder
                     []
                 );
             }
-            if ($is_assoc && !isset($value['column'])) {
+            if ($isassoc && !isset($value['column'])) {
                 throw new \InvalidArgumentException('orderBy query requires column key');
             }
 
@@ -299,6 +336,7 @@ class QueryFiltersBuilder
     }
 
     /**
+     * Build an order by query based on list of query parameters
      * 
      * @param array|string $params 
      * @return array 
@@ -322,6 +360,13 @@ class QueryFiltersBuilder
         return ['by' => $by, 'order' => $order];
     }
 
+    /**
+     * Build a where in query based on list of query parameters
+     * 
+     * @param array $query 
+     * @return array 
+     * @throws InvalidArgumentException 
+     */
     private static function buildWhereInQuery(array $query)
     {
         if (!Arr::isassoc($query) && Arr::isnotassoclist($query)) {
@@ -345,6 +390,12 @@ class QueryFiltersBuilder
         return [$query['column'], $query['match']];
     }
 
+    /**
+     * Build a where query based on query parameter array
+     * 
+     * @param array $query 
+     * @return array|Closure 
+     */
     private static function whereQueryParameters(array $query)
     {
         if (!Arr::isassoc($query) && Arr::isnotassoclist($query)) {
@@ -362,6 +413,7 @@ class QueryFiltersBuilder
     }
 
     /**
+     * Validate query parameters
      * 
      * @param array $params 
      * @return void 
@@ -375,6 +427,7 @@ class QueryFiltersBuilder
     }
 
     /**
+     * Build a match query based the list of query parameters
      * 
      * @param array $query 
      * @return Closure 
@@ -396,6 +449,7 @@ class QueryFiltersBuilder
     }
 
     /**
+     * Build a subquery based on array of query parameters
      * 
      * @param array $query 
      * @return array 
@@ -416,6 +470,12 @@ class QueryFiltersBuilder
         ];
     }
 
+    /**
+     * Check if list is an associative list of list
+     * 
+     * @param array $items 
+     * @return bool 
+     */
     private static function isAssocList(array $items)
     {
         if (empty($items)) {
@@ -426,6 +486,8 @@ class QueryFiltersBuilder
     }
 
     /**
+     * Parse the value in order to return the query method to apply and the operator
+     * that is needed to be used
      * 
      * @param string $value 
      * @return array 
@@ -433,7 +495,8 @@ class QueryFiltersBuilder
     private static function operatorValue($value)
     {
         // We use == to represent = db comparison operator
-        [$method, $operators, $operator] = ['orWhere', ['>=', '<>', '<=', '=like', '=='], null];
+        [$method, $operators, $operator] = ['orWhere', static::QUERY_OPERATORS, null];
+
         foreach ($operators as $current) {
             // By default we apply the query with or where clause. But in case the developper pass a query string
             // with &&: or and: operator we query using the where clause
@@ -461,10 +524,12 @@ class QueryFiltersBuilder
         } elseif ($operator === '==') {
             $operator = '=';
         }
+        $method = strtotime($value) !== false ? ($method === 'orWhere' ? 'orWhereDate' : 'whereDate') : $method;
         return [$operator, $value, $method];
     }
 
     /**
+     * Returns the supported query operators
      * 
      * @return string[] 
      */
@@ -476,6 +541,7 @@ class QueryFiltersBuilder
             'whereHas',
             'whereDoesntHave',
             'whereDate',
+            'orWhereDate',
             'has',
             'doesntHave',
             'whereIn',
