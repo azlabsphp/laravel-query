@@ -68,7 +68,9 @@ class QueryFiltersBuilder
      */
     public static function filtersFromQueryParameters($model, $parametersBag, $defaults = [])
     {
-        $filters = $defaults ?? [];
+        $filters = Arr::map($defaults ?? [], function($filter) {
+            return Arr::isList($filter) ? $filter : [$filter];
+        });
         if ($parametersBag->has($model->getPrimaryKey()) && null !== $parametersBag->get($model->getPrimaryKey())) {
             $filters['where'][] = [$model->getPrimaryKey(), $parametersBag->get($model->getPrimaryKey())];
         }
