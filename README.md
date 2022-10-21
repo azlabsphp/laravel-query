@@ -8,7 +8,7 @@ This package provides wrapper arround Laravel Illuminate Database ORM. It provid
 // ...
 "require": {
     // Other dependencies
-    "drewlabs/database": "^1.0"
+    "drewlabs/database": "^2.4"
 },
 // ...
 "repositories": [
@@ -73,14 +73,6 @@ Note:
 In it complex form, the create method takes in the attributes to insert and a set of parameters:
 
 ```php
-// [
-//     'upsert' => true, // Optional:Boolean
-//     'upsert_condition' => [
-//         // Condition for an upsertion operation
-//     ],
-//     'method': "create__relation_name_1__relation_name_2" // Complex method definition for inserting data and it child relations
-// ]
-
 $person = $dmlManager->create(
     // Attributes to insert
     [
@@ -101,8 +93,9 @@ $person = $dmlManager->create(
             'url' => 'https://i.picsum.photos/id/733/200/300.jpg?hmac=JYkTVVdGOo8BnLPxu1zWliHFvwXKurY-uTov5YiuX2s'
         ]
     ],
-    // Parameter
     [
+        // Here we tells the query provider to use `profile`, `addresses` keys of `inputs` as relation
+        // methods of the model class
         'relations' => [
             'addresses',
             'profile'
@@ -131,30 +124,13 @@ $example = $dmlManager->create([
 As the `create` method, the `update` method also provides overloaded method implementations for interacting with the database.
 
 ```php
-$person = $ql->update(
-    1, 
-    [
-        'firstname' => 'BENBOSS'
-    ]
-);
+$person = $ql->update(1, ['firstname' => 'BENBOSS']);
 
 // Update by ID String
-$person = $ql->update(
-    "1", 
-    [
-        'firstname' => 'AZANDREW'
-    ]
-);
+$person = $ql->update("1", ['firstname' => 'AZANDREW']);
 
 // Update using query without mass update
-$count = $ql->update(
-    [
-        'where' => ['firstname', 'SIDOINE']
-    ],
-    [
-        'firstname' => 'AZANDREW'
-    ]
-);
+$count = $ql->update(['where' => ['firstname', 'SIDOINE']], ['firstname' => 'AZANDREW']);
 ```
 
 * Delete
@@ -167,12 +143,7 @@ $ql = DMLManager(Person::class);
 $result = $ql->delete(1);
 
     // DELET AN ITEM USING COMPLEX QUERY
-$result = $ql->delete(
-    [
-        'where' => ['firstname', 'SIDOINE']
-    ],
-    true
-);
+$result = $ql->delete(['where' => ['firstname', 'SIDOINE']], true);
 ```
 
 * Select
