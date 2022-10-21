@@ -522,3 +522,189 @@ final class Adresse extends EloquentModel implements ActiveModel, Parseable, Rel
 
 }
 ```
+
+## [v2.5.x] Changes
+
+### SelectQueryAction
+
+`SelectQueryAction` Proxy function provides a typo free function for creating database query action of type `SELECT` .
+
+* SelectQueryAction($id [, array $columns, \Closure $callback])
+
+```php
+use function Drewlabs\Packages\Database\Proxy\SelectQueryAction;
+
+// ...
+
+// Example
+$action = SelectQueryAction($id) // Creates a select by id query
+```
+
+* SelectQueryAction(array $query [, array $columns, \Closure $callback])
+* SelectQueryAction(array $query, int $per_page [?int $page = null, array $columns, \Closure $callback])
+
+```php
+use function Drewlabs\Packages\Database\Proxy\SelectQueryAction;
+
+//...
+
+// Example
+$action = SelectQueryAction([
+ 'where' => ['id', 12],
+ 'whereHas' => ['parent', function($q) {
+     return $q->where('id', <>, 12);
+ }]
+]);
+```
+
+* SelectQueryAction(FiltersInterface $query [, array $columns, \Closure $callback])
+* SelectQueryAction(FiltersInterface $query, int $per_page [?int $page = null, array $columns, \Closure $callback])
+
+```php
+use function Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;
+use function Drewlabs\Packages\Database\Proxy\SelectQueryAction;
+
+// ...
+// Example
+$action = SelectQueryAction(ModelFiltersHandler(...));
+```
+
+### UpdateQueryAction
+
+`UpdateQueryAction` Proxy function provides a typo free function for creating database query action of type `UPDATE` .
+
+* UpdateQueryAction($id, array|object $attributes [, \Closure $callback])
+
+```php
+use function Drewlabs\Packages\Database\Proxy\UpdateQueryAction;
+
+// ...
+
+// Example
+$action = UpdateQueryAction($id, ['name' => 'John Doe'])
+```
+
+* UpdateQueryAction(array $query, array|object $attributes [, \Closure $callback])
+
+```php
+use function Drewlabs\Packages\Database\Proxy\UpdateQueryAction;
+
+// ...
+
+// Example
+$action = UpdateQueryAction(ModelFiltersHandler(...), ['name' => 'John Doe'])
+```
+
+* UpdateQueryAction(FiltersInterface $query, array|object $attributes [, \Closure $callback])
+
+```php
+use function Drewlabs\Packages\Database\Proxy\UpdateQueryAction;
+use function Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;
+
+// ...
+
+// Example
+$action = UpdateQueryAction(['where' => ['id' => 3]], ['name' => 'John Doe'])
+```
+
+### DeleteQueryAction
+
+Creates a `DELETE` type query action using user provided by function user.
+
+* DeleteQueryAction($id [, \Closure $callback])
+
+```php
+use function Drewlabs\Packages\Database\Proxy\DeleteQueryAction;
+
+// ...
+
+// Example
+$action = DeleteQueryAction($id)
+```
+
+* DeleteQueryAction(array $query [, \Closure $callback])
+
+```php
+use function Drewlabs\Packages\Database\Proxy\DeleteQueryAction;
+
+// ...
+
+// Example
+$action = DeleteQueryAction(['where' => ['id' => 3]])
+```
+
+* DeleteQueryAction(FiltersInterface $query [, \Closure $callback])
+
+```php
+use function Drewlabs\Packages\Database\Proxy\DeleteQueryAction;
+use function Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;
+
+// ...
+
+// Example
+$action = DeleteQueryAction(ModelFiltersHandler(...))
+```
+
+### CreateQueryAction
+
+Creates a `CREATE` type query action using user provided by function user
+
+* CreateQueryAction(array $attributes [, array $params, \Closure $callback])
+
+```php
+use function Drewlabs\Packages\Database\Proxy\CreateQueryAction;
+
+// ...
+
+// Example
+$action = CreateQueryAction([...])
+```
+
+* CreateQueryAction(object $attributes, [, array $params , \Closure $callback])
+
+```php
+use function Drewlabs\Packages\Database\Proxy\CreateQueryAction;
+
+// ...
+
+// Example
+$object = new stdClass;
+$object->name = 'John Doe';
+$object->notes = 67;
+
+$action = CreateQueryAction($object);
+```
+
+### useDMLQueryActionCommand
+
+Provides a default action handler command object for database queries.
+
+```php
+use function Drewlabs\Packages\Database\Proxy\useDMLQueryActionCommand;
+use function Drewlabs\Packages\Database\Proxy\DMLManager;
+use function Drewlabs\Packages\Database\Proxy\SelectQueryAction;
+
+$command = useDMLQueryActionCommand(DMLManager(Test::class));
+// Executing command with an action using `exec` method
+$result = $command->exec(SelectQueryAction($id));
+
+// or Executing command using invokable/high order function interface
+$result = $command(SelectQueryAction($id));
+
+// Creatating and executing action in a single line
+useDMLQueryActionCommand(DMLManager(Test::class))(SelectQueryAction($id));
+```
+
+**Note**
+To allow the creator function be more customizable, the function supports
+a second parameter that allow developpers to provides their own custom action handler.
+
+```php
+use function Drewlabs\Packages\Database\Proxy\useDMLQueryActionCommand;
+use function Drewlabs\Packages\Database\Proxy\DMLManager;
+use use Drewlabs\Contracts\Support\Actions\Action;
+
+$command = useDMLQueryActionCommand(DMLManager(Test::class), function(Action $action, ?\Closure $callback = null) {
+     // Provides custom action handlers
+});
+```
