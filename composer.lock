@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b7f19a2d1db701a918e0f137a7a7a8b6",
+    "content-hash": "ba86cf843970af452dcb57ebc1e358f2",
     "packages": [
         {
             "name": "brick/math",
@@ -603,16 +603,16 @@
         },
         {
             "name": "drewlabs/support",
-            "version": "v2.4.0",
+            "version": "v2.4.2",
             "source": {
                 "type": "git",
                 "url": "git@github.com:liksoft/drewlabs-php-support.git",
-                "reference": "5f53681596064f43b1d58c9e711b970600d452ee"
+                "reference": "5836dae2c6dca4c24b4fbc9cc9750e8c27ea2526"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/liksoft/drewlabs-php-support/zipball/5f53681596064f43b1d58c9e711b970600d452ee",
-                "reference": "5f53681596064f43b1d58c9e711b970600d452ee",
+                "url": "https://api.github.com/repos/liksoft/drewlabs-php-support/zipball/5836dae2c6dca4c24b4fbc9cc9750e8c27ea2526",
+                "reference": "5836dae2c6dca4c24b4fbc9cc9750e8c27ea2526",
                 "shasum": ""
             },
             "require": {
@@ -652,10 +652,10 @@
             ],
             "description": "Utility library for creating common objects like value object, collection, action creator etc...",
             "support": {
-                "source": "https://github.com/liksoft/drewlabs-php-support/tree/v2.4.0",
+                "source": "https://github.com/liksoft/drewlabs-php-support/tree/v2.4.2",
                 "issues": "https://github.com/liksoft/drewlabs-php-support/issues"
             },
-            "time": "2022-10-21T07:49:55+00:00"
+            "time": "2022-10-21T10:56:03+00:00"
         },
         {
             "name": "illuminate/collections",

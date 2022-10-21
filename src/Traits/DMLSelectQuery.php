@@ -13,17 +13,20 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Traits;
 
+use Closure;
+use Drewlabs\Contracts\Data\Filters\FiltersInterface;
 use Drewlabs\Contracts\Data\Model\HasRelations;
 use Drewlabs\Core\Helpers\Arr;
 use Drewlabs\Packages\Database\EloquentQueryBuilderMethods;
 use Drewlabs\Packages\Database\EnumerableQueryResult;
 use Drewlabs\Packages\Database\Helpers\QueryColumns;
 
-use function Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;
 use function Drewlabs\Packages\Database\Proxy\SelectQueryResult;
 
 trait DMLSelectQuery
 {
+    use PreparesQueryBuilder;
+
     public function select(...$args)
     {
         return $this->model->getConnection()->transaction(function () use ($args) {
@@ -33,9 +36,13 @@ trait DMLSelectQuery
                 'selectV2',
                 'selectV2_1',
                 'selectV3',
+                'selectV3_1',
+                'selectV4',
+                'selectV4_1',
                 'selectV5',
+                'selectV5_1',
                 'selectV6',
-                'selectV8',
+                'selectV6_1',
                 'selectV0',
             ]);
         });
@@ -110,10 +117,7 @@ trait DMLSelectQuery
         );
     }
 
-    /**
-     * @return Model|mixed
-     */
-    public function selectV0(?\Closure $callback = null)
+    private function selectV0(?\Closure $callback = null)
     {
         $callback = $callback ?? static function ($value) {
             return $value;
@@ -122,7 +126,7 @@ trait DMLSelectQuery
         return $callback($this->selectV3([]));
     }
 
-    public function selectV1(string $id, array $columns, ?\Closure $callback = null)
+    private function selectV1(string $id, array $columns, ?\Closure $callback = null)
     {
         $callback = $callback ?? static function ($value) {
             return $value;
@@ -142,22 +146,22 @@ trait DMLSelectQuery
         );
     }
 
-    public function selectV1_1(string $id, ?\Closure $callback = null)
+    private function selectV1_1(string $id, ?\Closure $callback = null)
     {
         return $this->selectV1($id, ['*'], $callback);
     }
 
-    public function selectV2(int $id, array $columns, ?\Closure $callback = null)
+    private function selectV2(int $id, array $columns, ?\Closure $callback = null)
     {
         return $this->selectV1((string) $id, $columns, $callback);
     }
 
-    public function selectV2_1(int $id, ?\Closure $callback = null)
+    private function selectV2_1(int $id, ?\Closure $callback = null)
     {
         return $this->selectV1((string) $id, ['*'], $callback);
     }
 
-    public function selectV3(array $query, ?\Closure $callback = null)
+    private function selectV3(array $query, ?\Closure $callback = null)
     {
         return $this->createSelector(
             $query,
@@ -172,7 +176,7 @@ trait DMLSelectQuery
         });
     }
 
-    public function selectV5(array $query, array $columns, ?\Closure $callback = null)
+    private function selectV3_1(array $query, array $columns, ?\Closure $callback = null)
     {
         return $this->createSelector(
             $query,
@@ -187,7 +191,7 @@ trait DMLSelectQuery
         });
     }
 
-    public function selectV6(array $query, int $per_page, ?int $page = null, ?\Closure $callback = null)
+    private function selectV4(array $query, int $per_page, ?int $page = null, ?\Closure $callback = null)
     {
         return $this->createSelector(
             $query,
@@ -202,7 +206,7 @@ trait DMLSelectQuery
         });
     }
 
-    public function selectV8(array $query, int $per_page, array $columns, ?int $page = null, ?\Closure $callback = null)
+    private function selectV4_1(array $query, int $per_page, array $columns, ?int $page = null, ?\Closure $callback = null)
     {
         return $this->createSelector(
             $query,
@@ -217,7 +221,74 @@ trait DMLSelectQuery
         });
     }
 
-    private function createSelector(array $query, array $columns, ?\Closure $callback = null)
+    private function selectV5(FiltersInterface $query, ?\Closure $callback = null)
+    {
+        return $this->createSelector(
+            $query,
+            ['*'],
+            $callback
+        )(function ($builder, $columns_) {
+            return $this->proxy(
+                $builder,
+                EloquentQueryBuilderMethods::SELECT,
+                [$columns_]
+            );
+        });
+    }
+
+    private function selectV5_1(FiltersInterface $query, array $columns, ?\Closure $callback = null)
+    {
+        return $this->createSelector(
+            $query,
+            $columns,
+            $callback
+        )(function ($builder, $columns_) {
+            return $this->proxy(
+                $builder,
+                EloquentQueryBuilderMethods::SELECT,
+                [$columns_]
+            );
+        });
+    }
+
+    private function selectV6(FiltersInterface $query, int $per_page, ?int $page = null, ?\Closure $callback = null)
+    {
+        return $this->createSelector(
+            $query,
+            ['*'],
+            $callback
+        )(function ($builder, $columns_) use ($per_page, $page) {
+            return $this->proxy(
+                $builder,
+                EloquentQueryBuilderMethods::PAGINATE,
+                [$per_page, $columns_, null, $page ?? 1]
+            );
+        });
+    }
+
+    private function selectV6_1(FiltersInterface $query, int $per_page, array $columns, ?int $page = null, ?\Closure $callback = null)
+    {
+        return $this->createSelector(
+            $query,
+            $columns,
+            $callback
+        )(function ($builder, $columns_) use ($per_page, $page) {
+            return $this->proxy(
+                $builder,
+                EloquentQueryBuilderMethods::PAGINATE,
+                [$per_page, $columns_, null, $page ?? 1]
+            );
+        });
+    }
+
+    /**
+     * 
+     * @param array|FiltersInterface $query 
+     * @param array $columns 
+     * @param null|Closure $callback 
+     * @return Closure 
+     */
+    private function createSelector($query, array $columns, ?\Closure $callback = null)
     {
         return function (\Closure $selector) use ($query, $columns, $callback) {
             $callback = $callback ?? static function ($value) {
@@ -230,18 +301,15 @@ trait DMLSelectQuery
             $declared_columns = $model->getDeclaredColumns();
             $primaryKey = $model->getPrimaryKey();
             $hidden_columns = $model->getHidden();
-            [$columns_, $relations] = QueryColumns::asTuple(
-                $columns,
-                $declared_columns,
-                $model_relations
-            );
-            // Apply user contructed query on the model instance to create query builder object
-            $builder = array_reduce(Arr::isnotassoclist($query) ? $query : [$query], static function ($model, $q) {
-                return ModelFiltersHandler($q)->apply($model);
-            }, $model);
+            [$columns_, $relations] = QueryColumns::asTuple($columns, $declared_columns, $model_relations);
+            // We prepare the query builder object    
+            $builder = $this->prepareQueryBuilder($model, $query);
+
+            // Add relationship queries to the builder if the relationship array is not empty
             if (!empty($relations)) {
                 $builder = $this->proxy($builder, 'with', [$relations]);
             }
+
             // Create set columns that must not be included in the output result
             $except_columns = array_unique((!empty($columns_) && !in_array('*', $columns_)) ?
                 array_merge($hidden_columns, array_diff(Arr::filter($declared_columns, function ($column) use ($primaryKey) {

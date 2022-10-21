@@ -13,118 +13,103 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Traits;
 
+use Drewlabs\Contracts\Data\Filters\FiltersInterface;
 use Drewlabs\Contracts\Data\Model\Model;
-use Drewlabs\Core\Helpers\Arr;
 use Drewlabs\Core\Helpers\Str;
 use Drewlabs\Packages\Database\EloquentQueryBuilderMethods;
 use Drewlabs\Packages\Database\TouchedModelRelationsHandler;
 
-use function Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;
-
 trait DMLUpdateQuery
 {
+    use PreparesQueryBuilder, ConvertAttributes;
+
     public function update(...$args)
     {
         return $this->model->getConnection()->transaction(function () use ($args) {
             return $this->overload($args, [
+                'updateV1',
+                'updateV1_1',
                 'updateV2',
                 'updateV3',
                 'updateV4',
                 'updateV5',
-                'updateV6',
             ]);
         });
     }
 
-    public function updateV2(
-        array $query,
-        array $attributes,
+    private function updateV1(array $query, $attributes, bool $batch = false)
+    {
+        return $this->updateByQueryCommand($query, $attributes, $batch);
+    }
+
+    private function updateV1_1(FiltersInterface $query, $attributes, bool $batch = false)
+    {
+        return $this->updateByQueryCommand($query, $attributes, $batch);
+    }
+
+    private function updateV2(
+        int $id,
+        $attributes,
+        ?\Closure $callback = null
+    ) {
+        return $this->updateCommand((string) $id, $attributes, [], $callback);
+    }
+
+    private function updateV3(int $id, $attributes, $params, ?\Closure $callback = null)
+    {
+        return $this->updateCommand((string) $id, $attributes, $params, $callback);
+    }
+
+    private function updateV4(string $id, $attributes, ?\Closure $callback = null)
+    {
+        return $this->updateCommand((string) $id, $attributes, [], $callback);
+    }
+
+    private function updateV5(string $id, $attributes, $params, ?\Closure $callback = null)
+    {
+        return $this->updateCommand($id, $attributes, $params, $callback);
+    }
+
+    /**
+     * Execute the updated query against the model instance
+     * 
+     * @param array|FiltersInterface $query 
+     * @param array $attributes 
+     * @param bool $batch 
+     * @return mixed 
+     */
+    private function updateByQueryCommand(
+        $query,
+        $attributes,
         bool $batch = false
     ) {
-        return $this->updateByQuery($query, $attributes, $batch);
+        $attributes = $this->attributesToArray($attributes);
+        return $batch ? $this->proxy(
+            $this->prepareQueryBuilder(drewlabs_core_create_attribute_getter('model', null)($this), $query),
+            EloquentQueryBuilderMethods::UPDATE,
+            [$this->parseAttributes(($attributes instanceof Model) ? $attributes->toArray() : $attributes)]
+        ) : array_reduce(
+            $this->select($query)->all(),
+            function ($carry, $value) use ($attributes) {
+                $this->proxy(
+                    $value,
+                    EloquentQueryBuilderMethods::UPDATE,
+                    [$this->parseAttributes(($attributes instanceof Model) ? $attributes->toArray() : $attributes)]
+                );
+                ++$carry;
+
+                return $carry;
+            },
+            0
+        );
     }
 
-    public function updateV3(
-        int $id,
-        array $attributes,
-        ?\Closure $callback = null
-    ) {
-        return $this->updateByID((string) $id, $attributes, [], $callback);
-    }
-
-    public function updateV4(
-        int $id,
-        array $attributes,
-        $params,
-        ?\Closure $callback = null
-    ) {
-        return $this->updateByID((string) $id, $attributes, $params, $callback);
-    }
-
-    public function updateV5(
-        string $id,
-        array $attributes,
-        ?\Closure $callback = null
-    ) {
-        return $this->updateByID((string) $id, $attributes, [], $callback);
-    }
-
-    public function updateV6(
-        string $id,
-        array $attributes,
-        $params,
-        ?\Closure $callback = null
-    ) {
-        return $this->updateByID($id, $attributes, $params, $callback);
-    }
-
-    private function updateByQuery(
-        array $query,
-        array $attributes,
-        bool $batch = false
-    ) {
-        if ($batch) {
-            return $this->proxy(
-                array_reduce(
-                    Arr::isnotassoclist($query) ?
-                        $query :
-                        [$query],
-                    static function ($model, $q) {
-                        return ModelFiltersHandler($q)->apply($model);
-                    },
-                    drewlabs_core_create_attribute_getter('model', null)($this)
-                ),
-                EloquentQueryBuilderMethods::UPDATE,
-                [$this->parseAttributes(($attributes instanceof Model) ? $attributes->toArray() : $attributes)]
-            );
-        } else {
-            // Loop through the matching columns and update each
-            return array_reduce(
-                $this->select($query)->all(),
-                function ($carry, $value) use ($attributes) {
-                    $this->proxy(
-                        $value,
-                        EloquentQueryBuilderMethods::UPDATE,
-                        [$this->parseAttributes(($attributes instanceof Model) ? $attributes->toArray() : $attributes)]
-                    );
-                    ++$carry;
-
-                    return $carry;
-                },
-                0
-            );
-        }
-    }
-
-    private function updateByID(
-        $id,
-        array $attributes,
-        $params,
-        ?\Closure $callback = null
-    ) {
+    private function updateCommand($id, $attributes, $params, ?\Closure $callback = null)
+    {
         $callback = $callback ?? static function ($value) {
             return $value;
         };
+        $attributes = $this->attributesToArray($attributes);
         // $that = $this;
         // region Update Handler func
         // TODO : Add an update handler func that update the model
@@ -141,7 +126,7 @@ trait DMLUpdateQuery
                 $callback
             ) {
                 $model = drewlabs_core_create_attribute_getter('model', null)($self);
-                $this->updateByQuery(['where' => [$model->getPrimaryKey(), $key]], $values);
+                $this->updateByQueryCommand(['where' => [$model->getPrimaryKey(), $key]], $values);
                 // Select the updated model
                 $model_ = $this->select($key);
                 // If there is a callable, call the callable, passing in updated model first and the other

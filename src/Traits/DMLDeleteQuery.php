@@ -13,13 +13,13 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Traits;
 
-use Drewlabs\Core\Helpers\Arr;
+use Drewlabs\Contracts\Data\Filters\FiltersInterface;
 use Drewlabs\Packages\Database\EloquentQueryBuilderMethods;
-
-use function Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;
 
 trait DMLDeleteQuery
 {
+    use PreparesQueryBuilder;
+
     public function delete(...$args)
     {
         return $this->model->getConnection()->transaction(function () use ($args) {
@@ -35,7 +35,7 @@ trait DMLDeleteQuery
     /**
      * @return bool
      */
-    public function deleteV1(int $id)
+    private function deleteV1(int $id)
     {
         return $this->deleteV2((string) $id);
     }
@@ -43,66 +43,54 @@ trait DMLDeleteQuery
     /**
      * @return bool
      */
-    public function deleteV2(string $id)
+    private function deleteV2(string $id)
     {
-        return 1 === (int) ($this->deleteV3(
-            [
-                'where' => [
-                    drewlabs_core_create_attribute_getter('model', null)($this)->getPrimaryKey(),
-                    $id,
-                ],
-            ]
-        )) ? true : false;
+        return 1 === (int) ($this->deleteV3([
+            'where' => [
+                drewlabs_core_create_attribute_getter('model', null)($this)->getPrimaryKey(),
+                $id,
+            ],
+        ])) ? true : false;
     }
 
     /**
      * @return int
      */
-    public function deleteV3(array $query)
+    private function deleteV3(array $query, ?bool $batch = false)
     {
-        return $this->applyDelete($query);
+        return $this->deleteCommand($query, $batch);
     }
 
     /**
      * @return int
      */
-    public function deleteV4(array $query, bool $batch)
+    private function deleteV4(FiltersInterface $query, ?bool $batch = false)
     {
-        return $this->applyDelete($query, $batch);
+        return $this->deleteCommand($query, $batch);
     }
 
-    private function applyDelete(array $query, bool $batch = false)
+    /**
+     * Executes the delete query on the query model
+     * 
+     * @param FiltersInterface|array $query 
+     * @param bool $batch 
+     * @return mixed 
+     */
+    private function deleteCommand($query, bool $batch = false)
     {
-        if ($batch) {
-            return $this->proxy(
-                array_reduce(
-                    Arr::isnotassoclist($query) ?
-                        $query :
-                        [$query],
-                    static function ($model, $q) {
-                        return ModelFiltersHandler($q)->apply($model);
-                    },
-                    drewlabs_core_create_attribute_getter('model', null)($this)
-                ),
+        return $batch ? $this->proxy(
+            $this->prepareQueryBuilder(drewlabs_core_create_attribute_getter('model', null)($this), $query),
+            EloquentQueryBuilderMethods::DELETE,
+            []
+        ) : array_reduce($this->select($query)->all(), function ($carry, $value) {
+            $this->proxy(
+                $value,
                 EloquentQueryBuilderMethods::DELETE,
                 []
             );
-        } else {
-            // Loop through the matching columns and update each
-            return array_reduce(
-                $this->select($query)->all(),
-                function ($carry, $value) {
-                    $this->proxy(
-                        $value,
-                        EloquentQueryBuilderMethods::DELETE,
-                        []
-                    );
-                    ++$carry;
+            ++$carry;
 
-                    return $carry;
-                },
-                0
-            );
-        }
+            return $carry;
+        }, 0);
     }
 }

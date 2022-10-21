@@ -24,9 +24,8 @@ use function Drewlabs\Packages\Database\Proxy\DMLManager;
 
 trait DMLCreateQuery
 {
-    /**
-     * {@inheritDoc}
-     */
+    use ConvertAttributes;
+    
     public function create(...$args)
     {
         return $this->model->getConnection()->transaction(function () use ($args) {
@@ -38,39 +37,27 @@ trait DMLCreateQuery
         });
     }
 
-    /**
-     * @return Model
-     */
-    public function createV1(array $attributes, ?\Closure $callback = null)
+    private function createV1($attributes, ?\Closure $callback = null)
     {
         $callback = $callback ?: static function ($param) {
             return $param;
         };
-
         return $callback(
             $this->proxy(
                 drewlabs_core_create_attribute_getter('model', null)($this),
                 EloquentQueryBuilderMethods::CREATE,
-                [$this->parseAttributes($attributes)]
+                [$this->parseAttributes($this->attributesToArray($attributes))]
             )
         );
     }
 
-    /**
-     * @param mixed $params
-     *
-     * @throws \InvalidArgumentException
-     * @throws \RuntimeException
-     *
-     * @return mixed
-     */
-    public function createV2(array $attributes, $params, ?\Closure $callback = null)
+    private function createV2($attributes, $params, ?\Closure $callback = null)
     {
         if (!(\is_array($params) || ($params instanceof DataProviderHandlerParamsInterface))) {
             throw new \InvalidArgumentException('Argument 2 of the create method must be an array or an instance of ' . DataProviderHandlerParamsInterface::class);
         }
 
-        return $this->handleCreateStatement(
+        return $this->createCommand(
             $attributes,
             drewlabs_database_parse_create_handler_params($params),
             false,
@@ -78,17 +65,12 @@ trait DMLCreateQuery
         );
     }
 
-    /**
-     * @param array|DataProviderHandlerParamsInterface $params
-     *
-     * @return Model
-     */
-    public function createV3(array $attributes, $params, bool $batch, ?\Closure $callback = null)
+    private function createV3($attributes, $params, bool $batch, ?\Closure $callback = null)
     {
         if (!(\is_array($params) || ($params instanceof DataProviderHandlerParamsInterface))) {
             throw new \InvalidArgumentException('Argument 2 of the create method must be an array or an instance of ' . DataProviderHandlerParamsInterface::class);
         }
-        return $this->handleCreateStatement(
+        return $this->createCommand(
             $attributes,
             drewlabs_database_parse_create_handler_params($params),
             $batch,
@@ -99,18 +81,19 @@ trait DMLCreateQuery
     /**
      * Base method that provides create implementation of the DML manager class
      *
-     * @param array $attributes
+     * @param array|object $attributes
      * @param array $params
      * @param bool $batch
      * @param null|Closure $callback
      * @return mixed
      * @throws RuntimeException
      */
-    private function handleCreateStatement(array $attributes, array $params, bool $batch = false, ?\Closure $callback = null)
+    private function createCommand($attributes, array $params, bool $batch = false, ?\Closure $callback = null)
     {
         $callback = $callback ?: static function ($param) {
             return $param;
         };
+        $attributes = $this->attributesToArray($attributes);
         $method = $params['method'] ?? EloquentQueryBuilderMethods::CREATE;
         $upsert_conditions = $params['upsert_conditions'] ?: [];
         $upsert = $params['upsert'] && !empty($upsert_conditions) ? true : false;

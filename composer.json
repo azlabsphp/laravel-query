@@ -1,6 +1,6 @@
 {
     "name": "drewlabs/database",
-    "description": "Provides functionnalities for accessing and working with databases using laravel Eloquent, or NoSQL Datatabase providers",
+    "description": "Provides functionnalities for accessing and working with databases using eloquent, or NoSQL database providers",
     "type": "library",
     "license": "MIT",
     "authors": [{
@@ -14,10 +14,10 @@
         "illuminate/database": "^7.0|^8.0|^9.0",
         "illuminate/support": "^7.0|^8.0|^9.0",
         "illuminate/pagination": "^7.0|^8.0|^9.0",
+        "doctrine/dbal": "^2.0|^3.1",
         "drewlabs/contracts": "^2.5",
         "drewlabs/core-helpers": "^2.3",
-        "doctrine/dbal": "^2.0|^3.1",
-        "drewlabs/support": "^2.3"
+        "drewlabs/support": "^2.4"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.0",
