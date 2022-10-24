@@ -170,14 +170,14 @@ trait DMLCreateQuery
             }
             $embededRelations = [];
             foreach ($relations as $rel) {
-                # code...
+                // code...
                 if (Str::startsWith($rel, "$value.")) {
                     $embededRelations[] = Str::after("$value.", $rel);
                     unset($relations[$rel]);
                 }
             }
             $createdInstance = DMLManager($parent)->create($attributes[$value], [
-                'relations' => $embededRelations
+                'relations' => $embededRelations,
             ]);
             // Once the create query of the parent model is executed, we add the foreign
             // key to the current instance attributes
@@ -185,7 +185,6 @@ trait DMLCreateQuery
             // Remove the relation from the list of relations to create after model
             // gets created
             unset($relations[$i], $attributes[$value]);
-
         }
 
         return $attributes;

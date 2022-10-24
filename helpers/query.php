@@ -16,7 +16,6 @@ use Drewlabs\Contracts\Data\Model\Model;
 use Drewlabs\Contracts\Data\Model\Parseable;
 use Drewlabs\Packages\Database\QueryFiltersBuilder;
 
-
 if (!function_exists('drewlabs_databse_parse_client_request_query')) {
     /**
      * Parse query provided in a client /GET request.
