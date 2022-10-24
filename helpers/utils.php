@@ -20,7 +20,7 @@ if (!function_exists('create_relations_after_create')) {
 
     /**
      * Call Eloquent model relation {create}/{updateOrCreate} method after the model is inserted.
-     * 
+     *
      * @deprecated v2.3.x
      *
      * @param mixed $model
@@ -74,6 +74,7 @@ if (!function_exists('create_relations_after_create')) {
                         $model->$relation()->create($attributes)
                     );
                 };
+
                 return Arr::isnotassoclist($inputs) ? $createMany($model, $relation, $inputs) : $createOne($model, $relation, $inputs);
             }
 
@@ -86,7 +87,7 @@ if (!function_exists('upsert_relations_after_update')) {
 
     /**
      * Update or create Eloquent model after it was updated.
-     * 
+     *
      * @deprecated v2.3.x
      *
      * @param \Illuminate\Database\Eloquent\Model $model
@@ -128,6 +129,7 @@ if (!function_exists('upsert_relations_after_update')) {
                         })($model, $relation);
                 }
             }
+
             return $model;
         }, $model);
     }
@@ -138,6 +140,7 @@ if (!function_exists('drewlabs_database_update_or_create')) {
     /**
      * @param \Illuminate\Database\Eloquent\Model $relation
      * @param array                               $value
+     *
      * @deprecated v2.3.x
      *
      * @return mixed
@@ -157,7 +160,9 @@ if (!function_exists('drewlabs_database_is_dynamic_create_method')) {
 
     /**
      * Check if a provided method name is a dynamic method starting with [create] or [insert].
+     *
      * @deprecated v2.3.x
+     *
      * @return bool
      */
     function drewlabs_database_is_dynamic_create_method(string $method)
@@ -178,7 +183,9 @@ if (!function_exists('drewlabs_database_is_dynamic_update_method')) {
 
     /**
      * Check if a provided method name is a dynamic method starting with [update].
+     *
      * @deprecated v2.3.x
+     *
      * @return bool
      */
     function drewlabs_database_is_dynamic_update_method(string $method)

@@ -27,7 +27,7 @@ if (!function_exists('drewlabs_databse_parse_client_request_query_params')) {
      * @throws \InvalidArgumentException
      *
      * @return array|mixed
-     * 
+     *
      * @deprecated v2.3.x Will be remove in future releases.
      */
     function drewlabs_databse_parse_client_request_query_params($model, $params_bag)
@@ -47,7 +47,7 @@ if (!function_exists('drewlabs_databse_parse_client_request_query_input')) {
      * @throws InvalidArgumentException
      *
      * @return array
-     * 
+     *
      * @deprecated v2.3.x Will be remove in future releases.
      */
     function drewlabs_databse_parse_client_request_query_input($params_bag, $in = [])
@@ -84,7 +84,7 @@ if (!function_exists('drewlabs_database_parse_query_method_params')) {
      * @throws \InvalidArgumentException
      *
      * @return \Closure|array<string, mixed>
-     * 
+     *
      * @deprecated v2.3.x Will be remove in future releases.
      */
     function drewlabs_database_parse_query_method_params($method, $params)
@@ -133,7 +133,7 @@ if (!function_exists('drewlabs_database_parse_where_null_query')) {
      * @throws \InvalidArgumentException
      *
      * @return string
-     * 
+     *
      * @deprecated v2.3.x Will be remove in future releases.
      */
     function drewlabs_database_parse_where_null_query($params)
@@ -228,7 +228,7 @@ if (!function_exists('drewlabs_database_parse_order_by_query')) {
      * @throws \InvalidArgumentException
      *
      * @return array<string, string>
-     * 
+     *
      * @deprecated v2.3.x Will be remove in future releases.
      */
     function drewlabs_database_parse_order_by_query(array $params)
@@ -250,7 +250,7 @@ if (!function_exists('drewlabs_database_parse_in_query')) {
      * @throws \InvalidArgumentException
      *
      * @return array<mixed, mixed>
-     * 
+     *
      * @deprecated v2.3.x Will be remove in future releases.
      */
     function drewlabs_database_parse_in_query(array $query)
@@ -287,7 +287,7 @@ if (!function_exists('drewlabs_database_parse_client_where_query')) {
      * @throws \InvalidArgumentException
      *
      * @return array
-     * 
+     *
      * @deprecated v2.3.x Will be remove in future releases.
      */
     function drewlabs_database_parse_client_where_query(array $query)
@@ -315,7 +315,7 @@ if (!function_exists('drewlabs_database_validate_query_object')) {
      * @throws \InvalidArgumentException
      *
      * @return void
-     * 
+     *
      * @deprecated v2.3.x Will be remove in future releases.
      */
     function drewlabs_database_validate_query_object(array $params)
@@ -334,7 +334,7 @@ if (!function_exists('drewlabs_database_build_inner_query')) {
      * @throws \InvalidArgumentException
      *
      * @return \Closure
-     * 
+     *
      * @deprecated v2.3.x Will be remove in future releases.
      */
     function drewlabs_database_build_inner_query(array $query)
@@ -363,7 +363,7 @@ if (!function_exists('drewlabs_database_client_parse_subquery')) {
      * @throws \InvalidArgumentException
      *
      * @return array<string, \Closure>
-     * 
+     *
      * @deprecated v2.3.x Will be remove in future releases.
      */
     function drewlabs_database_client_parse_subquery(array $query)
@@ -389,11 +389,11 @@ if (!function_exists('drewlabs_core_supported_query_methods')) {
      * Returns the list of query methods supported by the database package.
      *
      * @return array
-     * 
+     *
      * @deprecated v2.3.x Will be remove in future releases.
      */
     function drewlabs_database_supported_query_methods()
     {
-       return QueryFiltersBuilder::getSupportedQueryMethods();
+        return QueryFiltersBuilder::getSupportedQueryMethods();
     }
 }

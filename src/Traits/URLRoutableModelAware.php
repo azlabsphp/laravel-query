@@ -34,6 +34,7 @@ trait URLRoutableModelAware
 
         return null;
     }
+
     /**
      * {@inheritDoc}
      *
@@ -67,7 +68,7 @@ trait URLRoutableModelAware
     }
 
     /**
-     * @return \Illuminate\Contracts\Routing\UrlRoutable|null|mixed
+     * @return \Illuminate\Contracts\Routing\UrlRoutable|mixed|null
      */
     protected function getInstance()
     {

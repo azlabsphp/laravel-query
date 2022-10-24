@@ -30,36 +30,83 @@ final class ModelAttributesParser implements ModelAttributeParser
      */
     private $attributes;
 
+    public function __destruct()
+    {
+        unset($this->model);
+    }
+
     /**
-     * Creates an attribute builder instance from the model parameter
-     * 
-     * @param string|object $model 
-     * @return static 
+     * Creates an attribute builder instance from the model parameter.
+     *
+     * @param string|object $model
+     *
+     * @return static
      */
     public static function new($model)
     {
-        $static =  new static;
-        $static->model = is_string($model) ? new $model : $model;
+        $static = new static();
+        $static->model = \is_string($model) ? new $model() : $model;
+
         return $static;
     }
 
     /**
-     * Build Model attributest from a dirty attributes provided by the library user
-     * 
-     * @param array $dirty 
-     * @return array 
+     * Build Model attributest from a dirty attributes provided by the library user.
+     *
+     * @return array
      */
     public function build(array $dirty)
     {
         if (!(method_exists($this->model, 'getFillable'))) {
             throw new ModelTypeException([Model::class, Parseable::class], ' or must at least contains mthods getFillable()');
         }
+
         return $this->buildAttributes($dirty);
     }
 
-    public function __destruct()
+    // #region Deprecation
+    /**
+     * {@inheritDoc}
+     *
+     * @deprecated v2.4.x
+     */
+    public function setModel($model)
     {
-        unset($this->model);
+        $this->model = clone $model;
+
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @deprecated v2.4.x
+     */
+    public function getModel()
+    {
+        return clone $this->model;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @deprecated v2.4.x
+     */
+    public function setModelInputState(array $inputs)
+    {
+        $this->attributes = $this->build($inputs);
+
+        return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @deprecated v2.4.x
+     */
+    public function getModelInputState()
+    {
+        return $this->attributes;
     }
 
     /**
@@ -83,51 +130,8 @@ final class ModelAttributesParser implements ModelAttributeParser
                 $attributes[$value] = $inputs[$value];
             }
         }
+
         return $attributes;
     }
-
-    //#region Deprecation
-    /**
-     * {@inheritDoc}
-     * 
-     * @deprecated v2.4.x
-     */
-    public function setModel($model)
-    {
-        $this->model = clone $model;
-
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @deprecated v2.4.x
-     */
-    public function getModel()
-    {
-        return clone $this->model;
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @deprecated v2.4.x
-     */
-    public function setModelInputState(array $inputs)
-    {
-        $this->attributes = $this->build($inputs);
-        return $this;
-    }
-
-    /**
-     * {@inheritDoc}
-     * 
-     * @deprecated v2.4.x
-     */
-    public function getModelInputState()
-    {
-        return $this->attributes;
-    }
-    //#endregion Deprecation
+    // #endregion Deprecation
 }

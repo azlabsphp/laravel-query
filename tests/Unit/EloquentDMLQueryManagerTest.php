@@ -263,7 +263,6 @@ class EloquentDMLQueryManagerTest extends TestCase
         $this->assertSame(2, $manager->selectAggregate([], AggregationMethods::COUNT));
     }
 
-
     public function test_select_relations_as_columns()
     {
         $person = $this->personFactory()->create([
@@ -283,10 +282,10 @@ class EloquentDMLQueryManagerTest extends TestCase
         ]);
         $profil = $this->profilFactory()->create([
            'person_id' => $person->getKey(),
-           'url' => 'https://picsum.photos/id/1/200/300'
+           'url' => 'https://picsum.photos/id/1/200/300',
         ]);
         $profiles = DMLManager(Profil::class)->select($profil->getKey(), ['*', 'person.addresses']);
-        $this->assertEquals($profiles->person->getKey(), $person->getKey());
+        $this->assertSame($profiles->person->getKey(), $person->getKey());
     }
 
     public function test_dml_create_model_and_parent_relation()
@@ -299,9 +298,9 @@ class EloquentDMLQueryManagerTest extends TestCase
                 'phonenumber' => '509-733-6988',
                 'age' => 74,
                 'sex' => 'F',
-            ]
+            ],
         ], [
-            'relations' => ['person', 'addresses']
+            'relations' => ['person', 'addresses'],
         ]);
         $this->assertNotNull(DMLManager(Profil::class)->select($profil->getKey()));
         $this->assertNotNull(Person::where('firstname', 'Laura')->where('lastname', 'R. Clifford')->first());

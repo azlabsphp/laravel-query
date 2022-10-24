@@ -39,92 +39,6 @@ class TestCase extends FrameworkTestCase
         $this->migrateIdentitiesTable();
     }
 
-
-    protected function profilFactory()
-    {
-        return new class()
-        {
-            /**
-             * Creates an instance of the Profil model
-             * 
-             * @param array $attributes 
-             * @return Profil 
-             */
-            public function make(array $attributes = [])
-            {
-                return new Profil($attributes);
-            }
-
-            /**
-             * Creates and instance of Profil object and persist it to the database
-             * 
-             * @param array $attributes 
-             * @return Profil 
-             */
-            public function create(array $attributes)
-            {
-                return Profil::create($attributes);
-            }
-        };
-    }
-
-    protected function addressFactory()
-    {
-        return new class()
-        {
-            /**
-             * Creates an instance of the Address model
-             * 
-             * @param array $attributes 
-             * @return Address 
-             */
-            public function make(array $attributes = [])
-            {
-                return new Address($attributes);
-            }
-
-            /**
-             * Creates and instance of Address object and persist it to the database
-             * 
-             * @param array $attributes 
-             * @return Address 
-             */
-            public function create(array $attributes)
-            {
-                return Address::create($attributes);
-            }
-        };
-    }
-
-    protected function personFactory()
-    {
-        return new class()
-        {
-
-            /**
-             * Creates an instance of the person model
-             * 
-             * @param array $attributes 
-             * @return Person 
-             */
-            public function make(array $attributes = [])
-            {
-                return new Person($attributes);
-            }
-
-            /**
-             * Creates and instance of Person object and persist it to the database
-             * 
-             * @param array $attributes 
-             * @return Person 
-             */
-            public function create(array $attributes)
-            {
-                return Person::create($attributes);
-            }
-        };
-    }
-
     public function migrateIdentitiesTable()
     {
         Manager::schema()->create('persons', static function (Blueprint $table) {
@@ -138,7 +52,7 @@ class TestCase extends FrameworkTestCase
             $table->enum('sex', ['M', 'F']);
             $table->timestamps();
         });
-        
+
         Manager::schema()->create('managers', static function (Blueprint $table) {
             $table->increments('id');
             $table->string('name', 100);
@@ -175,7 +89,6 @@ class TestCase extends FrameworkTestCase
             $table->timestamps();
         });
 
-
         // Morph tables definitions
         Manager::schema()->create('individuals', static function (Blueprint $table) {
             $table->increments('id');
@@ -202,8 +115,7 @@ class TestCase extends FrameworkTestCase
             $table->timestamps();
         });
 
-
-        //#region Post - Video - Comments
+        // #region Post - Video - Comments
         Manager::schema()->create('posts', static function (Blueprint $table) {
             $table->increments('id');
             $table->string('title');
@@ -240,7 +152,7 @@ class TestCase extends FrameworkTestCase
             $table->integer('score');
             $table->timestamps();
         });
-        //#endregion Posts - Video - Comments
+        // #endregion Posts - Video - Comments
 
         // Seed table with default values
         $p1 = Person::create(
@@ -251,7 +163,7 @@ class TestCase extends FrameworkTestCase
                 'age' => 24,
                 'sex' => 'M',
                 'is_active' => 0,
-                'email' => 'benjaminpayaro@gmail.com'
+                'email' => 'benjaminpayaro@gmail.com',
             ],
             true,
             false,
@@ -265,7 +177,7 @@ class TestCase extends FrameworkTestCase
                 'age' => 28,
                 'sex' => 'M',
                 'is_active' => 1,
-                'email' => 'azandrewdevelopper@gmail.com'
+                'email' => 'azandrewdevelopper@gmail.com',
             ],
             true,
             false,
@@ -309,6 +221,81 @@ class TestCase extends FrameworkTestCase
     public function init()
     {
         $this->assertTrue(true);
+    }
+
+    protected function profilFactory()
+    {
+        return new class() {
+            /**
+             * Creates an instance of the Profil model.
+             *
+             * @return Profil
+             */
+            public function make(array $attributes = [])
+            {
+                return new Profil($attributes);
+            }
+
+            /**
+             * Creates and instance of Profil object and persist it to the database.
+             *
+             * @return Profil
+             */
+            public function create(array $attributes)
+            {
+                return Profil::create($attributes);
+            }
+        };
+    }
+
+    protected function addressFactory()
+    {
+        return new class() {
+            /**
+             * Creates an instance of the Address model.
+             *
+             * @return Address
+             */
+            public function make(array $attributes = [])
+            {
+                return new Address($attributes);
+            }
+
+            /**
+             * Creates and instance of Address object and persist it to the database.
+             *
+             * @return Address
+             */
+            public function create(array $attributes)
+            {
+                return Address::create($attributes);
+            }
+        };
+    }
+
+    protected function personFactory()
+    {
+        return new class() {
+            /**
+             * Creates an instance of the person model.
+             *
+             * @return Person
+             */
+            public function make(array $attributes = [])
+            {
+                return new Person($attributes);
+            }
+
+            /**
+             * Creates and instance of Person object and persist it to the database.
+             *
+             * @return Person
+             */
+            public function create(array $attributes)
+            {
+                return Person::create($attributes);
+            }
+        };
     }
 
     protected function configureDatabase()

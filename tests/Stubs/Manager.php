@@ -22,47 +22,41 @@ class Manager extends Model implements ORMModel
     use TraitsModel;
 
     /**
-     *
-     * @var string
-     */
-    protected $table = 'managers';
-
-    /**
-     *
-     * @var string
-     */
-    protected $primaryKey = 'id';
-
-    /**
-     * 
-     * @var array
-     */
-    protected $hidden = [];
-
-    /**
-     * 
-     * @var array
-     */
-    protected $appends = [];
-
-    /**
-     *
      * @var array
      */
     public $relation_methods = ['persons'];
 
     /**
-     *
+     * @var string
+     */
+    protected $table = 'managers';
+
+    /**
+     * @var string
+     */
+    protected $primaryKey = 'id';
+
+    /**
+     * @var array
+     */
+    protected $hidden = [];
+
+    /**
+     * @var array
+     */
+    protected $appends = [];
+
+    /**
      * @var array
      */
     protected $fillable = [
         'id',
         'name',
-        'position'
+        'position',
     ];
 
     /**
-     * Get list of persons being managed
+     * Get list of persons being managed.
      */
     public function persons()
     {

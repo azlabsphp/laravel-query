@@ -22,37 +22,31 @@ class Post extends Model implements ORMModel
     use TraitsModel;
 
     /**
-     *
-     * @var string
-     */
-    protected $table = 'posts';
-
-    /**
-     *
-     * @var string
-     */
-    protected $primaryKey = 'id';
-
-    /**
-     * 
-     * @var array
-     */
-    protected $hidden = [];
-
-    /**
-     * 
-     * @var array
-     */
-    protected $appends = [];
-
-    /**
-     *
      * @var array
      */
     public $relation_methods = ['comments'];
 
     /**
-     *
+     * @var string
+     */
+    protected $table = 'posts';
+
+    /**
+     * @var string
+     */
+    protected $primaryKey = 'id';
+
+    /**
+     * @var array
+     */
+    protected $hidden = [];
+
+    /**
+     * @var array
+     */
+    protected $appends = [];
+
+    /**
      * @var array
      */
     protected $fillable = [
@@ -76,5 +70,4 @@ class Post extends Model implements ORMModel
     {
         return $this->morphToMany(Tag::class, 'taggable');
     }
-
 }

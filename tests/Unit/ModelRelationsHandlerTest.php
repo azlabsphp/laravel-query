@@ -1,9 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
+/*
+ * This file is part of the Drewlabs package.
+ *
+ * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Drewlabs\Packages\Database\Tests\Unit;
 
+use function Drewlabs\Packages\Database\Proxy\DMLManager;
 use Drewlabs\Packages\Database\Tests\Stubs\Address;
-use Drewlabs\Packages\Database\TouchedModelRelationsHandler;
 use Drewlabs\Packages\Database\Tests\Stubs\Individual;
 use Drewlabs\Packages\Database\Tests\Stubs\Manager;
 use Drewlabs\Packages\Database\Tests\Stubs\Member;
@@ -12,9 +23,9 @@ use Drewlabs\Packages\Database\Tests\Stubs\Person;
 use Drewlabs\Packages\Database\Tests\Stubs\Post;
 use Drewlabs\Packages\Database\Tests\Stubs\Video;
 use Drewlabs\Packages\Database\Tests\TestCase;
-use Illuminate\Database\Eloquent\Collection;
+use Drewlabs\Packages\Database\TouchedModelRelationsHandler;
 
-use function Drewlabs\Packages\Database\Proxy\DMLManager;
+use Illuminate\Database\Eloquent\Collection;
 
 class ModelRelationsHandlerTest extends TestCase
 {
@@ -36,13 +47,12 @@ class ModelRelationsHandlerTest extends TestCase
             'sex' => 'M',
             'member' => [
                 'phonenumber' => '407-925-1076',
-                'email' => 'DavidPThompson@dayrep.com'
-            ]
+                'email' => 'DavidPThompson@dayrep.com',
+            ],
         ]);
         $this->assertNotNull(Member::where('phonenumber', '407-925-1076')->where('email', 'DavidPThompson@dayrep.com')->get()->first());
         $this->assertNotNull(Individual::where('firstname', 'David')->where('address', '1237 McDonald Avenue')->get()->first());
     }
-
 
     public function test_model_relation_handler_create_moral_create_morph_member()
     {
@@ -58,84 +68,82 @@ class ModelRelationsHandlerTest extends TestCase
             'address' => '3378 West Fork Drive',
             'member' => [
                 'phonenumber' => '954-438-2314',
-                'email' => 'azlabsjs@drewlabs.com'
-            ]
+                'email' => 'azlabsjs@drewlabs.com',
+            ],
         ]);
         $this->assertNotNull(Member::where('phonenumber', '954-438-2314')->where('email', 'azlabsjs@drewlabs.com')->get()->first());
         $this->assertNotNull(Moral::where('label', 'AZLAB\'s Ltd.')->get()->first());
     }
 
-
     public function test_model_relation_handler_create_on_morph_many()
     {
         $post = Post::create([
             'title' => 'Lorem Ipsum is simply dummy text of the printing and typesetting industry',
-            'body' => 'Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.'
+            'body' => 'Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.',
         ]);
         TouchedModelRelationsHandler::new($post)->create(['comments'], [
             'comments' => [
                 [
-                    'body' => 'it is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using \'Content here, content here\', making it look like readable English.'
+                    'body' => 'it is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using \'Content here, content here\', making it look like readable English.',
                 ],
                 [
-                    'body' => 'There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don\'t look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn\'t anything embarrassing hidden in the middle of text.'
-                ]
-            ]
+                    'body' => 'There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don\'t look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn\'t anything embarrassing hidden in the middle of text.',
+                ],
+            ],
         ]);
         /**
          * @var Collection
          */
         $comments = Post::find($post->getKey())->comments;
-        $this->assertEquals(2, $comments->count());
+        $this->assertSame(2, $comments->count());
 
         $video = Video::create([
             'title' => 'Funny Videos',
-            'url' => 'https://tinyurl.com/2p99ztyj'
+            'url' => 'https://tinyurl.com/2p99ztyj',
         ]);
 
         TouchedModelRelationsHandler::new($video)->create(['comments'], [
             'comments' => [
                 [
-                    'body' => 'Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old'
+                    'body' => 'Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old',
                 ],
-            ]
+            ],
         ]);
         /**
          * @var Collection
          */
         $comments = Video::find($video->getKey())->comments;
-        $this->assertNotEquals(3, $comments->count());
-        $this->assertEquals(1, $comments->count());
+        $this->assertNotSame(3, $comments->count());
+        $this->assertSame(1, $comments->count());
     }
-
 
     public function test_model_relation_handler_create_on_morph_many_to_many()
     {
         $post = Post::create([
             'title' => 'Lorem Ipsum is simply dummy text of the printing and typesetting industry',
-            'body' => 'Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.'
+            'body' => 'Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.',
         ]);
         TouchedModelRelationsHandler::new($post)->create(['tags'], [
             'tags' => [
                 [
                     'name' => 'warning',
                     'pivot' => [
-                        'score' => 7
-                    ]
+                        'score' => 7,
+                    ],
                 ],
                 [
                     'name' => 'success',
                     'pivot' => [
-                        'score' => 12
-                    ]
-                ]
-            ]
+                        'score' => 12,
+                    ],
+                ],
+            ],
         ]);
         /**
          * @var Collection
          */
         $tags = Post::find($post->getKey())->tags;
-        $this->assertEquals(2, $tags->count());
+        $this->assertSame(2, $tags->count());
     }
 
     public function test_model_relation_handler_update()
@@ -154,17 +162,17 @@ class ModelRelationsHandlerTest extends TestCase
             'sex' => 'M',
             'member' => [
                 'phonenumber' => '407-925-1076',
-                'email' => 'DavidPThompson@dayrep.com'
-            ]
+                'email' => 'DavidPThompson@dayrep.com',
+            ],
         ]);
         TouchedModelRelationsHandler::new($model)->update(['member'], [
             'member' => [
-                'email' => 'KatherineWSykora@dayrep.com'
-            ]
+                'email' => 'KatherineWSykora@dayrep.com',
+            ],
         ], true);
         $member = Member::where('email', 'KatherineWSykora@dayrep.com')->get()->first();
         $this->assertNotNull($member);
-        $this->assertEquals($model->getKey(), $member->distinctable_id);
+        $this->assertSame($model->getKey(), $member->distinctable_id);
     }
 
     public function test_model_relation_handler_update_modify_matching_instances()
@@ -205,33 +213,32 @@ class ModelRelationsHandlerTest extends TestCase
                 'addresses' => [
                     [
                         ['email' => 'KatherineWSykora@dayrep.com'],
-                        ['postal_code' => 'Montezuma, GA 31063', 'email' => 'LuanneCCardillo@armyspy.com']
+                        ['postal_code' => 'Montezuma, GA 31063', 'email' => 'LuanneCCardillo@armyspy.com'],
                     ],
                     [
                         ['email' => 'lordfera2@gmail.com'],
-                        ['postal_code' => 'Longmont, CO 80501']
-                    ]
-                ]
+                        ['postal_code' => 'Longmont, CO 80501'],
+                    ],
+                ],
             ],
             [
-                'relations' => ['addresses']
+                'relations' => ['addresses'],
             ]
         );
         $this->assertTrue(
-            Address::where('postal_code', 'Montezuma, GA 31063')
+            null !== Address::where('postal_code', 'Montezuma, GA 31063')
                 ->where('email', 'LuanneCCardillo@armyspy.com')
-                ->where('person_id', $person->getKey())->first() !== null
+                ->where('person_id', $person->getKey())->first()
         );
         $this->assertTrue(
-            Address::where('postal_code', 'Longmont, CO 80501')
+            null !== Address::where('postal_code', 'Longmont, CO 80501')
                 ->where('email', 'lordfera2@gmail.com')
-                ->where('person_id', $person->getKey())->first() !== null
+                ->where('person_id', $person->getKey())->first()
         );
     }
 
     public function test_model_relation_handler_create_on_belongs_to_many()
     {
-
         DMLManager(Person::class)->create([
             'firstname' => 'Linda',
             'lastname' => 'R. Jones',
@@ -241,10 +248,10 @@ class ModelRelationsHandlerTest extends TestCase
             'is_active' => true,
             'managers' => [
                 'name' => 'Alan G. Waite',
-                'position' => 'Private banker'
-            ]
+                'position' => 'Private banker',
+            ],
         ], [
-            'relations' => ['managers']
+            'relations' => ['managers'],
         ]);
         $this->assertNotNull(Manager::where('name', 'Alan G. Waite')->where('position', 'Private banker')->first(), 'Expected attached manager to exists in the managers table');
 
@@ -259,22 +266,22 @@ class ModelRelationsHandlerTest extends TestCase
                     'name' => 'Jordan A. Donaghy',
                     'position' => 'Dermatology nurse',
                     'pivot' => [
-                        'department' => 'MEDECINE'
-                    ]
+                        'department' => 'MEDECINE',
+                    ],
                 ],
                 [
                     'name' => 'Jenae S. Patrick',
                     'position' => 'Pediatry',
                     'pivot' => [
-                        'department' => 'MEDECINE'
-                    ]
-                ]
-            ]
+                        'department' => 'MEDECINE',
+                    ],
+                ],
+            ],
         ], [
-            'relations' => ['managers']
+            'relations' => ['managers'],
         ]);
         $manager = Manager::where('name', 'Jordan A. Donaghy')->where('position', 'Dermatology nurse')->first();
         $this->assertNotNull($manager, 'Expected attached manager to exists in the managers table');
-        $this->assertEquals('MEDECINE', $manager->person_manager->department);
+        $this->assertSame('MEDECINE', $manager->person_manager->department);
     }
 }

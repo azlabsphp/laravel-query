@@ -22,37 +22,31 @@ class Tag extends Model implements ORMModel
     use TraitsModel;
 
     /**
-     *
-     * @var string
-     */
-    protected $table = 'tags';
-
-    /**
-     *
-     * @var string
-     */
-    protected $primaryKey = 'id';
-
-    /**
-     * 
-     * @var array
-     */
-    protected $hidden = [];
-
-    /**
-     * 
-     * @var array
-     */
-    protected $appends = [];
-
-    /**
-     *
      * @var array
      */
     public $relation_methods = ['tags'];
 
     /**
-     *
+     * @var string
+     */
+    protected $table = 'tags';
+
+    /**
+     * @var string
+     */
+    protected $primaryKey = 'id';
+
+    /**
+     * @var array
+     */
+    protected $hidden = [];
+
+    /**
+     * @var array
+     */
+    protected $appends = [];
+
+    /**
      * @var array
      */
     protected $fillable = [
@@ -67,7 +61,7 @@ class Tag extends Model implements ORMModel
     {
         return $this->morphedByMany(Post::class, 'taggable');
     }
- 
+
     /**
      * Get all of the videos that are assigned this tag.
      */
@@ -75,5 +69,4 @@ class Tag extends Model implements ORMModel
     {
         return $this->morphedByMany(Video::class, 'taggable');
     }
-
 }

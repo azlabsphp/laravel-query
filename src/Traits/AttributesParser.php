@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Traits;
 
-use Drewlabs\Contracts\Data\Parser\ModelAttributeParser as ModelAttributesParserContract;
 use Drewlabs\Packages\Database\ModelAttributesParser;
 
 trait AttributesParser

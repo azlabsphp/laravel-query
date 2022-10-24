@@ -218,7 +218,7 @@ trait ModelRepository
 
             return $result;
         }
-        throw new \Exception(__METHOD__ . ' requires an list of list items for insertion');
+        throw new \Exception(__METHOD__.' requires an list of list items for insertion');
     }
 
     /**

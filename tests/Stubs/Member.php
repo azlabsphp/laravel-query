@@ -22,34 +22,29 @@ class Member extends Model implements ORMModel
     use TraitsModel;
 
     /**
-     *
+     * @var array
+     */
+    public $relation_methods = [];
+
+    /**
      * @var string
      */
     protected $table = 'members';
 
     /**
-     *
      * @var string
      */
     protected $primaryKey = 'id';
 
     /**
-     * 
      * @var array
      */
     protected $hidden = [];
 
     /**
-     * 
      * @var array
      */
     protected $appends = [];
-
-    /**
-     *
-     * @var array
-     */
-    public $relation_methods = [];
 
     /**
      * List of fillable properties of the current model.
@@ -62,7 +57,6 @@ class Member extends Model implements ORMModel
         'phonenumber',
         'email',
     ];
-
 
     public function distinctable()
     {
