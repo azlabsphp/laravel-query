@@ -61,3 +61,8 @@
 - Added `InvalidDMLQueryActionException` exception class
 - Added support for `FiltersInterface` in `select()`, `update()` and `delete()` method of the `DMLManager`
 - Added support for attributes as `object`, `viewModel` in `create()` and `update()` method of `DMLManager`
+
+## [2.5.1] 2022-10-24
+
+- Ported illuminate `HasUuids` trait to this package which add `uuid` columns support to eloquent models
+- Fixed bugs in QueryFiltersBuilder class
