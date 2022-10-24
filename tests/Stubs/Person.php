@@ -59,7 +59,7 @@ class Person extends Model implements ORMModel
         'age',
         'sex',
         'is_active',
-        'email'
+        'email',
     ];
 
     public function addresses()

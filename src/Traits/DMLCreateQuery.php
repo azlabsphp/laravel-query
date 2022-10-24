@@ -13,19 +13,17 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Traits;
 
-use Closure;
 use Drewlabs\Contracts\Data\DataProviderHandlerParamsInterface;
 use Drewlabs\Core\Helpers\Str;
 use Drewlabs\Packages\Database\EloquentQueryBuilderMethods;
-use Drewlabs\Packages\Database\TouchedModelRelationsHandler;
-use RuntimeException;
-
 use function Drewlabs\Packages\Database\Proxy\DMLManager;
+
+use Drewlabs\Packages\Database\TouchedModelRelationsHandler;
 
 trait DMLCreateQuery
 {
     use ConvertAttributes;
-    
+
     public function create(...$args)
     {
         return $this->model->getConnection()->transaction(function () use ($args) {
@@ -42,6 +40,7 @@ trait DMLCreateQuery
         $callback = $callback ?: static function ($param) {
             return $param;
         };
+
         return $callback(
             $this->proxy(
                 drewlabs_core_create_attribute_getter('model', null)($this),
@@ -54,7 +53,7 @@ trait DMLCreateQuery
     private function createV2($attributes, $params, ?\Closure $callback = null)
     {
         if (!(\is_array($params) || ($params instanceof DataProviderHandlerParamsInterface))) {
-            throw new \InvalidArgumentException('Argument 2 of the create method must be an array or an instance of ' . DataProviderHandlerParamsInterface::class);
+            throw new \InvalidArgumentException('Argument 2 of the create method must be an array or an instance of '.DataProviderHandlerParamsInterface::class);
         }
 
         return $this->createCommand(
@@ -68,8 +67,9 @@ trait DMLCreateQuery
     private function createV3($attributes, $params, bool $batch, ?\Closure $callback = null)
     {
         if (!(\is_array($params) || ($params instanceof DataProviderHandlerParamsInterface))) {
-            throw new \InvalidArgumentException('Argument 2 of the create method must be an array or an instance of ' . DataProviderHandlerParamsInterface::class);
+            throw new \InvalidArgumentException('Argument 2 of the create method must be an array or an instance of '.DataProviderHandlerParamsInterface::class);
         }
+
         return $this->createCommand(
             $attributes,
             drewlabs_database_parse_create_handler_params($params),
@@ -79,14 +79,13 @@ trait DMLCreateQuery
     }
 
     /**
-     * Base method that provides create implementation of the DML manager class
+     * Base method that provides create implementation of the DML manager class.
      *
      * @param array|object $attributes
-     * @param array $params
-     * @param bool $batch
-     * @param null|Closure $callback
+     *
+     * @throws \RuntimeException
+     *
      * @return mixed
-     * @throws RuntimeException
      */
     private function createCommand($attributes, array $params, bool $batch = false, ?\Closure $callback = null)
     {
@@ -97,7 +96,7 @@ trait DMLCreateQuery
         $method = $params['method'] ?? EloquentQueryBuilderMethods::CREATE;
         $upsert_conditions = $params['upsert_conditions'] ?: [];
         $upsert = $params['upsert'] && !empty($upsert_conditions) ? true : false;
-        $isComposedMethod = Str::contains($method, '__') && in_array(
+        $isComposedMethod = Str::contains($method, '__') && \in_array(
             Str::split($method, '__')[0],
             [
                 EloquentQueryBuilderMethods::CREATE,
@@ -145,13 +144,12 @@ trait DMLCreateQuery
      * It acts like a before create model event listener
      *
      * @param mixed $instance
-     * @param array $attributes
-     * @param array $relations
+     *
      * @return array
      */
     private function createParentIfExists($instance, array $attributes, array &$relations)
     {
-        for ($i = 0; $i < count($relations); $i++) {
+        for ($i = 0; $i < \count($relations); ++$i) {
             $value = $relations[$i];
             // If attributes does not contains entry with the current relation name
             // there is not need to process further therefore we simply continues
@@ -186,8 +184,8 @@ trait DMLCreateQuery
             $attributes[$foreignKey] = $createdInstance->getKey();
             // Remove the relation from the list of relations to create after model
             // gets created
-            unset($relations[$i]);
-            unset($attributes[$value]);
+            unset($relations[$i], $attributes[$value]);
+
         }
 
         return $attributes;

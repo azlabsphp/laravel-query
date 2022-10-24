@@ -23,11 +23,6 @@ use Drewlabs\Contracts\Data\Model\Parseable;
  * Interface definition arround methods provided by Laravel Eloquent ORM
  * along with some useful method.
  */
-interface ORMModel extends
-    Model,
-    HidesAttributes,
-    Parseable,
-    HasRelations,
-    GuardedModel
+interface ORMModel extends Model, HidesAttributes, Parseable, HasRelations, GuardedModel
 {
 }

@@ -22,37 +22,31 @@ class Comment extends Model implements ORMModel
     use TraitsModel;
 
     /**
-     *
-     * @var string
-     */
-    protected $table = 'comments';
-
-    /**
-     *
-     * @var string
-     */
-    protected $primaryKey = 'id';
-
-    /**
-     * 
-     * @var array
-     */
-    protected $hidden = [];
-
-    /**
-     * 
-     * @var array
-     */
-    protected $appends = [];
-
-    /**
-     *
      * @var array
      */
     public $relation_methods = ['commentable'];
 
     /**
-     *
+     * @var string
+     */
+    protected $table = 'comments';
+
+    /**
+     * @var string
+     */
+    protected $primaryKey = 'id';
+
+    /**
+     * @var array
+     */
+    protected $hidden = [];
+
+    /**
+     * @var array
+     */
+    protected $appends = [];
+
+    /**
      * @var array
      */
     protected $fillable = [

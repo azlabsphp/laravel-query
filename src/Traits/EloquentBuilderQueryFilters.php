@@ -26,8 +26,8 @@ trait EloquentBuilderQueryFilters
     private $filters = [];
 
     /**
-     * ORM Model instance
-     * 
+     * ORM Model instance.
+     *
      * @var object
      */
     private $model;
@@ -280,10 +280,11 @@ trait EloquentBuilderQueryFilters
     {
         // TODO: In future release, valide the filters inputs
         if (!Arr::isassoc($filters)) {
-            return array_reduce($filters, function($model, $current) {
+            return array_reduce($filters, static function ($model, $current) {
                 return $model->orderBy($current['by'], $current['order']);
             }, $model);
         }
+
         return $model->orderBy($filters['by'], $filters['order']);
     }
 

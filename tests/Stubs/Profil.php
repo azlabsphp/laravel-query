@@ -42,9 +42,8 @@ class Profil extends EloquentModel
         'person_id',
     ];
 
-
     protected $relation_methods = [
-        'person'
+        'person',
     ];
 
     public function person()

@@ -22,48 +22,42 @@ class PersonManager extends Model implements ORMModel
     use TraitsModel;
 
     /**
-     *
-     * @var string
-     */
-    protected $table = 'person_managers';
-
-    /**
-     *
-     * @var string
-     */
-    protected $primaryKey = 'id';
-
-    /**
-     * 
-     * @var array
-     */
-    protected $hidden = [];
-
-    /**
-     * 
-     * @var array
-     */
-    protected $appends = [];
-
-    /**
-     *
      * @var array
      */
     public $relation_methods = ['person', 'manager'];
 
     /**
-     *
+     * @var string
+     */
+    protected $table = 'person_managers';
+
+    /**
+     * @var string
+     */
+    protected $primaryKey = 'id';
+
+    /**
+     * @var array
+     */
+    protected $hidden = [];
+
+    /**
+     * @var array
+     */
+    protected $appends = [];
+
+    /**
      * @var array
      */
     protected $fillable = [
         'id',
         'person_id',
         'manager_id',
-        'department'
+        'department',
     ];
 
     /**
-     * Get attached person
+     * Get attached person.
      */
     public function person()
     {
@@ -77,5 +71,4 @@ class PersonManager extends Model implements ORMModel
     {
         return $this->belongsTo(Manager::class, 'manager_id', 'id');
     }
-
 }

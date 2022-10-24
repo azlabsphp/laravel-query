@@ -22,44 +22,38 @@ class Taggable extends Model implements ORMModel
     use TraitsModel;
 
     /**
-     *
-     * @var string
-     */
-    protected $table = 'taggables';
-
-    /**
-     *
-     * @var string
-     */
-    protected $primaryKey = 'id';
-
-    /**
-     * 
-     * @var array
-     */
-    protected $hidden = [];
-
-    /**
-     * 
-     * @var array
-     */
-    protected $appends = [];
-
-    /**
-     *
      * @var array
      */
     public $relation_methods = ['tags'];
 
     /**
-     *
+     * @var string
+     */
+    protected $table = 'taggables';
+
+    /**
+     * @var string
+     */
+    protected $primaryKey = 'id';
+
+    /**
+     * @var array
+     */
+    protected $hidden = [];
+
+    /**
+     * @var array
+     */
+    protected $appends = [];
+
+    /**
      * @var array
      */
     protected $fillable = [
         'tag_id',
         'taggable_id',
         'taggable_type',
-        'score'
+        'score',
     ];
 
     /**
@@ -68,5 +62,4 @@ class Taggable extends Model implements ORMModel
     public function tags()
     {
     }
-
 }

@@ -70,11 +70,11 @@ trait DMLDeleteQuery
     }
 
     /**
-     * Executes the delete query on the query model
-     * 
-     * @param FiltersInterface|array $query 
-     * @param bool $batch 
-     * @return mixed 
+     * Executes the delete query on the query model.
+     *
+     * @param FiltersInterface|array $query
+     *
+     * @return mixed
      */
     private function deleteCommand($query, bool $batch = false)
     {

@@ -1,24 +1,30 @@
 <?php
 
+declare(strict_types=1);
+
+/*
+ * This file is part of the Drewlabs package.
+ *
+ * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
 namespace Drewlabs\Packages\Database;
 
 use Drewlabs\Core\Helpers\Arr;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use LogicException;
 
 /**
  * The goal of the model relation handler implementation class is to
  * provide an API for inserting a model relations values after model
- * was inserted into the database
- *
- * @package Drewlabs\Packages\Database
+ * was inserted into the database.
  */
 class TouchedModelRelationsHandler
 {
     /**
-     *
      * @var mixed
      */
     private $model;
@@ -29,9 +35,10 @@ class TouchedModelRelationsHandler
     }
 
     /**
-     * Creates a new class instance
+     * Creates a new class instance.
      *
      * @param mixed $model
+     *
      * @return TouchedModelRelationsHandler
      */
     public static function new($model)
@@ -39,13 +46,9 @@ class TouchedModelRelationsHandler
         return new self($model);
     }
 
-
     /**
-     * Creates model child relations based on user provided parameters
+     * Creates model child relations based on user provided parameters.
      *
-     * @param array $relations
-     * @param array $attributes
-     * @param bool $batch
      * @return void
      */
     public function create(array $relations, array $attributes = [], bool $batch = false)
@@ -55,7 +58,8 @@ class TouchedModelRelationsHandler
                 continue;
             }
             Arr::isnotassoclist($attributes[$relation] ?? []) ?
-                ($batch ?
+                (
+                    $batch ?
                     $this->createManyBatch($this->model->$relation(), $attributes[$relation]) :
                     $this->createMany($this->model->$relation(), $attributes[$relation])
                 ) :
@@ -64,14 +68,11 @@ class TouchedModelRelationsHandler
     }
 
     /**
-     * Update model child relations based on user provided values
-     *
-     * @param array $relations
-     * @param array $attributes
+     * Update model child relations based on user provided values.
      *
      * @return void
      */
-    function update(array $relations, array $attributes)
+    public function update(array $relations, array $attributes)
     {
         foreach ($relations as $relation) {
             if (!(method_exists($this->model, $relation) && !empty($attributes[$relation] ?? []))) {
@@ -83,10 +84,7 @@ class TouchedModelRelationsHandler
 
     /**
      * Refresh the model child relations by deleting old ones and adding
-     * new ones based on user's provided data
-     *
-     * @param array $relations
-     * @param array $attributes
+     * new ones based on user's provided data.
      *
      * @return mixed
      */
@@ -101,15 +99,15 @@ class TouchedModelRelationsHandler
     }
 
     /**
-     *
      * @param mixed $nextInstance
-     * @param array $value
+     *
+     * @throws \LogicException
+     *
      * @return mixed
-     * @throws LogicException
      */
     private static function updateOrCreate($nextInstance, array $value = [])
     {
-        if (1 < count($value)) {
+        if (1 < \count($value)) {
             return $nextInstance->updateOrCreate(
                 ...static::formatUpsertAttributes(
                     $nextInstance,
@@ -118,7 +116,7 @@ class TouchedModelRelationsHandler
                 )
             );
         }
-        if (1 === count($value)) {
+        if (1 === \count($value)) {
             return $nextInstance->updateOrCreate(
                 ...static::formatUpsertAttributes(
                     $nextInstance,
@@ -127,13 +125,12 @@ class TouchedModelRelationsHandler
                 )
             );
         }
-        throw new LogicException('Expected ' . __METHOD__ . ' to receive an array of 1 or 2 array values');
+        throw new \LogicException('Expected '.__METHOD__.' to receive an array of 1 or 2 array values');
     }
 
     /**
-     *
      * @param mixed $nextInstance
-     * @param array $attributes
+     *
      * @return array
      */
     private static function formatCreateManyAttributes($nextInstance, array $attributes = [])
@@ -146,15 +143,16 @@ class TouchedModelRelationsHandler
                 $out[0][] = $attribute;
                 $out[1][] = $pivot;
             }
+
             return $out;
         }
+
         return [$attributes];
     }
 
     /**
-     *
      * @param mixed $nextInstance
-     * @param array $attributes
+     *
      * @return array
      */
     private static function formatCreateAttributes($nextInstance, array $attributes = [])
@@ -162,16 +160,16 @@ class TouchedModelRelationsHandler
         if ($nextInstance instanceof BelongsToMany) {
             $pivot = $attributes['pivot'] ?? $attributes['joining'] ?? [];
             $attribute = Arr::except($attributes, ['pivot', 'joining']);
+
             return [$attribute, $pivot];
         }
+
         return [$attributes];
     }
 
     /**
-     *
      * @param mixed $nextInstance
-     * @param array $attributes
-     * @param array $values
+     *
      * @return array
      */
     private static function formatUpsertAttributes($nextInstance, array $attributes, array $values = [])
@@ -179,17 +177,19 @@ class TouchedModelRelationsHandler
         if ($nextInstance instanceof BelongsToMany) {
             $pivot = $values['pivot'] ?? $values['joining'] ?? [];
             $attribute = Arr::except($values, ['pivot', 'joining']);
+
             return [$attributes, $attribute, $pivot];
         }
+
         return [$attributes, $values];
     }
 
     /**
-     *
      * @param mixed $instance
-     * @param array $values
+     *
+     * @throws \LogicException
+     *
      * @return void
-     * @throws LogicException
      */
     private function updateRelations($instance, array $values)
     {
@@ -205,9 +205,8 @@ class TouchedModelRelationsHandler
     }
 
     /**
-     *
      * @param mixed $instance
-     * @param array $values
+     *
      * @return void
      */
     private function refreshRelations($instance, array $values)

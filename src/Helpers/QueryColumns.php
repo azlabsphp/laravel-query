@@ -29,15 +29,16 @@ class QueryColumns
         $values = $values ?? [];
 
         // Get the list of top level declared relations
-        $top_level_relations = array_map(function ($relation) {
+        $top_level_relations = array_map(static function ($relation) {
             return Str::contains($relation, '.') ? Str::before('.', $relation) : $relation;
         }, $model_relations ?? []);
         // Creates the list of relation fields to be added to the model list of columns
-        $relations = array_filter($values, function($relation) use ($top_level_relations, $model_relations) {
+        $relations = array_filter($values, static function ($relation) use ($top_level_relations, $model_relations) {
             if (Str::contains($relation, '.')) {
-                return in_array(Str::before('.', $relation), $top_level_relations) || in_array($relation, $model_relations);
+                return \in_array(Str::before('.', $relation), $top_level_relations, true) || \in_array($relation, $model_relations, true);
             }
-            return in_array($relation, $top_level_relations);
+
+            return \in_array($relation, $top_level_relations, true);
         });
         // Create the actual list of model column to be selected from the database
         $columns = array_intersect($values, $declared_columns);

@@ -17,13 +17,13 @@ use Drewlabs\Packages\Database\QueryFiltersBuilder;
 
 trait CreatesFilters
 {
-
     /**
      * Creates a list of filters based on view model input & query
-     * parameters 
-     * 
+     * parameters.
+     *
      * @param array $defaults Default filters can be passed in by developpers that are merged with
      *                        query filters from builded from view model
+     *
      * @return array<string, mixed>
      */
     public function makeFilters(array $defaults = [])
@@ -32,13 +32,12 @@ trait CreatesFilters
     }
 
     /**
-     * Creates an instance of the attached model
-     * 
+     * Creates an instance of the attached model.
      *
      * @return StorageClient
      */
     public function resolveModel()
     {
-        return is_string($model = $this->getModel()) ? self::createResolver($model)() : $model;
+        return \is_string($model = $this->getModel()) ? self::createResolver($model)() : $model;
     }
 }

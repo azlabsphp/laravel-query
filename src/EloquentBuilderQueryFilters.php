@@ -27,11 +27,9 @@ final class EloquentBuilderQueryFilters implements FiltersInterface
     private $joinQueryParser;
 
     /**
-     * Creates an instance of {@see EloquentBuilderQueryFilters}
-     * 
-     * @param null|array $filters 
-     * @param null|QueryParser $joinQueryParser 
-     * @return self 
+     * Creates an instance of {@see EloquentBuilderQueryFilters}.
+     *
+     * @return self
      */
     public function __construct(?array $filters = null, ?QueryParser $joinQueryParser = null)
     {

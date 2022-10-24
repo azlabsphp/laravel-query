@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Traits;
 
-use Closure;
 use Drewlabs\Contracts\Data\Filters\FiltersInterface;
 use Drewlabs\Contracts\Data\Model\HasRelations;
 use Drewlabs\Core\Helpers\Arr;
@@ -282,11 +281,9 @@ trait DMLSelectQuery
     }
 
     /**
-     * 
-     * @param array|FiltersInterface $query 
-     * @param array $columns 
-     * @param null|Closure $callback 
-     * @return Closure 
+     * @param array|FiltersInterface $query
+     *
+     * @return \Closure
      */
     private function createSelector($query, array $columns, ?\Closure $callback = null)
     {
@@ -302,7 +299,7 @@ trait DMLSelectQuery
             $primaryKey = $model->getPrimaryKey();
             $hidden_columns = $model->getHidden();
             [$columns_, $relations] = QueryColumns::asTuple($columns, $declared_columns, $model_relations);
-            // We prepare the query builder object    
+            // We prepare the query builder object
             $builder = $this->prepareQueryBuilder($model, $query);
 
             // Add relationship queries to the builder if the relationship array is not empty
@@ -311,11 +308,12 @@ trait DMLSelectQuery
             }
 
             // Create set columns that must not be included in the output result
-            $except_columns = array_unique((!empty($columns_) && !in_array('*', $columns_)) ?
-                array_merge($hidden_columns, array_diff(Arr::filter($declared_columns, function ($column) use ($primaryKey) {
+            $except_columns = array_unique((!empty($columns_) && !\in_array('*', $columns_, true)) ?
+                array_merge($hidden_columns, array_diff(Arr::filter($declared_columns, static function ($column) use ($primaryKey) {
                     return $column !== $primaryKey;
                 }), [...$columns_, '*'])) :
                 $hidden_columns);
+
             return $callback(
                 SelectQueryResult(
                     new EnumerableQueryResult(
