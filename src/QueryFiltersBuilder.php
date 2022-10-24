@@ -554,20 +554,20 @@ class QueryFiltersBuilder
         foreach ($operators as $current) {
             // By default we apply the query with or where clause. But in case the developper pass a query string
             // with &&: or and: operator we query using the where clause
-            if (Str::startsWith($value, "and:$current:")) {
+            if (Str::startsWith((string)$value, "and:$current:")) {
                 [$method, $value, $operator] = ['where', Str::after("and:$current:", $value), $current];
                 break;
-            } elseif (Str::startsWith($value, "&&:$current:")) {
+            } elseif (Str::startsWith((string)$value, "&&:$current:")) {
                 [$method, $value, $operator] = ['where', Str::after("&&:$current:", $value), $current];
                 break;
-            } elseif (Str::startsWith($value, "$current:")) {
+            } elseif (Str::startsWith((string)$value, "$current:")) {
                 [$value, $operator] = [Str::after("$current:", $value), $current];
                 break;
             }
         }
-        if (Str::startsWith($value, 'and:')) {
+        if (Str::startsWith((string)$value, 'and:')) {
             [$method, $value] = ['where', Str::after('and:', $value)];
-        } elseif (Str::startsWith($value, '&&:')) {
+        } elseif (Str::startsWith((string)$value, '&&:')) {
             [$method, $value] = ['where', Str::after('&&:', $value)];
         }
         $operator = $operator ?? (is_numeric($value) || \is_bool($value) ? '=' : 'like');
@@ -578,8 +578,7 @@ class QueryFiltersBuilder
         } elseif ('==' === $operator) {
             $operator = '=';
         }
-        $method = false !== strtotime($value) ? ('orWhere' === $method ? 'orWhereDate' : 'whereDate') : $method;
-
+        $method = false !== strtotime((string)$value) ? ('orWhere' === $method ? 'orWhereDate' : 'whereDate') : $method;
         return [$operator, $value, $method];
     }
 }

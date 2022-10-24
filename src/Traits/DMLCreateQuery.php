@@ -173,7 +173,7 @@ trait DMLCreateQuery
             // We loop through parent relations which are loaded using composed
             // relation name in form of `relation.otherRelation`
             foreach ($relations as $rel) {
-                if (Str::startsWith($rel, "$value.")) {
+                if (Str::startsWith((string)$rel, "$value.")) {
                     $parentRelations[] = Str::after("$value.", $rel);
                     unset($relations[$rel]);
                 }
