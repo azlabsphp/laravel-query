@@ -15,6 +15,7 @@ namespace Drewlabs\Packages\Database\Traits;
 
 use Drewlabs\Core\Helpers\Arr;
 use Drewlabs\Packages\Database\FilterQueryParamsParser;
+use Illuminate\Database\Eloquent\Builder;
 
 trait EloquentBuilderQueryFilters
 {
@@ -157,7 +158,7 @@ trait EloquentBuilderQueryFilters
     /**
      * Apply a has query.
      *
-     * @param mixed $model
+     * @param Builder $model
      * @param array $filter
      *
      * @return mixed
@@ -165,14 +166,17 @@ trait EloquentBuilderQueryFilters
     private function applyHas($model, $filter)
     {
         if (\is_string($filter)) {
-            $model = $model->has($filter);
+            return $model->has($filter);
         }
-        if (\is_array($filter)) {
+        $operators = ['>=', '<=', '<', '>', '<>', '!='];
+        if (\is_array($filter) && (false !== Arr::search($filter[1] ?? null, $operators))) {
+            return $model->has(...$filter);
+        }
+        if (is_array($filter)) {
             foreach ($filter as $value) {
                 $model = $model->has($value);
             }
         }
-
         return $model;
     }
 

@@ -13,12 +13,14 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database;
 
+use Closure;
 use Drewlabs\Contracts\Data\Model\Model;
 use Drewlabs\Core\Helpers\Arr;
 use Drewlabs\Core\Helpers\Functional;
 use Drewlabs\Core\Helpers\Str;
 use Drewlabs\Packages\Database\Traits\ContainerAware;
 use Illuminate\Database\Eloquent\Model as Eloquent;
+use InvalidArgumentException;
 
 class QueryFiltersBuilder
 {
@@ -30,6 +32,60 @@ class QueryFiltersBuilder
      * @var string[]
      */
     private const QUERY_OPERATORS = ['>=', '<=', '<', '>', '<>', '=like', '=='];
+
+    /**
+     * List of query methods excepts the default query methods
+     * 
+     * @var string[]
+     */
+    private const QUERY_METHODS  = [
+        //
+        'or' => 'orWhere',
+        'and' => 'where',
+        'in' => 'whereIn',
+        'notin' => 'whereNotIn',
+        'notnull' => 'whereNotNull',
+        'ornotnull' => 'orWhereNotNull',
+        'isnull' => 'whereNull',
+        'orisnull' => 'orWhereNull',
+        'sort' => 'orderBy',
+        'exists' => 'has',
+        //
+        'wherehas' => 'whereHas',
+        'wheredoesnthave' => 'whereDoesntHave',
+        'wheredate' => 'whereDate',
+        'orwheredate' => 'orWhereDate',
+        'where' => 'where',
+        'has' => 'has',
+        'doesnthave' => 'doesntHave',
+        'wherein' => 'whereIn',
+        'wherenotin' => 'whereNotIn',
+
+        //
+        'wherebetween' => 'whereBetween',
+        'orwhere' => 'orWhere',
+        'orderby' => 'orderBy',
+        'groupby' => 'groupBy',
+
+        // 
+        'join' => 'join',
+        'rightjoin' => 'rightJoin',
+        'leftjoin' => 'leftJoin',
+
+        'wherenull' => 'whereNull',
+        'orwherenull' => 'orWhereNull',
+        'wherenotnull' => 'whereNotNull',
+        'orwherenotnull' => 'orWhereNotNull'
+    ];
+
+    /**
+     * @var array<string,string>
+     */
+    private const SUBQUERY_FALLBACKS = [
+        'doesntHave' => 'whereDoesntHave',
+        'has' => 'whereHas',
+        'exists' => 'whereHas'
+    ];
 
     /**
      * @var Model|Eloquent
@@ -143,87 +199,62 @@ class QueryFiltersBuilder
      * Build query filters using '_query' property of the parameter bag.
      *
      * @param mixed $parametersBag
-     * @param array $in
+     * @param array $inputs
      *
      * @throws \InvalidArgumentException
      *
      * @return array
      */
-    public static function filterFrom__Query($parametersBag, $in = [])
+    public static function filterFrom__Query($parametersBag, $inputs = [])
     {
-        $filters = $in ?? [];
+        $filters = $inputs ?? [];
         if ($parametersBag->has('_query')) {
             $query = $parametersBag->get('_query');
-            $query = Str::isStr($query) ? json_decode($query, true) : $query;
+            $query = Str::isStr($query) ? json_decode($query, true) : (array)$query;
             if (!Arr::isArrayable($query) || !Arr::isassoc($query)) {
                 return $filters;
             }
-            $queryMethods = static::getSupportedQueryMethods();
-            foreach ($queryMethods as $method) {
-                // code...
-                if (!\array_key_exists($method, $query)) {
+            $queryMethods = self::QUERY_METHODS;
+            $queryMethodKeys = array_keys(self::QUERY_METHODS);
+            foreach ($query as $key => $value) {
+                $parsed = [];
+                // First we convert query method name or key to lower case to handle
+                // query in case insensitively
+                $key = strtolower($key);
+
+                // We search for the query key matches in the supported query methods
+                if (false !== Arr::search($key, $queryMethodKeys, true)) {
+                    $parsed = static::buildParameters($value, $key, $queryMethodKeys);
+                    $key = $queryMethods[$key] ?? $key;
+                }
+
+                // In case the buildParameters() returns an empty result we simply ignore the provided
+                // query method
+                if (empty($parsed)) {
                     continue;
                 }
-                $parsed_value = static::buildParameters($method, $query[$method]);
-                if (empty($parsed_value)) {
-                    continue;
-                }
-                if (isset($filters[$method])) {
-                    if (Arr::isList($parsed_value)) {
-                        foreach ($parsed_value as $current) {
-                            $filters[$method][] = $current;
+
+                // We try to merge the current query parameters into existing parameters
+                // if they exist in the filters
+                if (isset($filters[$key])) {
+                    if (Arr::isList($parsed)) {
+                        foreach ($parsed as $current) {
+                            $filters[$key][] = $current;
                         }
                     } else {
-                        $filters[$method][] = $parsed_value;
+                        $filters[$key][] = $parsed;
                     }
                     continue;
                 }
-                if (!Arr::isArrayable($parsed_value)) {
-                    $filters[$method] = $parsed_value;
+                if (!Arr::isArrayable($parsed)) {
+                    $filters[$key] = $parsed;
                     continue;
                 }
-                $filters[$method] = array_merge($filters[$method] ?? [], $parsed_value);
+                $filters[$key] = array_merge($filters[$key] ?? [], $parsed);
             }
         }
 
         return $filters;
-    }
-
-    /**
-     * Returns the supported query operators.
-     *
-     * @return string[]
-     */
-    public static function getSupportedQueryMethods()
-    {
-        // Returns the supported query method in most valuable to the the less valuable order
-        return [
-            'where',
-            'whereHas',
-            'whereDoesntHave',
-            'whereDate',
-            'orWhereDate',
-            'has',
-            'doesntHave',
-            'whereIn',
-            'whereNotIn',
-            // Added where between query
-            'whereBetween',
-            'orWhere',
-            'orderBy',
-            'groupBy',
-            'skip',
-            'take',
-            // Supporting joins queries
-            'join',
-            'rightJoin',
-            'leftJoin',
-            // Supporting whereNull and whereNotNull queries
-            'whereNull',
-            'orWhereNull',
-            'whereNotNull',
-            'orWhereNotNull',
-        ];
     }
 
     /**
@@ -259,40 +290,49 @@ class QueryFiltersBuilder
 
     /**
      * Build queries based on list of query parameters.
-     *
-     * @param array $params
-     *
-     * @throws \InvalidArgumentException
-     *
-     * @return mixed
+     * 
+     * @param mixed $params 
+     * @param string $method 
+     * @param string[] $methods
+     * @return mixed 
+     * @throws InvalidArgumentException 
      */
-    private static function buildParameters(string $method, $params)
+    private static function buildParameters($params, string &$method, array $methods)
     {
         switch ($method) {
             case 'where':
-            case 'whereDate':
-            case 'orWhereDate':
-            case 'orWhere':
-                return static::whereQueryParameters($params);
-            case 'whereHas':
-            case 'whereDoesntHave':
-                return static::buildSubQuery($params);
-            case 'whereIn':
-            case 'whereNotIn':
-                return static::buildWhereInQuery($params);
-            case 'orderBy':
+            case 'wheredate':
+            case 'orwheredate':
+            case 'orwhere':
+            case 'or':
+            case 'and':
+                return static::buildWhereQueryParameters($params, $methods);
+            case 'wherehas':
+            case 'wheredoesnthave':
+                return static::buildSubQueryParameters($params, $methods);
+            case 'wherein':
+            case 'wherenotin':
+            case 'in':
+            case 'notin':
+                return static::buildInQueryParameters($params);
+            case 'orderby':
+            case 'sort':
                 return static::buildOrderByQuery($params);
-            case 'whereNull':
-            case 'orWhereNull':
-            case 'whereNotNull':
-            case 'orWhereNotNull':
-                return static::buildWhereNullQuery($params);
-            case 'doesntHave':
-                return Arr::isArrayable($params) ? (isset($params['column']) ? [$method => $params['column']] : []) : [$method => $params];
+            case 'wherenull':
+            case 'orwherenull':
+            case 'wherenotnull':
+            case 'orwherenotnull':
+            case 'notnull':
+            case 'ornotnull':
+            case 'isnull':
+            case 'orisnull':
+                return self::buildNullQueryParameters($params);
+            case 'doesnthave':
             case 'has':
-                return Arr::isArrayable($params) ? (isset($params['column']) ? [$method => $params['column']] : []) : [$method => $params];
+            case 'exists':
+                return self::buildHasQueryParameters($params, $method, $methods);
             default:
-                return [];
+                return $params;
         }
     }
 
@@ -303,10 +343,10 @@ class QueryFiltersBuilder
      *
      * @return array
      */
-    private static function buildWhereNullQuery($params)
+    private static function buildNullQueryParameters($params)
     {
         // TODO : Optimize algorithm for duplicate values
-        $assocParserFn = static function (array $value) use (&$assocParserFn) {
+        $helperFunction = static function (array $value) use (&$helperFunction) {
             if (Str::isStr($value)) {
                 return $value;
             }
@@ -314,10 +354,10 @@ class QueryFiltersBuilder
             if (!$isassoc) {
                 return array_reduce(
                     $value,
-                    static function ($carry, $current) use (&$assocParserFn) {
+                    static function ($carry, $current) use (&$helperFunction) {
                         $result = $current;
                         if (Arr::isArrayable($result) && Arr::isassoc($result)) {
-                            $result = $assocParserFn($current);
+                            $result = $helperFunction($current);
                         }
 
                         return \in_array($result, $carry, true) ?
@@ -338,12 +378,11 @@ class QueryFiltersBuilder
 
             return $value['column'] ?? $value[0] ?? null;
         };
-        $valueParserFn = static function ($value) use ($assocParserFn) {
+        $prepareParameters = static function ($value) use ($helperFunction) {
             if (Str::isStr($value)) {
                 return $value;
             }
-
-            return $assocParserFn($value);
+            return $helperFunction($value);
         };
 
         $removeNull = static function ($arr) {
@@ -368,8 +407,8 @@ class QueryFiltersBuilder
                 return $removeNull(
                     array_reduce(
                         $params,
-                        static function ($carry, $current) use ($valueParserFn) {
-                            $result = $valueParserFn($current);
+                        static function ($carry, $current) use ($prepareParameters) {
+                            $result = $prepareParameters($current);
                             if (\in_array($result, $carry, true)) {
                                 return $carry;
                             }
@@ -380,11 +419,11 @@ class QueryFiltersBuilder
                     )
                 );
             } else {
-                return $removeNull($assocParserFn($params));
+                return $removeNull($helperFunction($params));
             }
         }
 
-        return $removeNull($valueParserFn($params));
+        return $removeNull($prepareParameters($params));
     }
 
     /**
@@ -422,12 +461,12 @@ class QueryFiltersBuilder
      *
      * @return array
      */
-    private static function buildWhereInQuery(array $query)
+    private static function buildInQueryParameters(array $query)
     {
         if (!Arr::isassoc($query) && Arr::isnotassoclist($query)) {
             // The provided query parameters is an array
             return array_map(static function ($q) {
-                return static::buildWhereInQuery($q);
+                return static::buildInQueryParameters($q);
             }, $query);
         }
         if (!Arr::isassoc($query)) {
@@ -447,20 +486,22 @@ class QueryFiltersBuilder
 
     /**
      * Build a where query based on query parameter array.
-     *
-     * @return array|\Closure
+     * 
+     * @param array $query 
+     * @param array $methods 
+     * @return array|Closure 
      */
-    private static function whereQueryParameters(array $query)
+    private static function buildWhereQueryParameters(array $query, array $methods)
     {
         if (!Arr::isassoc($query) && Arr::isnotassoclist($query)) {
             // The provided query parameters is an array
-            return array_map(static function ($q) {
-                return static::whereQueryParameters($q);
+            return array_map(static function ($q) use ($methods) {
+                return static::buildWhereQueryParameters($q, $methods);
             }, $query);
         }
         if (Arr::isassoc($query) && isset($query['match'])) {
             // Parameters is an associayive array with a key called query
-            return static::buildMatchQuery($query['match']);
+            return static::buildMatchQueryParameters($query['match'], $methods);
         }
 
         return $query;
@@ -482,45 +523,73 @@ class QueryFiltersBuilder
 
     /**
      * Build a match query based the list of query parameters.
-     *
-     * @return \Closure
+     * 
+     * @param array $query 
+     * @param string[] $methods 
+     * @return Closure 
      */
-    private static function buildMatchQuery(array $query)
+    private static function buildMatchQueryParameters(array $query, array $methods)
     {
-        return static function ($q) use ($query) {
-            static::validateQueryParameters($query);
-            $supportedQueryMethods = static::getSupportedQueryMethods();
-            if (!\in_array($query['method'], $supportedQueryMethods, true)) {
-                throw new \InvalidArgumentException(sprintf('Query method %s not found, ', $query['method']));
-            }
+        static::validateQueryParameters($query);
+        if (false === Arr::search($method = strtolower($query['method'] ?? ''), $methods, true)) {
+            throw new \InvalidArgumentException(sprintf('Query method %s not found, ', $method));
+        }
+        return static function ($q) use ($query, $method) {
+            $method = self::QUERY_METHODS[$method] ?? $method;
             if (Arr::isnotassoclist($query['params'])) {
-                \call_user_func([$q, $query['method']], $query['params']);
+                \call_user_func([$q, $method], $query['params']);
             } else {
-                \call_user_func([$q, $query['method']], ...$query['params']);
+                \call_user_func([$q, $method], ...$query['params']);
             }
         };
     }
 
     /**
      * Build a subquery based on array of query parameters.
-     *
-     * @return array
+     * 
+     * @param array $query 
+     * @param string[] $methods 
+     * @return array 
      */
-    private static function buildSubQuery(array $query)
+    private static function buildSubQueryParameters(array $query, array $methods)
     {
         if (!Arr::isassoc($query) && Arr::isnotassoclist($query)) {
-            return array_map(static function ($params) {
+            return array_map(static function ($params) use ($methods) {
                 return [
                     $params['column'],
-                    static::buildMatchQuery($params['match']),
+                    static::buildMatchQueryParameters($params['match'], $methods),
                 ];
             }, $query);
         }
 
         return [
             $query['column'],
-            static::buildMatchQuery($query['match']),
+            static::buildMatchQueryParameters($query['match'], $methods),
         ];
+    }
+
+    /**
+     * Build query parameters based on doesntHave and has query method
+     * 
+     * @param mixed $params 
+     * @param string $method 
+     * @param string[] $methods 
+     * @return mixed 
+     */
+    private static function buildHasQueryParameters($params, string &$method, array $methods)
+    {
+        if (!Arr::isArrayable($params)) {
+            return [$params];
+        }
+        if ($params === array_filter($params, 'is_string')) {
+            return $params;
+        }
+
+        if (!Arr::isassoc($params) || (isset($params['match']) && isset($params['column']))) {
+            $method = self::SUBQUERY_FALLBACKS[$method] ?? $method;
+            return self::buildSubQueryParameters($params, $methods);
+        }
+        return [];
     }
 
     /**
@@ -534,7 +603,6 @@ class QueryFiltersBuilder
             return false;
         }
         $isAssociative = 0 !== \count(array_filter(array_keys($items), 'is_string'));
-
         return $isAssociative && Arr::isList($items);
     }
 
@@ -574,7 +642,7 @@ class QueryFiltersBuilder
         // If the operator is a like operator, we removes any % from start and end of value
         // And append our own. We also make sure the operator is like instead of =like
         if (('=like' === $operator) || ('like' === $operator)) {
-            [$value, $operator] = ['%'.trim($value, '%').'%', 'like'];
+            [$value, $operator] = ['%' . trim($value, '%') . '%', 'like'];
         } elseif ('==' === $operator) {
             $operator = '=';
         }

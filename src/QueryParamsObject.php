@@ -59,11 +59,6 @@ class QueryParamsObject
         return trim(Str::concat('.', ...$attributes));
     }
 
-    /**
-     * Returns string representation of the current object.
-     *
-     * @return string
-     */
     public function toString()
     {
         return $this->__toString();
