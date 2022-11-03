@@ -8,11 +8,26 @@ This package provides wrapper arround Laravel Illuminate Database ORM. It provid
 // ...
 "require": {
     // Other dependencies
-    "drewlabs/database": "^2.4"
+    "drewlabs/database": "^2.4",
+    "drewlabs/contracts": "^2.5",
+    "drewlabs/core-helpers": "^2.3",
+    "drewlabs/support": "^2.4"
 },
 // ...
 "repositories": [
     //...
+    {
+        "type": "vcs",
+        "url": "git@github.com:liksoft/drewlabs-php-contracts.git"
+    },
+    {
+        "type": "vcs",
+        "url": "git@github.com:liksoft/drewlabs-php-core-helpers.git"
+    },
+    {
+        "type": "vcs",
+        "url": "git@github.com:liksoft/drewlabs-php-support.git"
+    },
     {
         "type": "vcs",
         "url": "git@github.com:liksoft/drewlabs-php-packages-database.git"

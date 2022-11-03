@@ -66,3 +66,8 @@
 
 - Ported illuminate `HasUuids` trait to this package which add `uuid` columns support to eloquent models
 - Fixed bugs in QueryFiltersBuilder class
+
+## [2.5.2] 2022-11-02
+
+- Added support for query insensitive query method
+- Add match for `exists`, `in`, `notin`, `notnull`, `ornotnull`, `isnull`, `sort` query methods
