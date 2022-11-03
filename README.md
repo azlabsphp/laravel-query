@@ -18,6 +18,18 @@ This package provides wrapper arround Laravel Illuminate Database ORM. It provid
     //...
     {
         "type": "vcs",
+        "url": "git@github.com:liksoft/drewlabs-php-contracts.git"
+    },
+    {
+        "type": "vcs",
+        "url": "git@github.com:liksoft/drewlabs-php-core-helpers.git"
+    },
+    {
+        "type": "vcs",
+        "url": "git@github.com:liksoft/drewlabs-php-support.git"
+    },
+    {
+        "type": "vcs",
         "url": "git@github.com:liksoft/drewlabs-php-packages-database.git"
     }
 ]
