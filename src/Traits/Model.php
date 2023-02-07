@@ -22,6 +22,8 @@ trait Model
     use LinkAttributeAware;
 
     /**
+     * @deprecated v2.6.x
+     * 
      * {@inheritDoc}
      */
     public function add(array $items)
@@ -35,6 +37,8 @@ trait Model
     }
 
     /**
+     * @deprecated v2.6.x
+     * 
      * {@inheritDoc}
      */
     public function getAll(bool $relations = false, array $columns = ['*'])
