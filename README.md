@@ -39,11 +39,11 @@ This package provides wrapper arround Laravel Illuminate Database ORM. It provid
 
 ### Providers
 
-* Laravel
-    When using Laravel framework the service provider is automatically registered.
+- Laravel
+  When using Laravel framework the service provider is automatically registered.
 
-* Lumen
-    For Lumen appliation you must manually register the providers in the bootstrap/app.php:
+- Lumen
+  For Lumen appliation you must manually register the providers in the bootstrap/app.php:
 
 ```php
 // bootstrap/app.php
@@ -58,7 +58,7 @@ $app->register(\Drewlabs\Packages\Database\ServiceProvider::class);
 
 This component offer a unified language for quering the database using SELECT, CREATE, UPDATE and DELETE METHOD. It heavily makes use of PHP dictionnary a.k.a arrays for various operations.
 
-* Creating instance of the DMLManager
+- Creating instance of the DMLManager
 
 ```php
 // ...
@@ -71,7 +71,7 @@ use App\Models\Example;
 $ql = DMLManager(Example::class);
 ```
 
-* Create
+- Create
 
 The method takes in the attributes to insert into the database table as a row.
 
@@ -79,44 +79,22 @@ The method takes in the attributes to insert into the database table as a row.
 $ql = DMLManager(Example::class);
 
 // Insert single values to the database
-$example = $dmlManager->create([
-    'label' => '<EXAMPLE LABEL>',
-]);
+$example = $dmlManager->create([/* ... */]);
 ```
 
 Note:
 In it complex form, the create method takes in the attributes to insert and a set of parameters:
 
 ```php
-$person = $dmlManager->create(
-    // Attributes to insert
-    [
-        'firstname' => 'FERA ADEVOU',
-        'lastname' => 'EKPEH',
-        'phonenumber' => '+22892002345',
-        'age' => 33,
-        'sex' => 'M',
-        'addresses' => [
-            [
-                'postal_code' => 'BP 228 LOME - TOGO',
-                'country' => 'TOGO',
-                'city' => 'LOME',
-                'email' => 'lordfera@gmail.com',
-            ],
-        ],
-        'profile' => [
-            'url' => 'https://i.picsum.photos/id/733/200/300.jpg?hmac=JYkTVVdGOo8BnLPxu1zWliHFvwXKurY-uTov5YiuX2s'
-        ]
-    ],
-    [
+$person = $dmlManager->create([
+        /* ... */
+        'addresses' => [ [/* ... */] ],
+        'profile' => [/* ... */]
+    ],[
         // Here we tells the query provider to use `profile`, `addresses` keys of `inputs` as relation
         // methods of the model class
-        'relations' => [
-            'addresses',
-            'profile'
-        ]
-    ]
-);
+        'relations' => ['addresses', 'profile']
+    ]);
 ```
 
 The create method also takes in a 3rd parameter `PHP Closure` that can be executed after the create operation
@@ -127,28 +105,26 @@ Examples:
 $ql = DMLManager(Example::class);
 
 // Insert single values to the database
-$example = $dmlManager->create([
-    'label' => '<EXAMPLE LABEL>',
-], function($value) {
+$example = $dmlManager->create([/* ... */], function($value) {
     // Do something with the created value
 });
 ```
 
-* Update
+- Update
 
 As the `create` method, the `update` method also provides overloaded method implementations for interacting with the database.
 
 ```php
-$person = $ql->update(1, ['firstname' => 'BENBOSS']);
+$person = $ql->update(1, ['firstname' => '...']);
 
 // Update by ID String
-$person = $ql->update("1", ['firstname' => 'AZANDREW']);
+$person = $ql->update("1", ['firstname' => '...']);
 
 // Update using query without mass update
-$count = $ql->update(['where' => ['firstname', 'SIDOINE']], ['firstname' => 'AZANDREW']);
+$count = $ql->update(['where' => ['name', '...']], ['firstname' => '...']);
 ```
 
-* Delete
+- Delete
 
 Delete provides an interface for deleting items based on there id or a complex query.
 
@@ -158,10 +134,10 @@ $ql = DMLManager(Person::class);
 $result = $ql->delete(1);
 
     // DELET AN ITEM USING COMPLEX QUERY
-$result = $ql->delete(['where' => ['firstname', 'SIDOINE']], true);
+$result = $ql->delete(['where' => ['...', '...']], true);
 ```
 
-* Select
+- Select
 
 `select` method of the DMLManger, provides a single method for querying rows in the database using either a complex query array for which each key correspond to a laravel eloquent model methods.
 
@@ -172,39 +148,17 @@ $ql = DMLManager(Person::class);
     });
     // Select by ID
     $person = $ql->select(1);
-    $list = $ql->select(
-        [
-            'where' => [
-                'firstname', 'BENJAMIN'
-            ],
-            'orWhere' => [
-                'lastname', 'AZOMEDOH'
-            ]
-        ],
-        ['firstname', 'addresses']
-    );
+    $list = $ql->select([/* ... */],['firstname', 'addresses']);
 
     // Select using complex where and orWhere queries
-    $list = $ql->select(
-        [
-            'where' => [
-                'firstname', 'BENJAMIN'
-            ],
-            'orWhere' => [
-                'lastname', 'AZOMEDOH'
-            ]
-        ],
-        15,
-        ['addresses', 'profile'],
-        1
-    );
+    $list = $ql->select([/* ... */], 15, ['addresses', 'profile'], 1);
 ```
 
 #### Repository class
 
 They repository class provides method for working with database model without exposing Laravel/Eloquent model implementations. It tries to mimic complex query through array of query parameters.
 
-* Creating a repository class:
+- Creating a repository class:
 
 ```php
 
@@ -221,13 +175,13 @@ $repository = new \Drewlabs\Packages\Database\Extensions\IlluminateModelReposito
 
 ```
 
-* Get class name binded to the repository:
+- Get class name binded to the repository:
 
 ```php
 $modelClass = $repository->getModel();
 ```
 
-* Performing CRUD operations
+- Performing CRUD operations
 
 ```php
 
@@ -239,30 +193,13 @@ use Drewlabs\Packages\Database\EloquentBuilderQueryFilters;
 
 $repository = IlluminateModelRepository(Example::class);
 
-$result = $repository->insert([
-    'label' => '...',
-    'display_label' => '...'
-]);
+$result = $repository->insert(['label' => '...', 'display_label' => '...' ]);
 
 // Upsert or Insert/Update if exists
-$result = $repository->insert([
-    'label' => '...',
-    'display_label' => '...'
-], null, true, [
-    'label' => '....'
-]);
+$result = $repository->insert(['label' => '...', 'display_label' => '...'], null, true, ['label' => '....']);
 
 /// Inserting many values
-$result = $repository->insertMany([
-    [
-    'label' => '...',
-    'display_label' => '...'
-    ],
-    [
-    'label' => '...',
-    'display_label' => '...'
-    ]
-]);
+$result = $repository->insertMany([['label' => '...','display_label' => '...'],['label' => '...','display_label' => '...']]);
 
 /// Update values by id
 /// $repository->updateById(int|mixed $id, array $data) -> ModelInterface; Returns the updated model
@@ -300,7 +237,7 @@ $result = $repository->pushFilter(new EloquentBuilderQueryFilters())->paginate($
 
 Query filters provides a way to easily apply database select query using PHP array mapping keys of the array of a given method of the framework ORM, and each values to the list of parameters.
 
-* Default query filter
+- Default query filter
 
 The package comes with a handy query filter class that provide implementation for applying queries to an illuminate model. The default query filter take advantage of PHP dynamic call on object to apply the query params to eloquent model.
 
@@ -310,7 +247,7 @@ use Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;
 
 /// Using the default query filter without a repository
 
-/// Note: Each key is an eloquent model/Eloquent query builder method 
+/// Note: Each key is an eloquent model/Eloquent query builder method
 /// Parameters are passed in the order and the same way they are passed to the model method, but are specified as array
 $filter = ModelFiltersHandler([
     // Creatigng a where query
@@ -365,8 +302,8 @@ $filter = ModelFiltersHandler([
     // Normal laravel join
     'join' => [
         'table1',
-        'table2.id', 
-        '=', 
+        'table2.id',
+        '=',
         'table1.user_id'
     ]
 ]);
@@ -397,7 +334,7 @@ $request = new \Illuminate\Http\Request([
             [
                 'match' => [
                     'method' => 'whereIn',
-                    'params' => ['url', ['http://localhost', 'http://liksoft.tg']]
+                    'params' => ['url', [/* ... */]]
                 ]
             ],
             [
@@ -424,7 +361,7 @@ $request = new \Illuminate\Http\Request([
 $filters = \drewlabs_databse_parse_client_request_query(new TestModelStub, $request);
 ```
 
-* Here is a list of Eloquent methods supported by the package:
+- Here is a list of Eloquent methods supported by the package:
 
 ```php
 $methods = [
@@ -474,66 +411,9 @@ use Illuminate\Database\Eloquent\Model as EloquentModel;
 
 final class Adresse extends EloquentModel implements ActiveModel, Parseable, Relatable, GuardedModel
 {
-
     use Model;
-
-    /**
-     * Model referenced table
-     * 
-     * @var string
-     */
-    protected $table = "adresse";
-
-    /**
-     * List of values that must be hidden when generating the json output
-     * 
-     * @var array
-     */
-    protected $hidden = [];
-
-    /**
-     * List of attributes that will be appended to the json output of the model
-     * 
-     * @var array
-     */
-    protected $appends = [];
-
-    /**
-     * List of fillable properties of the current model
-     * 
-     * @var array
-     */
-    protected $fillable = [
-        "id",
-        "adresse",
-        "ville",
-    ];
-
-    /**
-     * List of fillable properties of the current model
-     * 
-     * @var array
-     */
-    public $relation_methods = [];
-
-    /**
-     * Table primary key
-     * 
-     * @var string
-     */
-    protected $primaryKey = "id";
-
-    /**
-     * Bootstrap the model and its traits.
-     * 
-     *
-     * @return void
-     */
-    protected static function boot()
-    {
-        # code...
-        parent::boot();
-    }
+    
+    /* ... */
 
 }
 ```
@@ -544,7 +424,7 @@ final class Adresse extends EloquentModel implements ActiveModel, Parseable, Rel
 
 `SelectQueryAction` Proxy function provides a typo free function for creating database query action of type `SELECT` .
 
-* SelectQueryAction($id [, array $columns, \Closure $callback])
+- SelectQueryAction($id [, array $columns, \Closure $callback])
 
 ```php
 use function Drewlabs\Packages\Database\Proxy\SelectQueryAction;
@@ -555,8 +435,8 @@ use function Drewlabs\Packages\Database\Proxy\SelectQueryAction;
 $action = SelectQueryAction($id) // Creates a select by id query
 ```
 
-* SelectQueryAction(array $query [, array $columns, \Closure $callback])
-* SelectQueryAction(array $query, int $per_page [?int $page = null, array $columns, \Closure $callback])
+- SelectQueryAction(array $query [, array $columns, \Closure $callback])
+- SelectQueryAction(array $query, int $per_page [?int $page = null, array $columns, \Closure $callback])
 
 ```php
 use function Drewlabs\Packages\Database\Proxy\SelectQueryAction;
@@ -572,8 +452,8 @@ $action = SelectQueryAction([
 ]);
 ```
 
-* SelectQueryAction(FiltersInterface $query [, array $columns, \Closure $callback])
-* SelectQueryAction(FiltersInterface $query, int $per_page [?int $page = null, array $columns, \Closure $callback])
+- SelectQueryAction(FiltersInterface $query [, array $columns, \Closure $callback])
+- SelectQueryAction(FiltersInterface $query, int $per_page [?int $page = null, array $columns, \Closure $callback])
 
 ```php
 use function Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;
@@ -588,7 +468,7 @@ $action = SelectQueryAction(ModelFiltersHandler(...));
 
 `UpdateQueryAction` Proxy function provides a typo free function for creating database query action of type `UPDATE` .
 
-* UpdateQueryAction($id, array|object $attributes [, \Closure $callback])
+- UpdateQueryAction($id, array|object $attributes [, \Closure $callback])
 
 ```php
 use function Drewlabs\Packages\Database\Proxy\UpdateQueryAction;
@@ -599,7 +479,7 @@ use function Drewlabs\Packages\Database\Proxy\UpdateQueryAction;
 $action = UpdateQueryAction($id, ['name' => 'John Doe'])
 ```
 
-* UpdateQueryAction(array $query, array|object $attributes [, \Closure $callback])
+- UpdateQueryAction(array $query, array|object $attributes [, \Closure $callback])
 
 ```php
 use function Drewlabs\Packages\Database\Proxy\UpdateQueryAction;
@@ -610,7 +490,7 @@ use function Drewlabs\Packages\Database\Proxy\UpdateQueryAction;
 $action = UpdateQueryAction(ModelFiltersHandler(...), ['name' => 'John Doe'])
 ```
 
-* UpdateQueryAction(FiltersInterface $query, array|object $attributes [, \Closure $callback])
+- UpdateQueryAction(FiltersInterface $query, array|object $attributes [, \Closure $callback])
 
 ```php
 use function Drewlabs\Packages\Database\Proxy\UpdateQueryAction;
@@ -626,7 +506,7 @@ $action = UpdateQueryAction(['where' => ['id' => 3]], ['name' => 'John Doe'])
 
 Creates a `DELETE` type query action using user provided by function user.
 
-* DeleteQueryAction($id [, \Closure $callback])
+- DeleteQueryAction($id [, \Closure $callback])
 
 ```php
 use function Drewlabs\Packages\Database\Proxy\DeleteQueryAction;
@@ -637,7 +517,7 @@ use function Drewlabs\Packages\Database\Proxy\DeleteQueryAction;
 $action = DeleteQueryAction($id)
 ```
 
-* DeleteQueryAction(array $query [, \Closure $callback])
+- DeleteQueryAction(array $query [, \Closure $callback])
 
 ```php
 use function Drewlabs\Packages\Database\Proxy\DeleteQueryAction;
@@ -648,7 +528,7 @@ use function Drewlabs\Packages\Database\Proxy\DeleteQueryAction;
 $action = DeleteQueryAction(['where' => ['id' => 3]])
 ```
 
-* DeleteQueryAction(FiltersInterface $query [, \Closure $callback])
+- DeleteQueryAction(FiltersInterface $query [, \Closure $callback])
 
 ```php
 use function Drewlabs\Packages\Database\Proxy\DeleteQueryAction;
@@ -664,7 +544,7 @@ $action = DeleteQueryAction(ModelFiltersHandler(...))
 
 Creates a `CREATE` type query action using user provided by function user
 
-* CreateQueryAction(array $attributes [, array $params, \Closure $callback])
+- CreateQueryAction(array $attributes [, array $params, \Closure $callback])
 
 ```php
 use function Drewlabs\Packages\Database\Proxy\CreateQueryAction;
@@ -675,7 +555,7 @@ use function Drewlabs\Packages\Database\Proxy\CreateQueryAction;
 $action = CreateQueryAction([...])
 ```
 
-* CreateQueryAction(object $attributes, [, array $params , \Closure $callback])
+- CreateQueryAction(object $attributes, [, array $params , \Closure $callback])
 
 ```php
 use function Drewlabs\Packages\Database\Proxy\CreateQueryAction;
