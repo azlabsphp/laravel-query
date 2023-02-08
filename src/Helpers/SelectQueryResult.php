@@ -15,6 +15,7 @@ namespace Drewlabs\Packages\Database\Helpers;
 
 use Drewlabs\Contracts\Data\EnumerableQueryResult as ContractsEnumerableQueryResult;
 use Drewlabs\Packages\Database\EnumerableQueryResult;
+use Illuminate\Contracts\Container\BindingResolutionException;
 
 class SelectQueryResult
 {
@@ -36,9 +37,11 @@ class SelectQueryResult
     }
 
     /**
-     * Apply an aggregation callback on each item of the result query.
-     *
-     * @return self
+     * Invoke the projected function on each item of the collection
+     * 
+     * @param callable $callback 
+     * @return $this 
+     * @throws BindingResolutionException 
      */
     public function map(callable $callback)
     {
@@ -51,9 +54,11 @@ class SelectQueryResult
     }
 
     /**
-     * Apply an aggregation callback to a batch query result.
-     *
-     * @return self
+     * Invoke the projected function the collection as whole
+     * 
+     * @param callable $callback 
+     * @return $this 
+     * @throws BindingResolutionException 
      */
     public function all(callable $callback)
     {
