@@ -23,7 +23,7 @@ use Drewlabs\Contracts\Support\Actions\ActionResult as ActionResultInterface;
 use Drewlabs\Packages\Database\Contracts\QueryLanguageCommandInterface;
 use Drewlabs\Packages\Database\Eloquent\QueryFilters;
 use Drewlabs\Packages\Database\QueryLanguage;
-use Drewlabs\Packages\Database\Exceptions\InvalidDMLQueryActionException;
+use Drewlabs\Packages\Database\Exceptions\InvalidQueryActionException;
 use Drewlabs\Packages\Database\Helpers\SelectQueryResult;
 use Drewlabs\Packages\Database\Query\QueryAttribute;
 use Drewlabs\Support\Actions\Action;
@@ -361,7 +361,7 @@ function useDMLQueryActionCommand(DMLProvider $instance, ?\Closure $overridesAct
 
                     return ActionResult($this->instance->select(...$payload));
                 default:
-                    throw new InvalidDMLQueryActionException('This '.__CLASS__.' can only handle CREATE,DELETE,UPDATE AND SELECT actions');
+                    throw new InvalidQueryActionException('This '.__CLASS__.' can only handle CREATE,DELETE,UPDATE AND SELECT actions');
             }
         }
 

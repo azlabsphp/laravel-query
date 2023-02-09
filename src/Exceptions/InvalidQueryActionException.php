@@ -13,11 +13,8 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Exceptions;
 
-class DMLException extends \RuntimeException
+use Drewlabs\Contracts\Support\Actions\Exceptions\InvalidActionException;
+
+class InvalidQueryActionException extends InvalidActionException
 {
-    public function __construct($message = null, $code = 500, \Throwable $trace)
-    {
-        $message = $message ? sprintf('DMLManager Error %d: %s', $code, $message) : sprintf('Unknown DML Error %d', $code);
-        parent::__construct($message, $code, $trace);
-    }
 }

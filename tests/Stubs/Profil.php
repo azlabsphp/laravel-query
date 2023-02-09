@@ -13,10 +13,14 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Tests\Stubs;
 
-use Drewlabs\Packages\Database\Extensions\EloquentModel;
+use Drewlabs\Packages\Database\Contracts\ORMModel;
+use Drewlabs\Packages\Database\Traits\Model as TraitsModel;
+use Illuminate\Database\Eloquent\Model;
 
-class Profil extends EloquentModel
+class Profil extends Model implements ORMModel
 {
+    use TraitsModel;
+    
     /**
      * Model referenced table.
      *

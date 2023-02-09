@@ -81,4 +81,7 @@
 - Removed unused `TransactionUtils` interface
 - Removed Attributes parser and moved implementations to QueryLanguage class
 - Removed `LinkAwareAttribute` trait
-- Remobed `PreparesQueryBuilder` trait
+- Removed `PreparesQueryBuilder` trait
+- Removed `ModelTypeException` exception class
+- Renameed `DMLException` to `QueryException` class
+- Removed `EloquentModel` base extension class for models
