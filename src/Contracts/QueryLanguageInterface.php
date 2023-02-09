@@ -16,22 +16,21 @@ namespace Drewlabs\Packages\Database\Contracts;
 interface QueryLanguageInterface
 {
     /**
-     * Provides implementation for creating new row application database
+     * Provides implementation for creating new row application database.
      *
      * @param array ...$args
      */
     public function create(...$args);
 
     /**
-     * Provides query implementation that performs a delete query on database
+     * Provides query implementation that performs a delete query on database.
      *
      * @param array ...$args
      */
     public function delete(...$args);
 
     /**
-     * Provides query implementation that performs a select query on database
-     *
+     * Provides query implementation that performs a select query on database.
      *
      * <code>
      * <?php
@@ -56,10 +55,11 @@ interface QueryLanguageInterface
     public function select(...$args);
 
     /**
-     * Provides update query implementation
-     * 
-     * @param mixed ...$params 
-     * @return mixed 
+     * Provides update query implementation.
+     *
+     * @param mixed ...$params
+     *
+     * @return mixed
      */
     public function update(...$params);
 

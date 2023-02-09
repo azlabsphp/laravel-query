@@ -51,9 +51,9 @@ trait Model
     {
         // Get table primary key
         $primaryKey = $this->getPrimaryKey();
-        if (is_bool($primaryKey)){
+        if (\is_bool($primaryKey)) {
             print_r(__CLASS__);
-            die();
+            exit();
         }
         // Get list of fillables
         return Arr::unique(array_merge(

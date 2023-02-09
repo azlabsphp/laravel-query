@@ -34,7 +34,7 @@ trait CreateQueryLanguage
         });
     }
 
-    private function createV1($attributes, ?\Closure $callback = null)
+    private function createV1($attributes, \Closure $callback = null)
     {
         $callback = $callback ?: static function ($param) {
             return $param;
@@ -49,10 +49,10 @@ trait CreateQueryLanguage
         );
     }
 
-    private function createV2($attributes, $params, ?\Closure $callback = null)
+    private function createV2($attributes, $params, \Closure $callback = null)
     {
         if (!(\is_array($params) || ($params instanceof DataProviderHandlerParamsInterface))) {
-            throw new \InvalidArgumentException('Argument 2 of the create method must be an array or an instance of ' . DataProviderHandlerParamsInterface::class);
+            throw new \InvalidArgumentException('Argument 2 of the create method must be an array or an instance of '.DataProviderHandlerParamsInterface::class);
         }
 
         return $this->createCommand(
@@ -63,10 +63,10 @@ trait CreateQueryLanguage
         );
     }
 
-    private function createV3($attributes, $params, bool $batch, ?\Closure $callback = null)
+    private function createV3($attributes, $params, bool $batch, \Closure $callback = null)
     {
         if (!(\is_array($params) || ($params instanceof DataProviderHandlerParamsInterface))) {
-            throw new \InvalidArgumentException('Argument 2 of the create method must be an array or an instance of ' . DataProviderHandlerParamsInterface::class);
+            throw new \InvalidArgumentException('Argument 2 of the create method must be an array or an instance of '.DataProviderHandlerParamsInterface::class);
         }
 
         return $this->createCommand(
@@ -86,7 +86,7 @@ trait CreateQueryLanguage
      *
      * @return mixed
      */
-    private function createCommand($attributes, array $params, bool $batch = false, ?\Closure $callback = null)
+    private function createCommand($attributes, array $params, bool $batch = false, \Closure $callback = null)
     {
         $callback = $callback ?: static function ($param) {
             return $param;

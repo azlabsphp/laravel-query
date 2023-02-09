@@ -19,14 +19,14 @@ use Drewlabs\Packages\Database\Query\ConditionQuery;
 trait QueryFilters
 {
     /**
-     * Query filters dictionary
+     * Query filters dictionary.
      *
      * @var array
      */
     private $filters = [];
 
     /**
-     * Query builder instance
+     * Query builder instance.
      *
      * @var object
      */
@@ -40,6 +40,7 @@ trait QueryFilters
                 $object = $this->{$key}($object, $value);
             }
         }
+
         return $object;
     }
 
@@ -118,11 +119,12 @@ trait QueryFilters
         if (\is_array($filter) && (false !== Arr::search($filter[1] ?? null, $operators))) {
             return $builder->has(...$filter);
         }
-        if (is_array($filter)) {
+        if (\is_array($filter)) {
             foreach ($filter as $value) {
                 $builder = $builder->has($value);
             }
         }
+
         return $builder;
     }
 

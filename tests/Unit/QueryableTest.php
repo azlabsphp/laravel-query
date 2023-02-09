@@ -1,21 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
+/*
+ * This file is part of the Drewlabs package.
+ *
+ * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 use Drewlabs\Contracts\Data\EnumerableQueryResult;
+use Drewlabs\Contracts\Data\Model\Model;
 use Drewlabs\Packages\Database\AggregationMethods;
 use Drewlabs\Packages\Database\Tests\Stubs\Person;
 use Drewlabs\Packages\Database\Tests\Stubs\PersonViewModelStub;
 use Drewlabs\Packages\Database\Tests\TestCase;
-use Drewlabs\Contracts\Data\Model\Model;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Support\Collection;
 
 class QueryableTest extends TestCase
 {
-    private function getQueryable()
-    {
-        return new PersonViewModelStub();
-    }
-
     public function test_create_method()
     {
         $person = $this->getQueryable()->create([
@@ -120,7 +126,6 @@ class QueryableTest extends TestCase
         $this->assertTrue(0 === Person::where('lastname', 'PAYARO')->count(), 'Expect person having lastname == PAYARO to be modified');
     }
 
-
     public function test_select_method()
     {
         $person = $this->getQueryable()->select('1', ['*'], static function ($model) {
@@ -128,7 +133,7 @@ class QueryableTest extends TestCase
         });
         $this->assertIsArray($person, 'Expect the returned person to be and array');
         $person = $this->getQueryable()->select(1);
-        $this->assertInstanceOf(Model::class, $person, 'Expect $person to be an instance of ' . Model::class);
+        $this->assertInstanceOf(Model::class, $person, 'Expect $person to be an instance of '.Model::class);
         $list = $this->getQueryable()->select(
             [
                 'where' => [
@@ -140,7 +145,7 @@ class QueryableTest extends TestCase
             ],
             ['firstname', 'addresses']
         );
-        $this->assertInstanceOf(EnumerableQueryResult::class, $list, 'Expect the returned result to be an instance of ' . EnumerableQueryResult::class);
+        $this->assertInstanceOf(EnumerableQueryResult::class, $list, 'Expect the returned result to be an instance of '.EnumerableQueryResult::class);
         $this->assertSame($list->count(), 2, 'Expect the total returned row to equals 2');
         $list = $this->getQueryable()->select(
             [
@@ -220,5 +225,10 @@ class QueryableTest extends TestCase
     public function test_select_aggregate()
     {
         $this->assertSame(2, $this->getQueryable()->aggregate([], AggregationMethods::COUNT));
+    }
+
+    private function getQueryable()
+    {
+        return new PersonViewModelStub();
     }
 }

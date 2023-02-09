@@ -15,7 +15,6 @@ namespace Drewlabs\Packages\Database\Query;
 
 use Drewlabs\Core\Helpers\Str;
 use Drewlabs\Packages\Database\Traits\ContainerAware;
-use InvalidArgumentException;
 
 /**
  * @internal Required internally for parsing query parameter
@@ -37,11 +36,13 @@ class QueryAttribute
     private $column;
 
     /**
-     * Creates a query attribute instance
-     * 
-     * @param array $attributes 
-     * @return void 
-     * @throws InvalidArgumentException 
+     * Creates a query attribute instance.
+     *
+     * @param array $attributes
+     *
+     * @throws \InvalidArgumentException
+     *
+     * @return void
      */
     public function __construct($attributes = [])
     {

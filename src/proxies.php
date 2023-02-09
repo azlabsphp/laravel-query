@@ -22,10 +22,10 @@ use Drewlabs\Contracts\Support\Actions\ActionPayload as ActionPayloadInterface;
 use Drewlabs\Contracts\Support\Actions\ActionResult as ActionResultInterface;
 use Drewlabs\Packages\Database\Contracts\QueryLanguageCommandInterface;
 use Drewlabs\Packages\Database\Eloquent\QueryFilters;
-use Drewlabs\Packages\Database\QueryLanguage;
 use Drewlabs\Packages\Database\Exceptions\InvalidQueryActionException;
 use Drewlabs\Packages\Database\Helpers\SelectQueryResult;
 use Drewlabs\Packages\Database\Query\QueryAttribute;
+use Drewlabs\Packages\Database\QueryLanguage;
 use Drewlabs\Support\Actions\Action;
 
 use function Drewlabs\Support\Proxy\Action;
@@ -306,7 +306,7 @@ function CreateQueryAction(...$payload)
  *
  * @return QueryLanguageCommandInterface
  */
-function useDMLQueryActionCommand(DMLProvider $instance, ?\Closure $overridesActionHandler = null)
+function useDMLQueryActionCommand(DMLProvider $instance, \Closure $overridesActionHandler = null)
 {
     return new class($instance, $overridesActionHandler) {
         /**
@@ -319,7 +319,7 @@ function useDMLQueryActionCommand(DMLProvider $instance, ?\Closure $overridesAct
          */
         private $overridesActionHandler;
 
-        public function __construct(DMLProvider $instance, ?\Closure $overridesActionHandler = null)
+        public function __construct(DMLProvider $instance, \Closure $overridesActionHandler = null)
         {
             $this->instance = $instance;
             $this->overridesActionHandler = $overridesActionHandler;
@@ -330,7 +330,7 @@ function useDMLQueryActionCommand(DMLProvider $instance, ?\Closure $overridesAct
          *
          * @return ActionResultInterface
          */
-        public function __invoke(ActionsInterface $action, ?\Closure $callback = null)
+        public function __invoke(ActionsInterface $action, \Closure $callback = null)
         {
             // We allow user to provide a custom handler that overrides the
             // default action handler for the command
@@ -370,7 +370,7 @@ function useDMLQueryActionCommand(DMLProvider $instance, ?\Closure $overridesAct
          *
          * @return ActionResultInterface
          */
-        public function exec(ActionsInterface $action, ?\Closure $callback = null)
+        public function exec(ActionsInterface $action, \Closure $callback = null)
         {
             return $this->__invoke($action, $callback);
         }

@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\Model;
 class Profil extends Model implements ORMModel
 {
     use TraitsModel;
-    
+
     /**
      * Model referenced table.
      *

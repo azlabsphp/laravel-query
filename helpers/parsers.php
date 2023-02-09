@@ -71,6 +71,7 @@ if (!function_exists('drewlabs_database_validate_dynamic_callback')) {
             // Throw a new Exception
             throw new \RuntimeException();
         }
+
         return $cbs;
     }
 }

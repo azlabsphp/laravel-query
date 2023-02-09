@@ -48,22 +48,22 @@ trait UpdateQueryLanguage
     private function updateV2(
         int $id,
         $attributes,
-        ?\Closure $callback = null
+        \Closure $callback = null
     ) {
         return $this->updateCommand((string) $id, $attributes, [], $callback);
     }
 
-    private function updateV3(int $id, $attributes, $params, ?\Closure $callback = null)
+    private function updateV3(int $id, $attributes, $params, \Closure $callback = null)
     {
         return $this->updateCommand((string) $id, $attributes, $params, $callback);
     }
 
-    private function updateV4(string $id, $attributes, ?\Closure $callback = null)
+    private function updateV4(string $id, $attributes, \Closure $callback = null)
     {
         return $this->updateCommand((string) $id, $attributes, [], $callback);
     }
 
-    private function updateV5(string $id, $attributes, $params, ?\Closure $callback = null)
+    private function updateV5(string $id, $attributes, $params, \Closure $callback = null)
     {
         return $this->updateCommand($id, $attributes, $params, $callback);
     }
@@ -103,7 +103,7 @@ trait UpdateQueryLanguage
         );
     }
 
-    private function updateCommand($id, $attributes, $params, ?\Closure $callback = null)
+    private function updateCommand($id, $attributes, $params, \Closure $callback = null)
     {
         $callback = $callback ?? static function ($value) {
             return $value;
@@ -118,7 +118,7 @@ trait UpdateQueryLanguage
             $key,
             array $values
         ) use ($callback) {
-            return function (?\Closure $callable = null) use (
+            return function (\Closure $callable = null) use (
                 $self,
                 $key,
                 $values,

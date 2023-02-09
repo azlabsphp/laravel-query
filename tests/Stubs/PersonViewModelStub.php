@@ -15,7 +15,6 @@ namespace Drewlabs\Packages\Database\Tests\Stubs;
 
 use Drewlabs\Packages\Database\Contracts\QueryLanguageInterface;
 use Drewlabs\Packages\Database\Query\Queryable;
-use Drewlabs\Packages\Database\Tests\Stubs\Person;
 
 class PersonViewModelStub implements QueryLanguageInterface
 {

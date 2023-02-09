@@ -50,7 +50,7 @@ trait SelectQueryLanguage
         return $this->overload(
             $args,
             [
-                function (array $query, ?\Closure $callback = null) {
+                function (array $query, \Closure $callback = null) {
                     $callback = $callback ?? static function ($value) {
                         return $value;
                     };
@@ -70,7 +70,7 @@ trait SelectQueryLanguage
                         })->first()
                     );
                 },
-                function (array $query, array $columns, ?\Closure $callback = null) {
+                function (array $query, array $columns, \Closure $callback = null) {
                     $callback = $callback ?? static function ($value) {
                         return $value;
                     };
@@ -90,7 +90,7 @@ trait SelectQueryLanguage
                         })->first()
                     );
                 },
-                function (?\Closure $callback = null) {
+                function (\Closure $callback = null) {
                     $callback = $callback ?? static function ($value) {
                         return $value;
                     };
@@ -114,7 +114,7 @@ trait SelectQueryLanguage
         );
     }
 
-    private function selectV0(?\Closure $callback = null)
+    private function selectV0(\Closure $callback = null)
     {
         $callback = $callback ?? static function ($value) {
             return $value;
@@ -123,7 +123,7 @@ trait SelectQueryLanguage
         return $callback($this->selectV3([]));
     }
 
-    private function selectV1(string $id, array $columns, ?\Closure $callback = null)
+    private function selectV1(string $id, array $columns, \Closure $callback = null)
     {
         $callback = $callback ?? static function ($value) {
             return $value;
@@ -143,22 +143,22 @@ trait SelectQueryLanguage
         );
     }
 
-    private function selectV1_1(string $id, ?\Closure $callback = null)
+    private function selectV1_1(string $id, \Closure $callback = null)
     {
         return $this->selectV1($id, ['*'], $callback);
     }
 
-    private function selectV2(int $id, array $columns, ?\Closure $callback = null)
+    private function selectV2(int $id, array $columns, \Closure $callback = null)
     {
         return $this->selectV1((string) $id, $columns, $callback);
     }
 
-    private function selectV2_1(int $id, ?\Closure $callback = null)
+    private function selectV2_1(int $id, \Closure $callback = null)
     {
         return $this->selectV1((string) $id, ['*'], $callback);
     }
 
-    private function selectV3(array $query, ?\Closure $callback = null)
+    private function selectV3(array $query, \Closure $callback = null)
     {
         return $this->createSelector(
             $query,
@@ -173,7 +173,7 @@ trait SelectQueryLanguage
         });
     }
 
-    private function selectV3_1(array $query, array $columns, ?\Closure $callback = null)
+    private function selectV3_1(array $query, array $columns, \Closure $callback = null)
     {
         return $this->createSelector(
             $query,
@@ -188,7 +188,7 @@ trait SelectQueryLanguage
         });
     }
 
-    private function selectV4(array $query, int $per_page, ?int $page = null, ?\Closure $callback = null)
+    private function selectV4(array $query, int $per_page, int $page = null, \Closure $callback = null)
     {
         return $this->createSelector(
             $query,
@@ -203,7 +203,7 @@ trait SelectQueryLanguage
         });
     }
 
-    private function selectV4_1(array $query, int $per_page, array $columns, ?int $page = null, ?\Closure $callback = null)
+    private function selectV4_1(array $query, int $per_page, array $columns, int $page = null, \Closure $callback = null)
     {
         return $this->createSelector(
             $query,
@@ -218,7 +218,7 @@ trait SelectQueryLanguage
         });
     }
 
-    private function selectV5(FiltersInterface $query, ?\Closure $callback = null)
+    private function selectV5(FiltersInterface $query, \Closure $callback = null)
     {
         return $this->createSelector(
             $query,
@@ -233,7 +233,7 @@ trait SelectQueryLanguage
         });
     }
 
-    private function selectV5_1(FiltersInterface $query, array $columns, ?\Closure $callback = null)
+    private function selectV5_1(FiltersInterface $query, array $columns, \Closure $callback = null)
     {
         return $this->createSelector(
             $query,
@@ -248,7 +248,7 @@ trait SelectQueryLanguage
         });
     }
 
-    private function selectV6(FiltersInterface $query, int $per_page, ?int $page = null, ?\Closure $callback = null)
+    private function selectV6(FiltersInterface $query, int $per_page, int $page = null, \Closure $callback = null)
     {
         return $this->createSelector(
             $query,
@@ -263,7 +263,7 @@ trait SelectQueryLanguage
         });
     }
 
-    private function selectV6_1(FiltersInterface $query, int $per_page, array $columns, ?int $page = null, ?\Closure $callback = null)
+    private function selectV6_1(FiltersInterface $query, int $per_page, array $columns, int $page = null, \Closure $callback = null)
     {
         return $this->createSelector(
             $query,
@@ -283,7 +283,7 @@ trait SelectQueryLanguage
      *
      * @return \Closure
      */
-    private function createSelector($query, array $columns, ?\Closure $callback = null)
+    private function createSelector($query, array $columns, \Closure $callback = null)
     {
         return function (\Closure $selector) use ($query, $columns, $callback) {
             $callback = $callback ?? static function ($value) {

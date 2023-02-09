@@ -15,8 +15,8 @@ namespace Drewlabs\Packages\Database\Eloquent;
 
 use Drewlabs\Contracts\Data\Filters\FiltersInterface;
 use Drewlabs\Contracts\Data\Parser\QueryParser;
-use Drewlabs\Packages\Database\Query\JoinQuery;
 use Drewlabs\Packages\Database\Eloquent\Traits\QueryFilters as QueryFiltersMixin;
+use Drewlabs\Packages\Database\Query\JoinQuery;
 
 final class QueryFilters implements FiltersInterface
 {
@@ -28,11 +28,11 @@ final class QueryFilters implements FiltersInterface
     private $joinQuery;
 
     /**
-     * Creates class instance
+     * Creates class instance.
      *
      * @return self
      */
-    public function __construct(?array $filters = null, ?QueryParser $joinQuery = null)
+    public function __construct(array $filters = null, QueryParser $joinQuery = null)
     {
         $this->joinQuery = $joinQuery ?? new JoinQuery();
         $this->setQueryFilters($filters ?? []);

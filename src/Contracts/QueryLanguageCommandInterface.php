@@ -24,7 +24,7 @@ interface QueryLanguageCommandInterface
      *
      * @return ActionResultInterface
      */
-    public function __invoke(Action $action, ?\Closure $closure = null);
+    public function __invoke(Action $action, \Closure $closure = null);
 
     /**
      * Execute the DML Query action command on developper provided action interface.
@@ -33,5 +33,5 @@ interface QueryLanguageCommandInterface
      *
      * @return ActionResultInterface
      */
-    public function exec(Action $action, ?\Closure $closure = null);
+    public function exec(Action $action, \Closure $closure = null);
 }

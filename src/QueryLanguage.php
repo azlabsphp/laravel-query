@@ -15,21 +15,21 @@ namespace Drewlabs\Packages\Database;
 
 use Closure;
 use Drewlabs\Contracts\Data\DML\DMLProvider;
+use Drewlabs\Contracts\Data\Filters\FiltersInterface;
 use Drewlabs\Contracts\Data\Model\ActiveModel;
 use Drewlabs\Contracts\Data\Model\Model;
 use Drewlabs\Core\Helpers\Arr;
 use Drewlabs\Packages\Database\Contracts\QueryLanguageInterface;
+use Drewlabs\Packages\Database\Eloquent\QueryMethod;
+use function Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;
 use Drewlabs\Packages\Database\Query\Concerns\CreateQueryLanguage;
+
 use Drewlabs\Packages\Database\Query\Concerns\DeleteQueryLanguage;
 use Drewlabs\Packages\Database\Query\Concerns\SelectQueryLanguage;
 use Drewlabs\Packages\Database\Query\Concerns\UpdateQueryLanguage;
-
-use function Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;
 use Drewlabs\Packages\Database\Traits\ContainerAware;
 use Drewlabs\Support\Traits\MethodProxy;
 use Drewlabs\Support\Traits\Overloadable;
-use Drewlabs\Contracts\Data\Filters\FiltersInterface;
-use Drewlabs\Packages\Database\Eloquent\QueryMethod;
 
 /**
  * @method \Drewlabs\Contracts\Data\Model\Model|mixed           create(array $attributes, \Closure $callback = null)
@@ -61,10 +61,10 @@ final class QueryLanguage implements DMLProvider, QueryLanguageInterface
     use ContainerAware;
     use CreateQueryLanguage;
     use DeleteQueryLanguage;
-    use SelectQueryLanguage;
-    use UpdateQueryLanguage;
     use MethodProxy;
     use Overloadable;
+    use SelectQueryLanguage;
+    use UpdateQueryLanguage;
 
     public const AGGREGATE_METHODS = [
         AggregationMethods::COUNT,
@@ -87,8 +87,7 @@ final class QueryLanguage implements DMLProvider, QueryLanguageInterface
     private $model;
 
     /**
-     * 
-     * @var Closure(mixed $builder, array|FiltersInterface $query): mixed 
+     * @var Closure(mixed, array|FiltersInterface $query): mixed
      */
     private $builderFactory;
 
@@ -97,14 +96,13 @@ final class QueryLanguage implements DMLProvider, QueryLanguageInterface
      *
      * @throws \Exception
      * @throws \InvalidArgumentException
-     *
      */
     public function __construct($blueprint)
     {
         if (!(\is_string($blueprint) || ($blueprint instanceof Model))) {
-            throw new \InvalidArgumentException('Constructor requires an instance of ' . Model::class . ', or a Model class name');
+            throw new \InvalidArgumentException('Constructor requires an instance of '.Model::class.', or a Model class name');
         }
-        $this->model =  \is_string($blueprint) ? self::createResolver($blueprint)() : $blueprint;
+        $this->model = \is_string($blueprint) ? self::createResolver($blueprint)() : $blueprint;
         $this->model_class = \is_string($blueprint) ? $blueprint : \get_class($blueprint);
         $this->setBuilderFactory($this->defaultBuilderFactory());
     }
@@ -117,7 +115,7 @@ final class QueryLanguage implements DMLProvider, QueryLanguageInterface
     public function createMany(array $attributes)
     {
         if (!(array_filter($attributes, 'is_array') === $attributes)) {
-            throw new \InvalidArgumentException(__METHOD__ . ' requires an list of list items for insertion');
+            throw new \InvalidArgumentException(__METHOD__.' requires an list of list items for insertion');
         }
 
         return $this->proxy(
@@ -137,6 +135,7 @@ final class QueryLanguage implements DMLProvider, QueryLanguageInterface
             throw new \InvalidArgumentException('The provided method is not part of the aggregation framework supported methods');
         }
         $model = drewlabs_core_create_attribute_getter('model', null)($this);
+
         return $this->proxy($this->builderFactory()($model, $query), $method, []);
     }
 
@@ -146,9 +145,9 @@ final class QueryLanguage implements DMLProvider, QueryLanguageInterface
     }
 
     /**
-     * Query language builder factory getter
-     * 
-     * @return Closure(mixed $builder, array|FiltersInterface $query): mixed 
+     * Query language builder factory getter.
+     *
+     * @return Closure(mixed $builder, array|FiltersInterface $query): mixed
      */
     public function builderFactory()
     {
@@ -156,25 +155,25 @@ final class QueryLanguage implements DMLProvider, QueryLanguageInterface
     }
 
     /**
-     * Query Language builder factory setter method
-     * 
-     * @param Closure $factory 
-     * @return self 
+     * Query Language builder factory setter method.
+     *
+     * @return self
      */
-    public function setBuilderFactory(Closure $factory)
+    public function setBuilderFactory(\Closure $factory)
     {
         $this->builderFactory = $factory;
+
         return $this;
     }
 
     /**
-     * Provides a default builder factory that is used to invoke database queries
-     * 
-     * @return Closure(mixed $builder, array|FiltersInterface $query): mixed 
+     * Provides a default builder factory that is used to invoke database queries.
+     *
+     * @return Closure(mixed $builder, array|FiltersInterface $query): mixed
      */
     private function defaultBuilderFactory()
     {
-        return function ($builder, $query) {
+        return static function ($builder, $query) {
             return \is_array($query) ? array_reduce(Arr::isnotassoclist($query) ? $query : [$query], static function ($builder, $query) {
                 return ModelFiltersHandler($query)->apply($builder);
             }, $builder) : $query->apply($builder);
@@ -193,11 +192,13 @@ final class QueryLanguage implements DMLProvider, QueryLanguageInterface
         if (\is_array($attributes)) {
             return $attributes;
         }
+
         return Arr::create($attributes);
     }
+
     /**
-     * Prepares database table attributes
-     * 
+     * Prepares database table attributes.
+     *
      * @return array
      */
     private function parseAttributes(array $attributes)
@@ -218,6 +219,7 @@ final class QueryLanguage implements DMLProvider, QueryLanguageInterface
         if (empty($fillable)) {
             return $attributes;
         }
+
         return Arr::create($this->yieldAttributes($fillable, $attributes));
     }
 

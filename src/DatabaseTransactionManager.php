@@ -25,7 +25,7 @@ class DatabaseTransactionManager
     private $db;
 
     /**
-     * Creates a database transaction management instance
+     * Creates a database transaction management instance.
      *
      * @param mixed|null $db
      *

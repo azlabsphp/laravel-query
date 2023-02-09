@@ -23,6 +23,7 @@ class ConditionQuery implements QueryParser
     public function parse(array $params)
     {
         $islist = array_filter($params, 'is_array') === $params;
+
         return $islist ? iterator_to_array(
             Iter::map(
                 new \ArrayIterator($params),

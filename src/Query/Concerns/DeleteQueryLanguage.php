@@ -38,7 +38,7 @@ trait DeleteQueryLanguage
     private function deleteV2(string $id)
     {
         return 1 === (int) ($this->deleteV3([
-            'where' => [drewlabs_core_create_attribute_getter('model', null)($this)->getPrimaryKey(), $id]
+            'where' => [drewlabs_core_create_attribute_getter('model', null)($this)->getPrimaryKey(), $id],
         ])) ? true : false;
     }
 
@@ -61,6 +61,7 @@ trait DeleteQueryLanguage
         ) : array_reduce($this->select($query)->all(), function ($carry, $value) {
             $this->proxy($value, QueryMethod::DELETE, []);
             ++$carry;
+
             return $carry;
         }, 0);
     }
