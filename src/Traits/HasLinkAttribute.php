@@ -15,13 +15,13 @@ namespace Drewlabs\Packages\Database\Traits;
 
 use Illuminate\Support\Facades\URL;
 
-trait LinkAttributeAware
+/**
+ * @deprecated v3.x Not needed for every application models therefore will
+ * be removed in future release. Provides an implementation in a data transfert
+ * object instead
+ */
+trait HasLinkAttribute
 {
-    /**
-     * [[link]] attribute getter.
-     *
-     * @return string
-     */
     public function getLinkAttribute()
     {
         $id = $this->ressourceId();
@@ -60,5 +60,14 @@ trait LinkAttributeAware
     protected function getIndexRoute()
     {
         return $this->indexRoute ?? null;
+    }
+
+    protected function getArrayableAppends()
+    {
+        $route = $this->getIndexRoute();
+        if ($this->withoutAppends) {
+            return null !== $route && \is_string($route) ? ['_link'] : [];
+        }
+        return array_merge(parent::getArrayableAppends(), isset($route) && \is_string($route) ? ['_link'] : []);
     }
 }

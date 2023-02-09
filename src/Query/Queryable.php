@@ -11,7 +11,7 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Database\Traits;
+namespace Drewlabs\Packages\Database\Query;
 
 use function Drewlabs\Packages\Database\Proxy\DMLManager;
 

@@ -11,18 +11,15 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Database;
+namespace Drewlabs\Packages\Database\Query;
 
 use Drewlabs\Contracts\Data\Parser\QueryParser;
 use Drewlabs\Core\Helpers\Iter;
 
 use function Drewlabs\Packages\Database\Proxy\QueryParam;
 
-class JoinQueryParamsParser implements QueryParser
+class JoinQuery implements QueryParser
 {
-    /**
-     * {@inheritDoc}
-     */
     public function parse(array $params)
     {
         $isArrayList = array_filter($params, 'is_array') === $params;

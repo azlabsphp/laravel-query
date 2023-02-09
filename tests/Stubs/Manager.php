@@ -68,4 +68,9 @@ class Manager extends Model implements ORMModel
     {
         return $this->hasOne(PersonManager::class, 'manager_id', 'id');
     }
+
+    public function getFillables()
+    {
+        return $this->getFillable();
+    }
 }

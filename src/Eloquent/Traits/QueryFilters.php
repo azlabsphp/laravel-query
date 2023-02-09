@@ -11,12 +11,12 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Database\Traits;
+namespace Drewlabs\Packages\Database\Eloquent\Traits;
 
 use Drewlabs\Core\Helpers\Arr;
-use Drewlabs\Packages\Database\FilterQueryParamsParser;
+use Drewlabs\Packages\Database\Query\ConditionQuery;
 
-trait EloquentBuilderQueryFilters
+trait QueryFilters
 {
     /**
      * Query filters dictionary
@@ -31,12 +31,11 @@ trait EloquentBuilderQueryFilters
      * @var object
      */
     private $model;
-    
+
     public function apply($builder)
     {
         $object = clone $builder;
         foreach ($this->filters ?? [] as $key => $value) {
-            // $method = $key; // 'apply'.ucfirst($key);
             if ((null !== $value) && method_exists($this, $key)) {
                 $object = $this->{$key}($object, $value);
             }
@@ -58,7 +57,7 @@ trait EloquentBuilderQueryFilters
 
             return $builder;
         }
-        $parser = new FilterQueryParamsParser();
+        $parser = new ConditionQuery();
         if (Arr::isList($result = $parser->parse($filter))) {
             $builder = array_reduce($result, static function ($builder, array $query) {
                 return $builder->where(...array_values($query));
@@ -126,7 +125,7 @@ trait EloquentBuilderQueryFilters
         }
         return $builder;
     }
-    
+
     private function doesntHave($builder, $filter)
     {
         if (\is_string($filter)) {
@@ -140,7 +139,7 @@ trait EloquentBuilderQueryFilters
 
         return $builder;
     }
-    
+
     private function orWhere($builder, $filter)
     {
         if ($filter instanceof \Closure) {
@@ -148,7 +147,7 @@ trait EloquentBuilderQueryFilters
 
             return $builder;
         }
-        $parser = new FilterQueryParamsParser();
+        $parser = new ConditionQuery();
         if (Arr::isList($result = $parser->parse($filter))) {
             $builder = array_reduce($result, static function ($builder, array $query) {
                 return $builder->orWhere(...array_values($query));
@@ -168,7 +167,7 @@ trait EloquentBuilderQueryFilters
             return \count($curr) >= 2 ? $carry->whereIn($curr[0], $curr[1]) : $carry;
         }, $builder);
     }
-    
+
     private function whereBetween($builder, array $filter)
     {
         return $builder->whereBetween($filter[0], $filter[1]);
@@ -217,7 +216,7 @@ trait EloquentBuilderQueryFilters
 
     private function sqlApplyJoinQueries($builder, $filter, $method = 'join')
     {
-        $result = $this->joinQueryParser->parse($filter);
+        $result = $this->joinQuery->parse($filter);
         $result = Arr::isList($result) ? $result : [$result];
         foreach ($result as $value) {
             $builder = $builder->{$method}(...$value);

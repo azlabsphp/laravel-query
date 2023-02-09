@@ -71,3 +71,14 @@
 
 - Added support for query insensitive query method
 - Add match for `exists`, `in`, `notin`, `notnull`, `ornotnull`, `isnull`, `sort` query methods
+
+## [3.0.x] 2023-02-08
+
+- Completely reviewed implementation API and removed deprecated classes, method, traits
+- Moved Eloquent related class and implementation to dedicated namespace
+- Removed unused and unnecessary trait from the `Traits` namespace
+- Replace `DMLQueryCommandInterface` with `QueryLanguageCommandInterface`
+- Removed unused `TransactionUtils` interface
+- Removed Attributes parser and moved implementations to QueryLanguage class
+- Removed `LinkAwareAttribute` trait
+- Remobed `PreparesQueryBuilder` trait

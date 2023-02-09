@@ -11,12 +11,12 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Database;
+namespace Drewlabs\Packages\Database\Eloquent;
 
 /**
  * @internal API could be subject to change using PHP enumeration class
  */
-class EloquentQueryBuilderMethods
+class QueryMethod
 {
     /**
      * @var string

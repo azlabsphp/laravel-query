@@ -15,7 +15,7 @@ namespace Drewlabs\Packages\Database\Contracts;
 
 use Drewlabs\Contracts\Support\Actions\Action;
 
-interface DMLQueryCommandInterface
+interface QueryLanguageCommandInterface
 {
     /**
      * Execute the DML Query action command on developper provided action interface.

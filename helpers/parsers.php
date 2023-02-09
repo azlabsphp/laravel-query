@@ -12,7 +12,7 @@ declare(strict_types=1);
  */
 
 use Drewlabs\Contracts\Data\DataProviderHandlerParamsInterface;
-use Drewlabs\Packages\Database\EloquentQueryBuilderMethods;
+use Drewlabs\Packages\Database\Eloquent\QueryMethod;
 
 if (!function_exists('drewlabs_database_parse_update_handler_params')) {
     /**
@@ -26,7 +26,7 @@ if (!function_exists('drewlabs_database_parse_update_handler_params')) {
     {
         $value = $params instanceof DataProviderHandlerParamsInterface ? $params->getParams() : (is_array($params) ? $params : []);
         $value['upsert'] = (bool) ($value['upsert'] ?? true);
-        $value['method'] = isset($value['method']) && is_string($value['method']) ? $value['method'] : EloquentQueryBuilderMethods::UPDATE;
+        $value['method'] = isset($value['method']) && is_string($value['method']) ? $value['method'] : QueryMethod::UPDATE;
 
         return $value;
     }
@@ -45,7 +45,7 @@ if (!function_exists('drewlabs_database_parse_create_handler_params')) {
         $value = $params instanceof DataProviderHandlerParamsInterface ? $params->getParams() : (is_array($params) ? $params : []);
         $upsert_conditions = isset($value['upsert_conditions']) && is_array($value['upsert_conditions']) ? $value['upsert_conditions'] : [];
         $upsert = !empty($upsert_conditions) ? true : false;
-        $method = isset($value['method']) && is_string($value['method']) ? $value['method'] : ($upsert ? EloquentQueryBuilderMethods::UPSERT : EloquentQueryBuilderMethods::CREATE);
+        $method = isset($value['method']) && is_string($value['method']) ? $value['method'] : ($upsert ? QueryMethod::UPSERT : QueryMethod::CREATE);
 
         return array_merge($value, [
             'method' => $method,
@@ -71,7 +71,6 @@ if (!function_exists('drewlabs_database_validate_dynamic_callback')) {
             // Throw a new Exception
             throw new \RuntimeException();
         }
-
         return $cbs;
     }
 }

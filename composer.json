@@ -30,7 +30,7 @@
         "files": [
             "helpers/query.php",
             "helpers/parsers.php",
-            "helpers/transformers.php",
+            "helpers/transform.php",
             "src/proxies.php"
         ]
     },

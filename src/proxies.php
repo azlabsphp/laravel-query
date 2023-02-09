@@ -20,12 +20,12 @@ use Drewlabs\Contracts\Data\ModelFiltersInterface;
 use Drewlabs\Contracts\Support\Actions\Action as ActionsInterface;
 use Drewlabs\Contracts\Support\Actions\ActionPayload as ActionPayloadInterface;
 use Drewlabs\Contracts\Support\Actions\ActionResult as ActionResultInterface;
-use Drewlabs\Packages\Database\Contracts\DMLQueryCommandInterface;
-use Drewlabs\Packages\Database\EloquentBuilderQueryFilters;
-use Drewlabs\Packages\Database\EloquentDMLManager;
+use Drewlabs\Packages\Database\Contracts\QueryLanguageCommandInterface;
+use Drewlabs\Packages\Database\Eloquent\QueryFilters;
+use Drewlabs\Packages\Database\QueryLanguage;
 use Drewlabs\Packages\Database\Exceptions\InvalidDMLQueryActionException;
 use Drewlabs\Packages\Database\Helpers\SelectQueryResult;
-use Drewlabs\Packages\Database\QueryParamsObject;
+use Drewlabs\Packages\Database\Query\QueryAttribute;
 use Drewlabs\Support\Actions\Action;
 
 use function Drewlabs\Support\Proxy\Action;
@@ -46,11 +46,11 @@ function SelectQueryResult($value)
  *
  * @param string|object $model
  *
- * @return EloquentDMLManager
+ * @return QueryLanguage
  */
 function DMLManager($model)
 {
-    return new EloquentDMLManager(\is_string($model) ? $model : \get_class($model));
+    return new QueryLanguage(\is_string($model) ? $model : \get_class($model));
 }
 
 /**
@@ -60,17 +60,17 @@ function DMLManager($model)
  */
 function ModelFiltersHandler(array $queries = [])
 {
-    return new EloquentBuilderQueryFilters($queries ?? []);
+    return new QueryFilters($queries ?? []);
 }
 
 /**
  * Create a query parameter object.
  *
- * @return QueryParamsObject
+ * @return QueryAttribute
  */
 function QueryParam(array $value = [])
 {
-    return new QueryParamsObject($value);
+    return new QueryAttribute($value);
 }
 
 /**
@@ -304,7 +304,7 @@ function CreateQueryAction(...$payload)
  * });
  * ```
  *
- * @return DMLQueryCommandInterface
+ * @return QueryLanguageCommandInterface
  */
 function useDMLQueryActionCommand(DMLProvider $instance, ?\Closure $overridesActionHandler = null)
 {

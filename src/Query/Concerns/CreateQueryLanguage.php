@@ -11,19 +11,18 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Database\Traits;
+namespace Drewlabs\Packages\Database\Query\Concerns;
 
 use Drewlabs\Contracts\Data\DataProviderHandlerParamsInterface;
 use Drewlabs\Core\Helpers\Str;
-use Drewlabs\Packages\Database\EloquentQueryBuilderMethods;
+use Drewlabs\Packages\Database\Eloquent\QueryMethod;
+
 use function Drewlabs\Packages\Database\Proxy\DMLManager;
 
 use Drewlabs\Packages\Database\TouchedModelRelationsHandler;
 
-trait DMLCreateQuery
+trait CreateQueryLanguage
 {
-    use ConvertAttributes;
-
     public function create(...$args)
     {
         return $this->model->getConnection()->transaction(function () use ($args) {
@@ -44,7 +43,7 @@ trait DMLCreateQuery
         return $callback(
             $this->proxy(
                 drewlabs_core_create_attribute_getter('model', null)($this),
-                EloquentQueryBuilderMethods::CREATE,
+                QueryMethod::CREATE,
                 [$this->parseAttributes($this->attributesToArray($attributes))]
             )
         );
@@ -53,7 +52,7 @@ trait DMLCreateQuery
     private function createV2($attributes, $params, ?\Closure $callback = null)
     {
         if (!(\is_array($params) || ($params instanceof DataProviderHandlerParamsInterface))) {
-            throw new \InvalidArgumentException('Argument 2 of the create method must be an array or an instance of '.DataProviderHandlerParamsInterface::class);
+            throw new \InvalidArgumentException('Argument 2 of the create method must be an array or an instance of ' . DataProviderHandlerParamsInterface::class);
         }
 
         return $this->createCommand(
@@ -67,7 +66,7 @@ trait DMLCreateQuery
     private function createV3($attributes, $params, bool $batch, ?\Closure $callback = null)
     {
         if (!(\is_array($params) || ($params instanceof DataProviderHandlerParamsInterface))) {
-            throw new \InvalidArgumentException('Argument 2 of the create method must be an array or an instance of '.DataProviderHandlerParamsInterface::class);
+            throw new \InvalidArgumentException('Argument 2 of the create method must be an array or an instance of ' . DataProviderHandlerParamsInterface::class);
         }
 
         return $this->createCommand(
@@ -93,14 +92,14 @@ trait DMLCreateQuery
             return $param;
         };
         $attributes = $this->attributesToArray($attributes);
-        $method = $params['method'] ?? EloquentQueryBuilderMethods::CREATE;
+        $method = $params['method'] ?? QueryMethod::CREATE;
         $upsert_conditions = $params['upsert_conditions'] ?: [];
         $upsert = $params['upsert'] && !empty($upsert_conditions) ? true : false;
         $isComposedMethod = Str::contains($method, '__') && \in_array(
             Str::split($method, '__')[0],
             [
-                EloquentQueryBuilderMethods::CREATE,
-                EloquentQueryBuilderMethods::INSERT_MANY,
+                QueryMethod::CREATE,
+                QueryMethod::INSERT_MANY,
             ],
             true
         );
@@ -116,7 +115,7 @@ trait DMLCreateQuery
             // was made on the relations variable
             $instance = $this->proxy(
                 $instance,
-                $upsert ? EloquentQueryBuilderMethods::UPSERT : EloquentQueryBuilderMethods::CREATE,
+                $upsert ? QueryMethod::UPSERT : QueryMethod::CREATE,
                 // if Upserting, pass the upsertion condition first else, pass in the attributes
                 $upsert ? [$upsert_conditions, $this->parseAttributes($attributes)] : [$this->parseAttributes($attributes)]
             );

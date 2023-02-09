@@ -11,19 +11,16 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Database\Traits;
+namespace Drewlabs\Packages\Database\Query\Concerns;
 
 use Drewlabs\Contracts\Data\Filters\FiltersInterface;
 use Drewlabs\Contracts\Data\Model\Model;
 use Drewlabs\Core\Helpers\Str;
-use Drewlabs\Packages\Database\EloquentQueryBuilderMethods;
+use Drewlabs\Packages\Database\Eloquent\QueryMethod;
 use Drewlabs\Packages\Database\TouchedModelRelationsHandler;
 
-trait DMLUpdateQuery
+trait UpdateQueryLanguage
 {
-    use ConvertAttributes;
-    use PreparesQueryBuilder;
-
     public function update(...$args)
     {
         return $this->model->getConnection()->transaction(function () use ($args) {
@@ -87,15 +84,15 @@ trait DMLUpdateQuery
         $attributes = $this->attributesToArray($attributes);
 
         return $batch ? $this->proxy(
-            $this->prepareQueryBuilder(drewlabs_core_create_attribute_getter('model', null)($this), $query),
-            EloquentQueryBuilderMethods::UPDATE,
+            $this->builderFactory()(drewlabs_core_create_attribute_getter('model', null)($this), $query),
+            QueryMethod::UPDATE,
             [$this->parseAttributes(($attributes instanceof Model) ? $attributes->toArray() : $attributes)]
         ) : array_reduce(
             $this->select($query)->all(),
             function ($carry, $value) use ($attributes) {
                 $this->proxy(
                     $value,
-                    EloquentQueryBuilderMethods::UPDATE,
+                    QueryMethod::UPDATE,
                     [$this->parseAttributes(($attributes instanceof Model) ? $attributes->toArray() : $attributes)]
                 );
                 ++$carry;
@@ -143,12 +140,12 @@ trait DMLUpdateQuery
                 return $callback($model_);
             };
         };
-        // endregion Update handler fund
+        // endregion update handler fund
         // Parse the params in order to get the method and upsert value
         $params = drewlabs_database_parse_update_handler_params($params);
         $method = $params['method'];
         $upsert = $params['upsert'] ?? true;
-        $isComposedMethod = Str::contains($method, '__') && \in_array(Str::split($method, '__')[0], [EloquentQueryBuilderMethods::UPDATE], true);
+        $isComposedMethod = Str::contains($method, '__') && \in_array(Str::split($method, '__')[0], [QueryMethod::UPDATE], true);
 
         return \is_string($method) && ((null !== ($params['relations'] ?? null)) || $isComposedMethod) ?
             $update_model_func(

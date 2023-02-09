@@ -78,6 +78,11 @@ class Person extends Model implements ORMModel
         // ->using(PersonManager::class);
     }
 
+    public function getFillables()
+    {
+        return $this->getFillable();
+    }
+
     protected static function boot()
     {
         parent::boot();

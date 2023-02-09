@@ -17,7 +17,7 @@ use Drewlabs\Contracts\Data\Filters\FiltersInterface;
 use Drewlabs\Contracts\Data\Parser\ModelAttributeParser as ModelAttributesParserContract;
 use Drewlabs\Packages\Database\Contracts\TransactionUtils;
 use Drewlabs\Packages\Database\DatabaseTransactionManager;
-use Drewlabs\Packages\Database\EloquentBuilderQueryFilters;
+use Drewlabs\Packages\Database\QueryFilters;
 use Drewlabs\Packages\Database\ModelAttributesParser;
 use Drewlabs\Packages\Database\Tests\Stubs\Address;
 use Drewlabs\Packages\Database\Tests\Stubs\Person;
@@ -211,7 +211,7 @@ class TestCase extends FrameworkTestCase
         $app->singleton(TransactionUtils::class, static function ($app) {
             return new DatabaseTransactionManager();
         });
-        $app->bind(FiltersInterface::class, EloquentBuilderQueryFilters::class);
+        $app->bind(FiltersInterface::class, QueryFilters::class);
         $app->bind(ModelAttributesParserContract::class, ModelAttributesParser::class);
     }
 

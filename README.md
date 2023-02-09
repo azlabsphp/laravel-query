@@ -154,85 +154,6 @@ $ql = DMLManager(Person::class);
     $list = $ql->select([/* ... */], 15, ['addresses', 'profile'], 1);
 ```
 
-#### Repository class
-
-They repository class provides method for working with database model without exposing Laravel/Eloquent model implementations. It tries to mimic complex query through array of query parameters.
-
-- Creating a repository class:
-
-```php
-
-$repository = new \Drewlabs\Packages\Database\Extensions\IlluminateModelRepository();
-
-// Because php does not provide Generic implementation, we can bind a model to the repository using {setModel()} method
-$repository = $repository->setModel(Example::class);
-
-// By default the repository class use Laravel Container to load and inject dependencies. If your application uses a different injector
-$repository = new \Drewlabs\Packages\Database\Extensions\IlluminateModelRepository(null, new ContainerClass());
-
-// Binding model at initialization
-$repository = new \Drewlabs\Packages\Database\Extensions\IlluminateModelRepository(Example::class);
-
-```
-
-- Get class name binded to the repository:
-
-```php
-$modelClass = $repository->getModel();
-```
-
-- Performing CRUD operations
-
-```php
-
-use Drewlabs\Packages\Database\Extensions\IlluminateModelRepository;
-use Drewlabs\Packages\Database\EloquentBuilderQueryFilters;
-// Insert new item to the table
-/// Syntax:
-/// $repository->insert(Array <Data>, bool <ParseInput>, bool <Upsert>, Array <UpsertConditions>);
-
-$repository = IlluminateModelRepository(Example::class);
-
-$result = $repository->insert(['label' => '...', 'display_label' => '...' ]);
-
-// Upsert or Insert/Update if exists
-$result = $repository->insert(['label' => '...', 'display_label' => '...'], null, true, ['label' => '....']);
-
-/// Inserting many values
-$result = $repository->insertMany([['label' => '...','display_label' => '...'],['label' => '...','display_label' => '...']]);
-
-/// Update values by id
-/// $repository->updateById(int|mixed $id, array $data) -> ModelInterface; Returns the updated model
-
-$result = $repository->updateById($id, array $data);
-
-/// Update based on conditions
-/// $repository->updateById(array $values, array $conditions, bool $parse_input = true, bool $mass_uptate = true) -> int; Returns the number of updated items
-
-$result = $repository->updateById($values, $conditions, $parse_input = true, $mass_uptate = true);
-
-/// Delete value by id
-/// $repository->deleteById(int|mixed $id) -> int; Returns the 0 if no value is deleted and 1 if value is deleted
-
-$result = $repository->deleteById($id);
-
-/// Delete based on conditions
-/// $repository->delete(array $conditions, bool $mass_delete = true) -> int; Returns the number of deleted items
-
-$result = $repository->delete($conditions, $mass_delete = true);
-
-/// Querying for Items in the database
-
-/// Query by id
-$result = $repository->findById($id, $columns = ['*']);
-
-// Note the CustomFilter is your user provided class that implement {Drewlabs\Contracts\Data\IModelFilter} interface
-$result = $repository->pushFilter(new EloquentBuilderQueryFilters())->find([], $columns = ['*']);
-
-/// Pagination
-$result = $repository->pushFilter(new EloquentBuilderQueryFilters())->paginate($item_per_page = 20, $columns = ['*']);
-```
-
 #### Query filters
 
 Query filters provides a way to easily apply database select query using PHP array mapping keys of the array of a given method of the framework ORM, and each values to the list of parameters.
@@ -244,8 +165,6 @@ The package comes with a handy query filter class that provide implementation fo
 ```php
 
 use Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;
-
-/// Using the default query filter without a repository
 
 /// Note: Each key is an eloquent model/Eloquent query builder method
 /// Parameters are passed in the order and the same way they are passed to the model method, but are specified as array
@@ -310,9 +229,6 @@ $filter = ModelFiltersHandler([
 
 /// Applying the query to an Eloquent model and call the Builder get() method to retrieve the matching model
 $result = $filter->apply(new Example())->get($columns = ['*']);
-
-/// Applying the filter on a repository class
-$result = $repository->pushFilter($filter)->find([], $columns = ['*']);
 ```
 
 #### Client request filters Generator
@@ -361,7 +277,7 @@ $request = new \Illuminate\Http\Request([
 $filters = \drewlabs_databse_parse_client_request_query(new TestModelStub, $request);
 ```
 
-- Here is a list of Eloquent methods supported by the package:
+- Here is a list of query methods supported by the package:
 
 ```php
 $methods = [
@@ -394,24 +310,17 @@ $methods = [
 
 #### ORM Model
 
-In order to be repository compatible, the model class must implement [Drewlabs\Contracts\Data\Model] interface.
-
-Example:
-
 ```php
 
 namespace App\Models\Patients;
 
-use Drewlabs\Packages\Database\Traits\Model;
-use Drewlabs\Contracts\Data\Model\ActiveModel;
-use Drewlabs\Contracts\Data\Model\Parseable;
-use Drewlabs\Contracts\Data\Model\Relatable;
-use Drewlabs\Contracts\Data\Model\GuardedModel;
-use Illuminate\Database\Eloquent\Model as EloquentModel;
+use Drewlabs\Packages\Database\Traits\Model as Trait;
+use Drewlabs\Packages\Database\Contracts\ORMModel;
+use Illuminate\Database\Eloquent\Model;
 
-final class Adresse extends EloquentModel implements ActiveModel, Parseable, Relatable, GuardedModel
+final class Adresse extends Model implements ORMModel
 {
-    use Model;
+    use Trait;
     
     /* ... */
 

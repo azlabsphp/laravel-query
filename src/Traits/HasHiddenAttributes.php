@@ -13,6 +13,12 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Traits;
 
+/**
+ * @deprecated v3.x Not needed for every application models therefore will
+ * be removed in future release. Provides an implementation in a data transfert
+ * object instead
+ * 
+ */
 trait HasHiddenAttributes
 {
     /**

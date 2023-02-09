@@ -14,7 +14,8 @@ declare(strict_types=1);
 namespace Drewlabs\Packages\Database\Tests\Unit;
 
 use function Drewlabs\Packages\Database\Proxy\QueryParam;
-use Drewlabs\Packages\Database\QueryParamsObject;
+
+use Drewlabs\Packages\Database\Query\QueryAttribute;
 use Drewlabs\Packages\Database\Tests\Stubs\Person;
 
 use Drewlabs\Packages\Database\Tests\TestCase;
@@ -27,13 +28,13 @@ class QueryParamTest extends TestCase
             'model' => Person::class,
             'column' => 'firstname',
         ]);
-        $this->assertInstanceOf(QueryParamsObject::class, $object);
+        $this->assertInstanceOf(QueryAttribute::class, $object);
     }
 
     public function test_constructor_throws_exception()
     {
         $this->expectException(\InvalidArgumentException::class);
-        new QueryParamsObject([
+        new QueryAttribute([
             'model' => null,
             'column' => 'firstname',
         ]);

@@ -62,4 +62,9 @@ class Taggable extends Model implements ORMModel
     public function tags()
     {
     }
+
+    public function getFillables()
+    {
+        return $this->getFillable();
+    }
 }

@@ -11,23 +11,19 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Database;
+namespace Drewlabs\Packages\Database\Query;
 
 use Drewlabs\Contracts\Data\Parser\QueryParser;
 use Drewlabs\Core\Helpers\Iter;
 
 use function Drewlabs\Packages\Database\Proxy\QueryParam;
 
-class FilterQueryParamsParser implements QueryParser
+class ConditionQuery implements QueryParser
 {
-    /**
-     * {@inheritDoc}
-     */
     public function parse(array $params)
     {
-        $isArrayList = array_filter($params, 'is_array') === $params;
-
-        return $isArrayList ? iterator_to_array(
+        $islist = array_filter($params, 'is_array') === $params;
+        return $islist ? iterator_to_array(
             Iter::map(
                 new \ArrayIterator($params),
                 function ($item) {
@@ -39,10 +35,10 @@ class FilterQueryParamsParser implements QueryParser
 
     private function parseList(array $params)
     {
-        $allEntiresAreNull = array_filter($params, static function ($item) {
+        $fails = array_filter($params, static function ($item) {
             return null === $item || !isset($item);
         }) === $params;
-        if ($allEntiresAreNull) {
+        if ($fails) {
             throw new \InvalidArgumentException('Provided query parameters are not defined');
         }
         // Insure that where not working with associative arrays

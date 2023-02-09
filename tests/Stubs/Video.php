@@ -70,4 +70,9 @@ class Video extends Model implements ORMModel
     {
         return $this->morphToMany(Tag::class, 'taggable');
     }
+
+    public function getFillables()
+    {
+        return $this->getFillable();
+    }
 }

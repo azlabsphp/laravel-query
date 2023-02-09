@@ -11,29 +11,30 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Database;
+namespace Drewlabs\Packages\Database\Eloquent;
 
 use Drewlabs\Contracts\Data\Filters\FiltersInterface;
 use Drewlabs\Contracts\Data\Parser\QueryParser;
-use Drewlabs\Packages\Database\Traits\EloquentBuilderQueryFilters as QueryFilters;
+use Drewlabs\Packages\Database\Query\JoinQuery;
+use Drewlabs\Packages\Database\Eloquent\Traits\QueryFilters as QueryFiltersMixin;
 
-final class EloquentBuilderQueryFilters implements FiltersInterface
+final class QueryFilters implements FiltersInterface
 {
-    use QueryFilters;
+    use QueryFiltersMixin;
 
     /**
      * @var QueryParser
      */
-    private $joinQueryParser;
+    private $joinQuery;
 
     /**
-     * Creates an instance of {@see EloquentBuilderQueryFilters}.
+     * Creates class instance
      *
      * @return self
      */
-    public function __construct(?array $filters = null, ?QueryParser $joinQueryParser = null)
+    public function __construct(?array $filters = null, ?QueryParser $joinQuery = null)
     {
-        $this->joinQueryParser = $joinQueryParser ?? new JoinQueryParamsParser();
+        $this->joinQuery = $joinQuery ?? new JoinQuery();
         $this->setQueryFilters($filters ?? []);
     }
 }

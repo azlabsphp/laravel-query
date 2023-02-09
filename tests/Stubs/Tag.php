@@ -69,4 +69,9 @@ class Tag extends Model implements ORMModel
     {
         return $this->morphedByMany(Video::class, 'taggable');
     }
+
+    public function getFillables()
+    {
+        return $this->getFillable();
+    }
 }

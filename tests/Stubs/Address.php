@@ -13,10 +13,14 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Tests\Stubs;
 
-use Drewlabs\Packages\Database\Extensions\EloquentModel;
+use Drewlabs\Packages\Database\Contracts\ORMModel;
+use Drewlabs\Packages\Database\Traits\Model as TraitsModel;
+use Illuminate\Database\Eloquent\Model;
 
-class Address extends EloquentModel
+class Address extends Model implements ORMModel
 {
+    use TraitsModel;
+
     /**
      * Model referenced table.
      *
@@ -48,4 +52,9 @@ class Address extends EloquentModel
         'email',
         'person_id',
     ];
+
+    public function getFillables()
+    {
+        return $this->getFillable();
+    }
 }

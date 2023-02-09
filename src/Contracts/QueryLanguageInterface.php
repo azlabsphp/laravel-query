@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Contracts;
 
-interface ProvidesQueryLanguage
+interface QueryLanguageInterface
 {
     /**
      * Provides implementation for creating new row application database

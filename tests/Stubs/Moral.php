@@ -58,4 +58,9 @@ class Moral extends Model implements ORMModel
     {
         return $this->morphOne(Member::class, 'distinctable');
     }
+
+    public function getFillables()
+    {
+        return $this->getFillable();
+    }
 }

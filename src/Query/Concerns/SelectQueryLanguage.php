@@ -11,21 +11,19 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Database\Traits;
+namespace Drewlabs\Packages\Database\Query\Concerns;
 
 use Drewlabs\Contracts\Data\Filters\FiltersInterface;
 use Drewlabs\Contracts\Data\Model\HasRelations;
 use Drewlabs\Core\Helpers\Arr;
-use Drewlabs\Packages\Database\EloquentQueryBuilderMethods;
+use Drewlabs\Packages\Database\Eloquent\QueryMethod;
 use Drewlabs\Packages\Database\EnumerableQueryResult;
 use Drewlabs\Packages\Database\Helpers\QueryColumns;
 
 use function Drewlabs\Packages\Database\Proxy\SelectQueryResult;
 
-trait DMLSelectQuery
+trait SelectQueryLanguage
 {
-    use PreparesQueryBuilder;
-
     public function select(...$args)
     {
         return $this->model->getConnection()->transaction(function () use ($args) {
@@ -65,7 +63,7 @@ trait DMLSelectQuery
                             return [
                                 $this->proxy(
                                     $builder,
-                                    EloquentQueryBuilderMethods::SELECT_ONE,
+                                    QueryMethod::SELECT_ONE,
                                     [$columns_]
                                 ),
                             ];
@@ -85,7 +83,7 @@ trait DMLSelectQuery
                             return [
                                 $this->proxy(
                                     $builder,
-                                    EloquentQueryBuilderMethods::SELECT_ONE,
+                                    QueryMethod::SELECT_ONE,
                                     [$columns_]
                                 ),
                             ];
@@ -105,7 +103,7 @@ trait DMLSelectQuery
                             return [
                                 $this->proxy(
                                     $builder,
-                                    EloquentQueryBuilderMethods::SELECT_ONE,
+                                    QueryMethod::SELECT_ONE,
                                     [$columns_]
                                 ),
                             ];
@@ -138,7 +136,7 @@ trait DMLSelectQuery
             )(function ($builder, $columns_) {
                 return $this->proxy(
                     $builder,
-                    EloquentQueryBuilderMethods::SELECT,
+                    QueryMethod::SELECT,
                     [$columns_]
                 );
             })->first()
@@ -169,7 +167,7 @@ trait DMLSelectQuery
         )(function ($builder, $columns_) {
             return $this->proxy(
                 $builder,
-                EloquentQueryBuilderMethods::SELECT,
+                QueryMethod::SELECT,
                 [$columns_]
             );
         });
@@ -184,7 +182,7 @@ trait DMLSelectQuery
         )(function ($builder, $columns_) {
             return $this->proxy(
                 $builder,
-                EloquentQueryBuilderMethods::SELECT,
+                QueryMethod::SELECT,
                 [$columns_]
             );
         });
@@ -199,7 +197,7 @@ trait DMLSelectQuery
         )(function ($builder, $columns_) use ($per_page, $page) {
             return $this->proxy(
                 $builder,
-                EloquentQueryBuilderMethods::PAGINATE,
+                QueryMethod::PAGINATE,
                 [$per_page, $columns_, null, $page ?? 1]
             );
         });
@@ -214,7 +212,7 @@ trait DMLSelectQuery
         )(function ($builder, $columns_) use ($per_page, $page) {
             return $this->proxy(
                 $builder,
-                EloquentQueryBuilderMethods::PAGINATE,
+                QueryMethod::PAGINATE,
                 [$per_page, $columns_, null, $page ?? 1]
             );
         });
@@ -229,7 +227,7 @@ trait DMLSelectQuery
         )(function ($builder, $columns_) {
             return $this->proxy(
                 $builder,
-                EloquentQueryBuilderMethods::SELECT,
+                QueryMethod::SELECT,
                 [$columns_]
             );
         });
@@ -244,7 +242,7 @@ trait DMLSelectQuery
         )(function ($builder, $columns_) {
             return $this->proxy(
                 $builder,
-                EloquentQueryBuilderMethods::SELECT,
+                QueryMethod::SELECT,
                 [$columns_]
             );
         });
@@ -259,7 +257,7 @@ trait DMLSelectQuery
         )(function ($builder, $columns_) use ($per_page, $page) {
             return $this->proxy(
                 $builder,
-                EloquentQueryBuilderMethods::PAGINATE,
+                QueryMethod::PAGINATE,
                 [$per_page, $columns_, null, $page ?? 1]
             );
         });
@@ -274,7 +272,7 @@ trait DMLSelectQuery
         )(function ($builder, $columns_) use ($per_page, $page) {
             return $this->proxy(
                 $builder,
-                EloquentQueryBuilderMethods::PAGINATE,
+                QueryMethod::PAGINATE,
                 [$per_page, $columns_, null, $page ?? 1]
             );
         });
@@ -300,7 +298,7 @@ trait DMLSelectQuery
             $hidden_columns = $model->getHidden();
             [$columns_, $relations] = QueryColumns::asTuple($columns, $declared_columns, $model_relations);
             // We prepare the query builder object
-            $builder = $this->prepareQueryBuilder($model, $query);
+            $builder = $this->builderFactory()($model, $query);
 
             // Add relationship queries to the builder if the relationship array is not empty
             if (!empty($relations)) {

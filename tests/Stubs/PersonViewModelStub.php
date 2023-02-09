@@ -13,11 +13,11 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Tests\Stubs;
 
-use Drewlabs\Packages\Database\Contracts\ProvidesQueryLanguage;
+use Drewlabs\Packages\Database\Contracts\QueryLanguageInterface;
+use Drewlabs\Packages\Database\Query\Queryable;
 use Drewlabs\Packages\Database\Tests\Stubs\Person;
-use Drewlabs\Packages\Database\Traits\Queryable;
 
-class PersonViewModelStub implements ProvidesQueryLanguage
+class PersonViewModelStub implements QueryLanguageInterface
 {
     use Queryable;
 

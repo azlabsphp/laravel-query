@@ -14,13 +14,14 @@ declare(strict_types=1);
 namespace Drewlabs\Packages\Database;
 
 use Closure;
-use Drewlabs\Contracts\Data\Model\Model;
 use Drewlabs\Core\Helpers\Arr;
 use Drewlabs\Core\Helpers\Functional;
 use Drewlabs\Core\Helpers\Str;
 use Drewlabs\Packages\Database\Traits\ContainerAware;
-use Illuminate\Database\Eloquent\Model as Eloquent;
 use InvalidArgumentException;
+use Drewlabs\Contracts\Data\Model\Model;
+use Drewlabs\Contracts\Data\Model\Parseable;
+use Drewlabs\Contracts\Data\Model\GuardedModel;
 
 class QueryFiltersBuilder
 {
@@ -88,7 +89,7 @@ class QueryFiltersBuilder
     ];
 
     /**
-     * @var Model|Eloquent
+     * @var Model
      */
     private $model;
 
@@ -142,7 +143,7 @@ class QueryFiltersBuilder
     /**
      * Build filters from parameter bags.
      *
-     * @param object $model
+     * @param Model $model
      * @param object $parametersBag
      * @param array  $defaults
      *
@@ -160,7 +161,7 @@ class QueryFiltersBuilder
             $filters['where'][] = [$model->getPrimaryKey(), $parametersBag->get($model->getPrimaryKey())];
         }
         foreach ($parametersBag->all() as $key => $value) {
-            $list = array_merge($model->getFillable(), $model->getGuarded());
+            $list = array_merge(self::getDeclaredColumns($model));
             if (\is_string($value) && Str::contains($value, '|')) {
                 // For composed value, if the value is a string and contains | character we split the value using
                 // the | character and foreach item in the splitted list we add a filter
@@ -649,5 +650,24 @@ class QueryFiltersBuilder
         $method = false !== strtotime((string) $value) ? ('orWhere' === $method ? 'orWhereDate' : 'whereDate') : $method;
 
         return [$operator, $value, $method];
+    }
+
+    /**
+     * Returns the list of table columns to query
+     * 
+     * @param Model|GuardedModel|Parseable $model 
+     * @return array 
+     */
+    private static function getDeclaredColumns($model)
+    {
+        return Arr::unique(array_merge(
+            $model instanceof Parseable ? $model->getFillable() : [],
+            $model instanceof GuardedModel ? $model->getGuarded() : [],
+            // Case the timestamps are not on the fillables, we simply add them
+            // to support query by created_at & updated_at, as it does
+            // no harm to the implementation
+            ['created_at', 'updated_at'],
+            ($primaryKey = $model->getPrimaryKey()) ? [$primaryKey] : []
+        ));
     }
 }

@@ -62,4 +62,9 @@ class Member extends Model implements ORMModel
     {
         return $this->morphTo(__FUNCTION__, 'distinctable_type', 'distinctable_id');
     }
+
+    public function getFillables()
+    {
+        return $this->getFillable();
+    }
 }

@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Drewlabs\Packages\Database;
 
 use Drewlabs\Contracts\Data\Filters\FiltersInterface;
-use Drewlabs\Packages\Database\Contracts\TransactionUtils;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
 class ServiceProvider extends BaseServiceProvider
@@ -36,12 +35,10 @@ class ServiceProvider extends BaseServiceProvider
      */
     public function register()
     {
-        $this->app->singleton(TransactionUtils::class, static function ($app) {
+        $this->app->singleton(DatabaseTransactionManager::class, static function ($app) {
             return new DatabaseTransactionManager($app->make('db'));
         });
-        $this->app->bind(FiltersInterface::class, EloquentBuilderQueryFilters::class);
-
-        $this->app->bind(\Drewlabs\Contracts\Data\Parser\ModelAttributeParser::class, ModelAttributesParser::class);
+        $this->app->bind(FiltersInterface::class, QueryFilters::class);
     }
 
     protected function bindings()

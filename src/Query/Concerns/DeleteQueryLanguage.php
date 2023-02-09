@@ -11,15 +11,13 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Database\Traits;
+namespace Drewlabs\Packages\Database\Query\Concerns;
 
 use Drewlabs\Contracts\Data\Filters\FiltersInterface;
-use Drewlabs\Packages\Database\EloquentQueryBuilderMethods;
+use Drewlabs\Packages\Database\Eloquent\QueryMethod;
 
-trait DMLDeleteQuery
+trait DeleteQueryLanguage
 {
-    use PreparesQueryBuilder;
-
     public function delete(...$args)
     {
         return $this->model->getConnection()->transaction(function () use ($args) {
@@ -32,64 +30,37 @@ trait DMLDeleteQuery
         });
     }
 
-    /**
-     * @return bool
-     */
     private function deleteV1(int $id)
     {
         return $this->deleteV2((string) $id);
     }
 
-    /**
-     * @return bool
-     */
     private function deleteV2(string $id)
     {
         return 1 === (int) ($this->deleteV3([
-            'where' => [
-                drewlabs_core_create_attribute_getter('model', null)($this)->getPrimaryKey(),
-                $id,
-            ],
+            'where' => [drewlabs_core_create_attribute_getter('model', null)($this)->getPrimaryKey(), $id]
         ])) ? true : false;
     }
 
-    /**
-     * @return int
-     */
     private function deleteV3(array $query, ?bool $batch = false)
     {
         return $this->deleteCommand($query, $batch);
     }
 
-    /**
-     * @return int
-     */
     private function deleteV4(FiltersInterface $query, ?bool $batch = false)
     {
         return $this->deleteCommand($query, $batch);
     }
 
-    /**
-     * Executes the delete query on the query model.
-     *
-     * @param FiltersInterface|array $query
-     *
-     * @return mixed
-     */
     private function deleteCommand($query, bool $batch = false)
     {
         return $batch ? $this->proxy(
-            $this->prepareQueryBuilder(drewlabs_core_create_attribute_getter('model', null)($this), $query),
-            EloquentQueryBuilderMethods::DELETE,
+            $this->builderFactory()(drewlabs_core_create_attribute_getter('model', null)($this), $query),
+            QueryMethod::DELETE,
             []
         ) : array_reduce($this->select($query)->all(), function ($carry, $value) {
-            $this->proxy(
-                $value,
-                EloquentQueryBuilderMethods::DELETE,
-                []
-            );
+            $this->proxy($value, QueryMethod::DELETE, []);
             ++$carry;
-
             return $carry;
         }, 0);
     }

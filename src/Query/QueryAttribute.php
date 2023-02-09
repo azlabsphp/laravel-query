@@ -11,17 +11,18 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Database;
+namespace Drewlabs\Packages\Database\Query;
 
 use Drewlabs\Core\Helpers\Str;
 use Drewlabs\Packages\Database\Traits\ContainerAware;
+use InvalidArgumentException;
 
 /**
  * @internal Required internally for parsing query parameter
  *           The API is subject to change as the name can change as well
  *           Therefore using it externally, may lead to breaking changes when internal decisions are made
  */
-class QueryParamsObject
+class QueryAttribute
 {
     use ContainerAware;
 
@@ -35,6 +36,13 @@ class QueryParamsObject
      */
     private $column;
 
+    /**
+     * Creates a query attribute instance
+     * 
+     * @param array $attributes 
+     * @return void 
+     * @throws InvalidArgumentException 
+     */
     public function __construct($attributes = [])
     {
         $this->model = $attributes['model'] ?? null;

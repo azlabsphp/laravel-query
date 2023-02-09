@@ -17,58 +17,11 @@ use Drewlabs\Core\Helpers\Arr;
 
 trait Model
 {
-    use Guarded;
-    use HasAppendedAttributes;
-    use LinkAttributeAware;
-
-    /**
-     * @deprecated v2.6.x
-     * 
-     * {@inheritDoc}
-     */
-    public function add(array $items)
-    {
-        $isList = Arr::isnotassoclist($items);
-        if (!$isList) {
-            return $this->create($items);
-        }
-
-        return $this->insert($items);
-    }
-
-    /**
-     * @deprecated v2.6.x
-     * 
-     * {@inheritDoc}
-     */
-    public function getAll(bool $relations = false, array $columns = ['*'])
-    {
-        if ($relations) {
-            return $this->with($this->getDeclaredRelations())->get($columns);
-        }
-
-        return $this->get($columns);
-    }
-
-    /**
-     * @deprecated v2.1.x
-     */
-    public function getFillables()
-    {
-        return $this->fillable ?? [];
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public function getRelations()
     {
         return $this->relations ?? [];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public function getPrimaryKey()
     {
         return $this->primaryKey ?? 'id';
@@ -98,29 +51,27 @@ trait Model
     {
         // Get table primary key
         $primaryKey = $this->getPrimaryKey();
-        // Get timestamps columns
-        $timestamps = array_merge(
-            method_exists($this, 'getCreatedAtColumn') ?
-                [$this->getCreatedAtColumn()] :
-                ['created_at'],
-            method_exists($this, 'getUpdatedAtColumn') ?
-                [$this->getUpdatedAtColumn()] :
-                ['updated_at']
-        );
+        if (is_bool($primaryKey)){
+            print_r(__CLASS__);
+            die();
+        }
         // Get list of fillables
         return Arr::unique(array_merge(
             $this->getFillable() ?? [],
             $this->getGuarded() ?? [],
-            $this->timestamps ? $timestamps : [],
+            // Case the timestamps are not on the fillables, we simply add them
+            // to support query by created_at & updated_at, as it does
+            // no harm to the implementation
+            ['created_at', 'updated_at'],
             $primaryKey ? [$primaryKey] : []
         ));
     }
 
-    /**
-     * Checks if the current model has some relations.
-     *
-     * @return bool
-     */
+    public function getGuardedAttributes()
+    {
+        return $this->guarded ?? [];
+    }
+
     protected function hasRelations()
     {
         return \is_array($this->getRelations()) ?: false;

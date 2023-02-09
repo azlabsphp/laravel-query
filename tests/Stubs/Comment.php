@@ -63,4 +63,9 @@ class Comment extends Model implements ORMModel
     {
         return $this->morphTo();
     }
+
+    public function getFillables()
+    {
+        return $this->getFillable();
+    }
 }

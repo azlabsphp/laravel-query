@@ -13,10 +13,9 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database;
 
-use Drewlabs\Packages\Database\Contracts\TransactionUtils;
 use Drewlabs\Packages\Database\Traits\ContainerAware;
 
-class DatabaseTransactionManager implements TransactionUtils
+class DatabaseTransactionManager
 {
     use ContainerAware;
 
@@ -26,7 +25,7 @@ class DatabaseTransactionManager implements TransactionUtils
     private $db;
 
     /**
-     * Creates an instance of the {@link TransactionUtils} interface.
+     * Creates a database transaction management instance
      *
      * @param mixed|null $db
      *

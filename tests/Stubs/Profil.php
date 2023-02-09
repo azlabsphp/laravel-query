@@ -50,4 +50,9 @@ class Profil extends EloquentModel
     {
         return $this->belongsTo(Person::class, 'person_id', 'id');
     }
+
+    public function getFillables()
+    {
+        return $this->getFillable();
+    }
 }
