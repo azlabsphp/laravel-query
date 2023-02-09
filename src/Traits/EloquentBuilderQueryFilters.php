@@ -15,38 +15,33 @@ namespace Drewlabs\Packages\Database\Traits;
 
 use Drewlabs\Core\Helpers\Arr;
 use Drewlabs\Packages\Database\FilterQueryParamsParser;
-use Illuminate\Database\Eloquent\Builder;
 
 trait EloquentBuilderQueryFilters
 {
     /**
-     * Dictionnary of model method to query filters.
+     * Query filters dictionary
      *
      * @var array
      */
     private $filters = [];
 
     /**
-     * ORM Model instance.
+     * Query builder instance
      *
      * @var object
      */
     private $model;
-
-    /**
-     * {@inheritDoc}
-     */
-    public function apply($model)
+    
+    public function apply($builder)
     {
-        $clone = clone $model;
+        $object = clone $builder;
         foreach ($this->filters ?? [] as $key => $value) {
-            $method = 'apply'.ucfirst($key);
-            if ((null !== $value) && method_exists($this, $method)) {
-                $clone = $this->{$method}($clone, $value);
+            // $method = $key; // 'apply'.ucfirst($key);
+            if ((null !== $value) && method_exists($this, $key)) {
+                $object = $this->{$key}($object, $value);
             }
         }
-
-        return $clone;
+        return $object;
     }
 
     public function setQueryFilters(array $list)
@@ -56,370 +51,214 @@ trait EloquentBuilderQueryFilters
         return $this;
     }
 
-    /**
-     * apply a where query to the model.
-     *
-     * @param mixed          $model
-     * @param array|callable $filter
-     *
-     * @return mixed
-     */
-    private function applyWhere($model, $filter)
+    private function where($builder, $filter)
     {
         if ($filter instanceof \Closure) {
-            $model = $model->where($filter);
+            $builder = $builder->where($filter);
 
-            return $model;
+            return $builder;
         }
         $parser = new FilterQueryParamsParser();
         if (Arr::isList($result = $parser->parse($filter))) {
-            $model = array_reduce($result, static function ($model, array $query) {
-                return $model->where(...array_values($query));
-            }, $model);
+            $builder = array_reduce($result, static function ($builder, array $query) {
+                return $builder->where(...array_values($query));
+            }, $builder);
         } else {
-            $model = $model->where(...$result);
+            $builder = $builder->where(...$result);
         }
 
-        return $model;
+        return $builder;
     }
 
-    /**
-     * apply a where query to the model.
-     *
-     * @param mixed $model
-     * @param array $filter
-     *
-     * @return mixed
-     */
-    private function applyWhereHas($model, $filter)
+    private function whereHas($builder, $filter)
     {
         $filter = array_filter($filter, 'is_array') === $filter ? $filter : [$filter];
         foreach ($filter as $value) {
-            $model = $model->whereHas($value[0], $value[1]);
+            $builder = $builder->whereHas($value[0], $value[1]);
         }
 
-        return $model;
+        return $builder;
     }
 
-    /**
-     * apply a where query to the model.
-     *
-     * @param mixed $model
-     * @param array $filter
-     *
-     * @return mixed
-     */
-    private function applyWhereDoesntHave($model, $filter)
+    private function whereDoesntHave($builder, $filter)
     {
         $filter = array_filter($filter, 'is_array') === $filter ? $filter : [$filter];
         foreach ($filter as $value) {
-            $model = $model->whereDoesntHave(...$value);
+            $builder = $builder->whereDoesntHave(...$value);
         }
 
-        return $model;
+        return $builder;
     }
 
-    /**
-     * apply a whereDate query to the model.
-     *
-     * @param mixed $model
-     * @param array $filter
-     *
-     * @return mixed
-     */
-    private function applyWhereDate($model, $filter)
+    private function whereDate($builder, $filter)
     {
         $filter = array_filter($filter, 'is_array') === $filter ? $filter : [$filter];
         foreach ($filter as $value) {
-            $model = $model->whereDate(...$value);
+            $builder = $builder->whereDate(...$value);
         }
 
-        return $model;
+        return $builder;
     }
 
-    /**
-     * apply a orWhereDate query to the model.
-     *
-     * @param mixed $model
-     * @param array $filter
-     *
-     * @return mixed
-     */
-    private function applyOrWhereDate($model, $filter)
+    private function orWhereDate($builder, $filter)
     {
         $filter = array_filter($filter, 'is_array') === $filter ? $filter : [$filter];
         foreach ($filter as $value) {
-            $model = $model->whereDate(...$value);
+            $builder = $builder->whereDate(...$value);
         }
 
-        return $model;
+        return $builder;
     }
 
-    /**
-     * Apply a has query.
-     *
-     * @param Builder $model
-     * @param array $filter
-     *
-     * @return mixed
-     */
-    private function applyHas($model, $filter)
+    private function has($builder, $filter)
     {
         if (\is_string($filter)) {
-            return $model->has($filter);
+            return $builder->has($filter);
         }
         $operators = ['>=', '<=', '<', '>', '<>', '!='];
         if (\is_array($filter) && (false !== Arr::search($filter[1] ?? null, $operators))) {
-            return $model->has(...$filter);
+            return $builder->has(...$filter);
         }
         if (is_array($filter)) {
             foreach ($filter as $value) {
-                $model = $model->has($value);
+                $builder = $builder->has($value);
             }
         }
-        return $model;
+        return $builder;
     }
-
-    /**
-     * Apply a has query.
-     *
-     * @param mixed $model
-     * @param array $filter
-     *
-     * @return mixed
-     */
-    private function applyDoesntHave($model, $filter)
+    
+    private function doesntHave($builder, $filter)
     {
         if (\is_string($filter)) {
-            $model = $model->doesntHave($filter);
+            $builder = $builder->doesntHave($filter);
         }
         if (\is_array($filter)) {
             foreach ($filter as $value) {
-                $model = $model->doesntHave($value);
+                $builder = $builder->doesntHave($value);
             }
         }
 
-        return $model;
+        return $builder;
     }
-
-    /**
-     * apply an orWhere query to the model.
-     *
-     * @param mixed $model
-     * @param array $filter
-     *
-     * @return mixed
-     */
-    private function applyOrWhere($model, $filter)
+    
+    private function orWhere($builder, $filter)
     {
         if ($filter instanceof \Closure) {
-            $model = $model->where($filter);
+            $builder = $builder->where($filter);
 
-            return $model;
+            return $builder;
         }
         $parser = new FilterQueryParamsParser();
         if (Arr::isList($result = $parser->parse($filter))) {
-            $model = array_reduce($result, static function ($model, array $query) {
-                return $model->orWhere(...array_values($query));
-            }, $model);
+            $builder = array_reduce($result, static function ($builder, array $query) {
+                return $builder->orWhere(...array_values($query));
+            }, $builder);
         } else {
-            $model = $model->orWhere(...$result);
+            $builder = $builder->orWhere(...$result);
         }
 
-        return $model;
+        return $builder;
     }
 
-    /**
-     * apply a whereIn query to the model.
-     *
-     * @param mixed $model
-     *
-     * @return mixed
-     */
-    private function applyWhereIn($model, array $filter)
+    private function whereIn($builder, array $filter)
     {
         $filter = array_filter($filter, 'is_array') === $filter ? $filter : [$filter];
 
         return array_reduce($filter, static function ($carry, $curr) {
             return \count($curr) >= 2 ? $carry->whereIn($curr[0], $curr[1]) : $carry;
-        }, $model);
+        }, $builder);
     }
-
-    /**
-     * apply a whereBetween query to the model.
-     *
-     * @param mixed $model
-     *
-     * @return mixed
-     */
-    private function applyWhereBetween($model, array $filter)
+    
+    private function whereBetween($builder, array $filter)
     {
-        return $model->whereBetween($filter[0], $filter[1]);
+        return $builder->whereBetween($filter[0], $filter[1]);
     }
 
-    /**
-     * apply a whereNotIn query to the model.
-     *
-     * @param mixed $model
-     *
-     * @return mixed
-     */
-    private function applyWhereNotIn($model, array $filter)
+    private function whereNotIn($builder, array $filter)
     {
         $filter = array_filter($filter, 'is_array') === $filter ? $filter : [$filter];
 
         return array_reduce($filter, static function ($carry, $curr) {
             return \count($curr) >= 2 ? $carry->whereNotIn($curr[0], $curr[1]) : $carry;
-        }, $model);
+        }, $builder);
     }
 
-    /**
-     * apply an orderBy query to the model.
-     *
-     * @param mixed $model
-     *
-     * @return mixed
-     */
-    private function applyOrderBy($model, array $filters)
+    private function orderBy($builder, array $filters)
     {
         // TODO: In future release, valide the filters inputs
         if (!Arr::isassoc($filters)) {
-            return array_reduce($filters, static function ($model, $current) {
-                return $model->orderBy($current['by'], $current['order']);
-            }, $model);
+            return array_reduce($filters, static function ($builder, $current) {
+                return $builder->orderBy($current['by'], $current['order']);
+            }, $builder);
         }
 
-        return $model->orderBy($filters['by'], $filters['order']);
+        return $builder->orderBy($filters['by'], $filters['order']);
     }
 
-    /**
-     * Apply group by query on the provided model instance.
-     *
-     * @param mixed          $model
-     * @param array[]|string $filter
-     *
-     * @return mixed
-     */
-    private function applyGroupBy($model, $filter)
+    private function groupBy($builder, $filter)
     {
-        return \is_string($filter) ? $model->groupBy($filter) : $model->groupBy(...$filter);
+        return \is_string($filter) ? $builder->groupBy($filter) : $builder->groupBy(...$filter);
     }
 
-    /**
-     * apply a join query on the model query to the model.
-     *
-     * @param mixed          $model
-     * @param array|callable $filter
-     *
-     * @return mixed
-     */
-    private function applyJoin($model, $filter)
+    private function join($builder, $filter)
     {
-        return $this->sqlApplyJoinQueries($model, $filter);
+        return $this->sqlApplyJoinQueries($builder, $filter);
     }
 
-    /**
-     * apply a right join query on the model.
-     *
-     * @param mixed          $model
-     * @param array|callable $filter
-     *
-     * @return mixed
-     */
-    private function applyRightJoin($model, $filter)
+    private function rightJoin($builder, $filter)
     {
-        return $this->sqlApplyJoinQueries($model, $filter, 'rightJoin');
+        return $this->sqlApplyJoinQueries($builder, $filter, 'rightJoin');
     }
 
-    /**
-     * apply a left join query on the model.
-     *
-     * @param mixed          $model
-     * @param array|callable $filter
-     *
-     * @return mixed
-     */
-    private function applyLeftJoin($model, $filter)
+    private function leftJoin($builder, $filter)
     {
-        return $this->sqlApplyJoinQueries($model, $filter, 'leftJoin');
+        return $this->sqlApplyJoinQueries($builder, $filter, 'leftJoin');
     }
 
-    private function sqlApplyJoinQueries($model, $filter, $method = 'join')
+    private function sqlApplyJoinQueries($builder, $filter, $method = 'join')
     {
         $result = $this->joinQueryParser->parse($filter);
         $result = Arr::isList($result) ? $result : [$result];
         foreach ($result as $value) {
-            $model = $model->{$method}(...$value);
+            $builder = $builder->{$method}(...$value);
         }
 
-        return $model;
+        return $builder;
     }
 
-    /**
-     * apply an whereNull query to the model.
-     *
-     * @param mixed $model
-     * @param array $filter
-     *
-     * @return mixed
-     */
-    private function applyWhereNull($model, $filter)
+    private function whereNull($builder, $filter)
     {
         $filter = \is_array($filter) ? $filter : [$filter];
 
         return array_reduce($filter, static function ($carry, $current) {
             return $carry->whereNull($current);
-        }, $model);
+        }, $builder);
     }
 
-    /**
-     * apply an whereNotNull query to the model.
-     *
-     * @param mixed $model
-     * @param array $filter
-     *
-     * @return mixed
-     */
-    private function applyWhereNotNull($model, $filter)
+    private function whereNotNull($builder, $filter)
     {
         $filter = \is_array($filter) ? $filter : [$filter];
 
         return array_reduce($filter, static function ($carry, $current) {
             return $carry->whereNotNull($current);
-        }, $model);
+        }, $builder);
     }
 
-    /**
-     * apply an orWhereNull query to the model.
-     *
-     * @param mixed $model
-     * @param array $filter
-     *
-     * @return mixed
-     */
-    private function applyOrWhereNull($model, $filter)
+    private function orWhereNull($builder, $filter)
     {
         $filter = \is_array($filter) ? $filter : [$filter];
 
         return array_reduce($filter, static function ($carry, $current) {
             return $carry->orWhereNull($current);
-        }, $model);
+        }, $builder);
     }
 
-    /**
-     * apply an orWhereNotNull query to the model.
-     *
-     * @param mixed $model
-     * @param array $filter
-     *
-     * @return mixed
-     */
-    private function applyOrWhereNotNull($model, $filter)
+    private function orWhereNotNull($builder, $filter)
     {
         $filter = \is_array($filter) ? $filter : [$filter];
 
         return array_reduce($filter, static function ($carry, $current) {
             return $carry->orWhereNotNull($current);
-        }, $model);
+        }, $builder);
     }
 }

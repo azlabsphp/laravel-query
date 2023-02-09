@@ -17,6 +17,8 @@ trait HasAppendedAttributes
 {
     /**
      * Set the value of the withoutAppends property.
+     * 
+     * @deprecated v2.6.x
      *
      * @param bool $value
      *
