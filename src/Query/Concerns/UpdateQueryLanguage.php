@@ -16,14 +16,18 @@ namespace Drewlabs\Packages\Database\Query\Concerns;
 use Drewlabs\Contracts\Data\Filters\FiltersInterface;
 use Drewlabs\Contracts\Data\Model\Model;
 use Drewlabs\Core\Helpers\Str;
+use Drewlabs\Packages\Database\Contracts\TransactionManagerInterface;
 use Drewlabs\Packages\Database\Eloquent\QueryMethod;
 use Drewlabs\Packages\Database\TouchedModelRelationsHandler;
 
+/**
+ * @property TransactionManagerInterface transactionManager
+ */
 trait UpdateQueryLanguage
 {
     public function update(...$args)
     {
-        return $this->model->getConnection()->transaction(function () use ($args) {
+        return $this->transactionManager->transaction(function () use ($args) {
             return $this->overload($args, [
                 'updateV1',
                 'updateV1_1',

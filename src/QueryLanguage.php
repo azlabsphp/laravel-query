@@ -20,10 +20,11 @@ use Drewlabs\Contracts\Data\Model\ActiveModel;
 use Drewlabs\Contracts\Data\Model\Model;
 use Drewlabs\Core\Helpers\Arr;
 use Drewlabs\Packages\Database\Contracts\QueryLanguageInterface;
+use Drewlabs\Packages\Database\Contracts\TransactionManagerInterface;
 use Drewlabs\Packages\Database\Eloquent\QueryMethod;
 use function Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;
-use Drewlabs\Packages\Database\Query\Concerns\CreateQueryLanguage;
 
+use Drewlabs\Packages\Database\Query\Concerns\CreateQueryLanguage;
 use Drewlabs\Packages\Database\Query\Concerns\DeleteQueryLanguage;
 use Drewlabs\Packages\Database\Query\Concerns\SelectQueryLanguage;
 use Drewlabs\Packages\Database\Query\Concerns\UpdateQueryLanguage;
@@ -87,9 +88,14 @@ final class QueryLanguage implements DMLProvider, QueryLanguageInterface
     private $model;
 
     /**
-     * @var Closure(mixed, array|FiltersInterface $query): mixed
+     * @var \Closure(mixed, array|FiltersInterface): mixed
      */
     private $builderFactory;
+
+    /**
+     * @var TransactionManagerInterface
+     */
+    private $transactionManager;
 
     /**
      * @param Model|string $blueprint
@@ -104,6 +110,7 @@ final class QueryLanguage implements DMLProvider, QueryLanguageInterface
         }
         $this->model = \is_string($blueprint) ? self::createResolver($blueprint)() : $blueprint;
         $this->model_class = \is_string($blueprint) ? $blueprint : \get_class($blueprint);
+        $this->transactionManager = TransactionManager::new($this->model);
         $this->setBuilderFactory($this->defaultBuilderFactory());
     }
 

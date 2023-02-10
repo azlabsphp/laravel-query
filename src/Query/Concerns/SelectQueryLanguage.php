@@ -26,23 +26,21 @@ trait SelectQueryLanguage
 {
     public function select(...$args)
     {
-        return $this->model->getConnection()->transaction(function () use ($args) {
-            return $this->overload($args, [
-                'selectV1',
-                'selectV1_1',
-                'selectV2',
-                'selectV2_1',
-                'selectV3',
-                'selectV3_1',
-                'selectV4',
-                'selectV4_1',
-                'selectV5',
-                'selectV5_1',
-                'selectV6',
-                'selectV6_1',
-                'selectV0',
-            ]);
-        });
+        return $this->overload($args, [
+            'selectV1',
+            'selectV1_1',
+            'selectV2',
+            'selectV2_1',
+            'selectV3',
+            'selectV3_1',
+            'selectV4',
+            'selectV4_1',
+            'selectV5',
+            'selectV5_1',
+            'selectV6',
+            'selectV6_1',
+            'selectV0',
+        ]);
     }
 
     public function selectOne(...$args)

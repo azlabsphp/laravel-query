@@ -35,8 +35,8 @@ class ServiceProvider extends BaseServiceProvider
      */
     public function register()
     {
-        $this->app->singleton(DatabaseTransactionManager::class, static function ($app) {
-            return new DatabaseTransactionManager($app->make('db'));
+        $this->app->singleton(TransactionManager::class, static function ($app) {
+            return new TransactionManager($app->make('db'));
         });
         $this->app->bind(FiltersInterface::class, QueryFilters::class);
     }

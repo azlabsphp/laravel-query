@@ -14,13 +14,17 @@ declare(strict_types=1);
 namespace Drewlabs\Packages\Database\Query\Concerns;
 
 use Drewlabs\Contracts\Data\Filters\FiltersInterface;
+use Drewlabs\Packages\Database\Contracts\TransactionManagerInterface;
 use Drewlabs\Packages\Database\Eloquent\QueryMethod;
 
+/**
+ * @property TransactionManagerInterface transactionManager
+ */
 trait DeleteQueryLanguage
 {
     public function delete(...$args)
     {
-        return $this->model->getConnection()->transaction(function () use ($args) {
+        return $this->transactionManager->transaction(function () use ($args) {
             return $this->overload($args, [
                 'deleteV1',
                 'deleteV2',
