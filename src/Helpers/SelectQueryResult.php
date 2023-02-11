@@ -36,13 +36,13 @@ class SelectQueryResult
         $this->value_ = $value ?? new EnumerableQueryResult();
     }
 
-     /**
+    /**
      * Invoke the projected function on each item of the collection.
-      * 
-      * @param callable $callback 
-      * @return $this 
-      * @throws BindingResolutionException 
-      */
+     *
+     * @throws BindingResolutionException
+     *
+     * @return $this
+     */
     public function map(callable $callback)
     {
         $this->value_ = drewlabs_database_map_query_result(

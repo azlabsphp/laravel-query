@@ -61,9 +61,9 @@ trait QueryFilters
             return $builder;
         }
         $parser = new ConditionQuery();
-        
+
         $builder = Arr::isList($result = $parser->parse($filter)) ? array_reduce($result, static function ($builder, array $query) {
-            return is_array($query) ? $builder->where(...array_values($query)) : $builder->where($query);
+            return \is_array($query) ? $builder->where(...array_values($query)) : $builder->where($query);
         }, $builder) : $builder->where(...$result);
 
         return $builder;
@@ -75,7 +75,7 @@ trait QueryFilters
         foreach ($filter as $value) {
             // To avoid query to throw, we check if the count of parameter isn't less than 2
             // Case it's less than 2 we skip to the next iteration
-            if (!is_array($value) || count($value) < 2) {
+            if (!\is_array($value) || \count($value) < 2) {
                 continue;
             }
             $builder = $builder->whereHas(...array_values($value));
@@ -90,7 +90,7 @@ trait QueryFilters
         foreach ($filter as $value) {
             // To avoid query to throw, we check if the count of parameter isn't less than 2
             // Case it's less than 2 we skip to the next iteration
-            if (!is_array($value) || count($value) < 2) {
+            if (!\is_array($value) || \count($value) < 2) {
                 continue;
             }
             $builder = $builder->whereDoesntHave(...$value);
@@ -103,11 +103,12 @@ trait QueryFilters
     {
         $filter = array_filter($filter, 'is_array') === $filter ? $filter : [$filter];
         foreach ($filter as $value) {
-            if (!is_array($value)) {
+            if (!\is_array($value)) {
                 continue;
             }
             $builder = $builder->whereDate(...$value);
         }
+
         return $builder;
     }
 
@@ -115,11 +116,12 @@ trait QueryFilters
     {
         $filter = array_filter($filter, 'is_array') === $filter ? $filter : [$filter];
         foreach ($filter as $value) {
-            if (!is_array($value)) {
+            if (!\is_array($value)) {
                 continue;
             }
             $builder = $builder->whereDate(...$value);
         }
+
         return $builder;
     }
 
@@ -143,11 +145,12 @@ trait QueryFilters
 
     private function doesntHave($builder, $filter)
     {
-        $filter = is_array($filter) ? $filter : [$filter];
+        $filter = \is_array($filter) ? $filter : [$filter];
         foreach ($filter as $value) {
-            $value = is_array($value) ? $value : [$value];
+            $value = \is_array($value) ? $value : [$value];
             $builder = $builder->doesntHave(...array_values($value));
         }
+
         return $builder;
     }
 
@@ -155,14 +158,16 @@ trait QueryFilters
     {
         if ($filter instanceof \Closure) {
             $builder = $builder->where($filter);
+
             return $builder;
         }
         $parser = new ConditionQuery();
         $builder = Arr::isList($result = $parser->parse($filter)) ? array_reduce($result, static function ($builder, array $query) {
             // In case the internal query is not an array, we simply pass it to the illuminate query builder
             // Which may throws if the parameters are not supported
-            return is_array($query) ? $builder->orWhere(...array_values($query)) : $builder->orWhere($query);
+            return \is_array($query) ? $builder->orWhere(...array_values($query)) : $builder->orWhere($query);
         }, $builder) : $builder->orWhere(...$result);
+
         return $builder;
     }
 
@@ -179,9 +184,10 @@ trait QueryFilters
 
     private function whereBetween(Builder $builder, array $filter)
     {
-        if (count($filter) < 2) {
+        if (\count($filter) < 2) {
             return $builder;
         }
+
         return $builder->whereBetween(...array_values($filter));
     }
 
@@ -199,7 +205,7 @@ trait QueryFilters
     private function orderBy($builder, array $filters)
     {
         $filters = Arr::isassoc($filters) ? [$filters] : $filters;
-        $validate = function($values) {
+        $validate = static function ($values) {
             if (empty($values)) {
                 return false;
             }
@@ -208,6 +214,7 @@ trait QueryFilters
                     return false;
                 }
             }
+
             return true;
         };
         // Case the filters is a data structure or type [['order' => '...', 'by' => '...']]
