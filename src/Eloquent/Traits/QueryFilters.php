@@ -15,6 +15,8 @@ namespace Drewlabs\Packages\Database\Eloquent\Traits;
 
 use Drewlabs\Core\Helpers\Arr;
 use Drewlabs\Packages\Database\Query\ConditionQuery;
+use Illuminate\Contracts\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Query\Builder;
 
 trait QueryFilters
 {
@@ -59,22 +61,24 @@ trait QueryFilters
             return $builder;
         }
         $parser = new ConditionQuery();
-        if (Arr::isList($result = $parser->parse($filter))) {
-            $builder = array_reduce($result, static function ($builder, array $query) {
-                return $builder->where(...array_values($query));
-            }, $builder);
-        } else {
-            $builder = $builder->where(...$result);
-        }
+        
+        $builder = Arr::isList($result = $parser->parse($filter)) ? array_reduce($result, static function ($builder, array $query) {
+            return is_array($query) ? $builder->where(...array_values($query)) : $builder->where($query);
+        }, $builder) : $builder->where(...$result);
 
         return $builder;
     }
 
-    private function whereHas($builder, $filter)
+    private function whereHas(EloquentBuilder $builder, $filter)
     {
         $filter = array_filter($filter, 'is_array') === $filter ? $filter : [$filter];
         foreach ($filter as $value) {
-            $builder = $builder->whereHas($value[0], $value[1]);
+            // To avoid query to throw, we check if the count of parameter isn't less than 2
+            // Case it's less than 2 we skip to the next iteration
+            if (!is_array($value) || count($value) < 2) {
+                continue;
+            }
+            $builder = $builder->whereHas(...array_values($value));
         }
 
         return $builder;
@@ -84,6 +88,11 @@ trait QueryFilters
     {
         $filter = array_filter($filter, 'is_array') === $filter ? $filter : [$filter];
         foreach ($filter as $value) {
+            // To avoid query to throw, we check if the count of parameter isn't less than 2
+            // Case it's less than 2 we skip to the next iteration
+            if (!is_array($value) || count($value) < 2) {
+                continue;
+            }
             $builder = $builder->whereDoesntHave(...$value);
         }
 
@@ -94,9 +103,11 @@ trait QueryFilters
     {
         $filter = array_filter($filter, 'is_array') === $filter ? $filter : [$filter];
         foreach ($filter as $value) {
+            if (!is_array($value)) {
+                continue;
+            }
             $builder = $builder->whereDate(...$value);
         }
-
         return $builder;
     }
 
@@ -104,9 +115,11 @@ trait QueryFilters
     {
         $filter = array_filter($filter, 'is_array') === $filter ? $filter : [$filter];
         foreach ($filter as $value) {
+            if (!is_array($value)) {
+                continue;
+            }
             $builder = $builder->whereDate(...$value);
         }
-
         return $builder;
     }
 
@@ -130,15 +143,11 @@ trait QueryFilters
 
     private function doesntHave($builder, $filter)
     {
-        if (\is_string($filter)) {
-            $builder = $builder->doesntHave($filter);
+        $filter = is_array($filter) ? $filter : [$filter];
+        foreach ($filter as $value) {
+            $value = is_array($value) ? $value : [$value];
+            $builder = $builder->doesntHave(...array_values($value));
         }
-        if (\is_array($filter)) {
-            foreach ($filter as $value) {
-                $builder = $builder->doesntHave($value);
-            }
-        }
-
         return $builder;
     }
 
@@ -146,18 +155,14 @@ trait QueryFilters
     {
         if ($filter instanceof \Closure) {
             $builder = $builder->where($filter);
-
             return $builder;
         }
         $parser = new ConditionQuery();
-        if (Arr::isList($result = $parser->parse($filter))) {
-            $builder = array_reduce($result, static function ($builder, array $query) {
-                return $builder->orWhere(...array_values($query));
-            }, $builder);
-        } else {
-            $builder = $builder->orWhere(...$result);
-        }
-
+        $builder = Arr::isList($result = $parser->parse($filter)) ? array_reduce($result, static function ($builder, array $query) {
+            // In case the internal query is not an array, we simply pass it to the illuminate query builder
+            // Which may throws if the parameters are not supported
+            return is_array($query) ? $builder->orWhere(...array_values($query)) : $builder->orWhere($query);
+        }, $builder) : $builder->orWhere(...$result);
         return $builder;
     }
 
@@ -166,13 +171,18 @@ trait QueryFilters
         $filter = array_filter($filter, 'is_array') === $filter ? $filter : [$filter];
 
         return array_reduce($filter, static function ($carry, $curr) {
+            // To make sure the builder does not throw we ignore any in query providing invalid
+            // arguments
             return \count($curr) >= 2 ? $carry->whereIn($curr[0], $curr[1]) : $carry;
         }, $builder);
     }
 
-    private function whereBetween($builder, array $filter)
+    private function whereBetween(Builder $builder, array $filter)
     {
-        return $builder->whereBetween($filter[0], $filter[1]);
+        if (count($filter) < 2) {
+            return $builder;
+        }
+        return $builder->whereBetween(...array_values($filter));
     }
 
     private function whereNotIn($builder, array $filter)
@@ -180,20 +190,36 @@ trait QueryFilters
         $filter = array_filter($filter, 'is_array') === $filter ? $filter : [$filter];
 
         return array_reduce($filter, static function ($carry, $curr) {
+            // To make sure the builder does not throw we ignore any in query providing invalid
+            // arguments
             return \count($curr) >= 2 ? $carry->whereNotIn($curr[0], $curr[1]) : $carry;
         }, $builder);
     }
 
     private function orderBy($builder, array $filters)
     {
-        // TODO: In future release, valide the filters inputs
-        if (!Arr::isassoc($filters)) {
+        $filters = Arr::isassoc($filters) ? [$filters] : $filters;
+        $validate = function($values) {
+            if (empty($values)) {
+                return false;
+            }
+            foreach ($values as $value) {
+                if (!isset($value['order']) || !isset($value['by'])) {
+                    return false;
+                }
+            }
+            return true;
+        };
+        // Case the filters is a data structure or type [['order' => '...', 'by' => '...']]
+        // we apply the filters
+        if ($validate($filters)) {
             return array_reduce($filters, static function ($builder, $current) {
                 return $builder->orderBy($current['by'], $current['order']);
             }, $builder);
         }
-
-        return $builder->orderBy($filters['by'], $filters['order']);
+        // Else we simply returns the builder without throwing any exception
+        // As we consider it a falsy query parameter
+        return $builder;
     }
 
     private function groupBy($builder, $filter)
