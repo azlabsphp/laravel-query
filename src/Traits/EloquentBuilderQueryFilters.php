@@ -19,19 +19,19 @@ use Drewlabs\Packages\Database\FilterQueryParamsParser;
 trait EloquentBuilderQueryFilters
 {
     /**
-     * Query filters dictionary
+     * Query filters dictionary.
      *
      * @var array
      */
     private $filters = [];
 
     /**
-     * Query builder instance
+     * Query builder instance.
      *
      * @var object
      */
     private $model;
-    
+
     public function apply($builder)
     {
         $object = clone $builder;
@@ -41,6 +41,7 @@ trait EloquentBuilderQueryFilters
                 $object = $this->{$key}($object, $value);
             }
         }
+
         return $object;
     }
 
@@ -59,13 +60,9 @@ trait EloquentBuilderQueryFilters
             return $builder;
         }
         $parser = new FilterQueryParamsParser();
-        if (Arr::isList($result = $parser->parse($filter))) {
-            $builder = array_reduce($result, static function ($builder, array $query) {
-                return $builder->where(...array_values($query));
-            }, $builder);
-        } else {
-            $builder = $builder->where(...$result);
-        }
+        $builder = Arr::isList($result = $parser->parse($filter)) ? array_reduce($result, static function ($builder, array $query) {
+            return \is_array($query) ? $builder->where(...array_values($query)) : $builder->where($query);
+        }, $builder) : $builder->where(...$result);
 
         return $builder;
     }
@@ -119,14 +116,15 @@ trait EloquentBuilderQueryFilters
         if (\is_array($filter) && (false !== Arr::search($filter[1] ?? null, $operators))) {
             return $builder->has(...$filter);
         }
-        if (is_array($filter)) {
+        if (\is_array($filter)) {
             foreach ($filter as $value) {
                 $builder = $builder->has($value);
             }
         }
+
         return $builder;
     }
-    
+
     private function doesntHave($builder, $filter)
     {
         if (\is_string($filter)) {
@@ -140,7 +138,7 @@ trait EloquentBuilderQueryFilters
 
         return $builder;
     }
-    
+
     private function orWhere($builder, $filter)
     {
         if ($filter instanceof \Closure) {
@@ -149,13 +147,11 @@ trait EloquentBuilderQueryFilters
             return $builder;
         }
         $parser = new FilterQueryParamsParser();
-        if (Arr::isList($result = $parser->parse($filter))) {
-            $builder = array_reduce($result, static function ($builder, array $query) {
-                return $builder->orWhere(...array_values($query));
-            }, $builder);
-        } else {
-            $builder = $builder->orWhere(...$result);
-        }
+        $builder = Arr::isList($result = $parser->parse($filter)) ? array_reduce($result, static function ($builder, array $query) {
+            // In case the internal query is not an array, we simply pass it to the illuminate query builder
+            // Which may throws if the parameters are not supported
+            return \is_array($query) ? $builder->orWhere(...array_values($query)) : $builder->orWhere($query);
+        }, $builder) : $builder->orWhere(...$result);
 
         return $builder;
     }
@@ -168,7 +164,7 @@ trait EloquentBuilderQueryFilters
             return \count($curr) >= 2 ? $carry->whereIn($curr[0], $curr[1]) : $carry;
         }, $builder);
     }
-    
+
     private function whereBetween($builder, array $filter)
     {
         return $builder->whereBetween($filter[0], $filter[1]);

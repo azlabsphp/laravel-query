@@ -37,11 +37,11 @@ class SelectQueryResult
     }
 
     /**
-     * Invoke the projected function on each item of the collection
-     * 
-     * @param callable $callback 
-     * @return $this 
-     * @throws BindingResolutionException 
+     * Invoke the projected function on each item of the collection.
+     *
+     * @throws BindingResolutionException
+     *
+     * @return $this
      */
     public function map(callable $callback)
     {
@@ -54,11 +54,11 @@ class SelectQueryResult
     }
 
     /**
-     * Invoke the projected function the collection as whole
-     * 
-     * @param callable $callback 
-     * @return $this 
-     * @throws BindingResolutionException 
+     * Invoke the projected function the collection as whole.
+     *
+     * @throws BindingResolutionException
+     *
+     * @return $this
      */
     public function all(callable $callback)
     {

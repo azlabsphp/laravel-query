@@ -173,7 +173,7 @@ trait DMLCreateQuery
             // We loop through parent relations which are loaded using composed
             // relation name in form of `relation.otherRelation`
             foreach ($relations as $rel) {
-                if (Str::startsWith((string)$rel, "$value.")) {
+                if (Str::startsWith((string) $rel, "$value.")) {
                     $parentRelations[] = Str::after("$value.", $rel);
                     unset($relations[$rel]);
                 }
@@ -187,7 +187,6 @@ trait DMLCreateQuery
             // Remove the relation from the list of relations to create after model
             // gets created
             unset($relations[$i], $attributes[$value]);
-
         }
 
         return $attributes;

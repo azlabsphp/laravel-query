@@ -34,7 +34,7 @@ class QueryFiltersBuilderTest extends TestCase
         });
         $this->assertTrue('addresses' === $filters['whereHas'][0][0]);
         $this->assertInstanceOf(\Closure::class, $filters['whereHas'][0][1]);
-        $this->assertEquals($filters['orWhere'][0], ['lastname', 'like', '%Azandrew%']);
+        $this->assertSame($filters['orWhere'][0], ['lastname', 'like', '%Azandrew%']);
     }
 
     public function test_build_from_query_input()
@@ -58,7 +58,7 @@ class QueryFiltersBuilderTest extends TestCase
         });
         $this->assertTrue('addresses' === $filters['whereHas'][0]);
         $this->assertInstanceOf(\Closure::class, $filters['whereHas'][1]);
-        $this->assertEquals($filters['orWhere'], ['lastname', 'like', '%AZOMEDOH%']);
+        $this->assertSame($filters['orWhere'], ['lastname', 'like', '%AZOMEDOH%']);
     }
 
     public function test_build_method()
@@ -84,7 +84,7 @@ class QueryFiltersBuilderTest extends TestCase
         });
         $result = DMLManager(Person::class)->select($filters);
         $this->assertNotNull($result);
-        $this->assertEquals('azandrew@liksoft.tg', $result->first()->addresses->first()->email);
+        $this->assertSame('azandrew@liksoft.tg', $result->first()->addresses->first()->email);
     }
 
     public function test_filter_query_parameters_returns_where_clauses_if_value_contains_and_operator()
@@ -95,8 +95,8 @@ class QueryFiltersBuilderTest extends TestCase
             'age' => '&&:>=:2022-10-10|&&:<=:2022-10-10',
         ]));
         $this->assertTrue(($result['where'] ?? null) !== null);
-        $this->assertEquals(['email', '=', 'azandrewdevelopper@gmail.com'], $result['where'][0]);
-        $this->assertEquals(['lastname', 'like', '%AZOMEDOH%'], $result['where'][1]);
+        $this->assertSame(['email', '=', 'azandrewdevelopper@gmail.com'], $result['where'][0]);
+        $this->assertSame(['lastname', 'like', '%AZOMEDOH%'], $result['where'][1]);
     }
 
     public function test_build_query_filters_with_default_parameters()
@@ -130,8 +130,8 @@ class QueryFiltersBuilderTest extends TestCase
             ]
         );
         $this->assertTrue(($result['whereHas'] ?? null) !== null);
-        $this->assertEquals(['profile', $query], $result['whereHas'][0]);
-        $this->assertEquals(['profile', $query], $result['whereHas'][0]);
+        $this->assertSame(['profile', $query], $result['whereHas'][0]);
+        $this->assertSame(['profile', $query], $result['whereHas'][0]);
     }
 
     public function test_alternate_query_methods()
@@ -157,14 +157,14 @@ class QueryFiltersBuilderTest extends TestCase
             ];
             use ViewModel;
         });
-        //
+
         $this->assertTrue('addresses' === $filters['whereHas'][0]);
         $this->assertInstanceOf(\Closure::class, $filters['whereHas'][1]);
-        $this->assertEquals($filters['orWhere'], ['lastname', 'like', '%AZOMEDOH%']);
-        $this->assertEquals($filters['whereIn'], ['likes', [10, 12, 2]]);
-        $this->assertEquals($filters['whereNotIn'], ['name', ['Milick', 'Jonh Doe']]);
-        $this->assertEquals('firstname', $filters['whereNotNull']);
-        $this->assertEquals('lastname', $filters['whereNull']);
+        $this->assertSame($filters['orWhere'], ['lastname', 'like', '%AZOMEDOH%']);
+        $this->assertSame($filters['whereIn'], ['likes', [10, 12, 2]]);
+        $this->assertSame($filters['whereNotIn'], ['name', ['Milick', 'Jonh Doe']]);
+        $this->assertSame('firstname', $filters['whereNotNull']);
+        $this->assertSame('lastname', $filters['whereNull']);
     }
 
     private function createParametersBag(array $inputs)
