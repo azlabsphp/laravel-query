@@ -68,5 +68,5 @@ interface QueryLanguageInterface
      *
      * @return int|mixed
      */
-    public function aggregate(array $query = [], string $method = 'count');
+    public function aggregate(array $query = [], string $aggregation = 'count');
 }

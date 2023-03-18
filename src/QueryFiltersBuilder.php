@@ -73,6 +73,9 @@ class QueryFiltersBuilder
         'orwherenull' => 'orWhereNull',
         'wherenotnull' => 'whereNotNull',
         'orwherenotnull' => 'orWhereNotNull',
+
+        // Limit query
+        'limit' => 'limit'
     ];
 
     /**

@@ -31,54 +31,28 @@ trait CreateQueryLanguage
     {
         return $this->transactionManager->transaction(function () use ($args) {
             return $this->overload($args, [
-                'createV1',
-                'createV2',
-                'createV3',
+                function ($attributes, \Closure $callback = null) {
+                    $callback = $callback ?: static function ($param) {
+                        return $param;
+                    };
+                    return $callback(
+                        $this->proxy(drewlabs_core_create_attribute_getter('model', null)($this), QueryMethod::CREATE, [$this->parseAttributes($this->attributesToArray($attributes))])
+                    );
+                },
+                function ($attributes, array $params, \Closure $callback = null) {
+                    if (!(\is_array($params) || ($params instanceof DataProviderHandlerParamsInterface))) {
+                        throw new \InvalidArgumentException('Argument 2 of the create method must be an array or an instance of ' . DataProviderHandlerParamsInterface::class);
+                    }
+                    return $this->executeCreateQuery($attributes, $params ?? [], false, $callback);
+                },
+                function ($attributes, array $params, bool $batch, \Closure $callback = null) {
+                    if (!(\is_array($params) || ($params instanceof DataProviderHandlerParamsInterface))) {
+                        throw new \InvalidArgumentException('Argument 2 of the create method must be an array or an instance of ' . DataProviderHandlerParamsInterface::class);
+                    }
+                    return $this->executeCreateQuery($attributes, $params, $batch, $callback);
+                },
             ]);
         });
-    }
-
-    private function createV1($attributes, \Closure $callback = null)
-    {
-        $callback = $callback ?: static function ($param) {
-            return $param;
-        };
-
-        return $callback(
-            $this->proxy(
-                drewlabs_core_create_attribute_getter('model', null)($this),
-                QueryMethod::CREATE,
-                [$this->parseAttributes($this->attributesToArray($attributes))]
-            )
-        );
-    }
-
-    private function createV2($attributes, $params, \Closure $callback = null)
-    {
-        if (!(\is_array($params) || ($params instanceof DataProviderHandlerParamsInterface))) {
-            throw new \InvalidArgumentException('Argument 2 of the create method must be an array or an instance of '.DataProviderHandlerParamsInterface::class);
-        }
-
-        return $this->createCommand(
-            $attributes,
-            drewlabs_database_parse_create_handler_params($params),
-            false,
-            $callback
-        );
-    }
-
-    private function createV3($attributes, $params, bool $batch, \Closure $callback = null)
-    {
-        if (!(\is_array($params) || ($params instanceof DataProviderHandlerParamsInterface))) {
-            throw new \InvalidArgumentException('Argument 2 of the create method must be an array or an instance of '.DataProviderHandlerParamsInterface::class);
-        }
-
-        return $this->createCommand(
-            $attributes,
-            drewlabs_database_parse_create_handler_params($params),
-            $batch,
-            $callback
-        );
     }
 
     /**
@@ -90,25 +64,16 @@ trait CreateQueryLanguage
      *
      * @return mixed
      */
-    private function createCommand($attributes, array $params, bool $batch = false, \Closure $callback = null)
+    private function executeCreateQuery($attributes, array $params, bool $batch = false, \Closure $callback = null)
     {
         $callback = $callback ?: static function ($param) {
             return $param;
         };
         $attributes = $this->attributesToArray($attributes);
-        $method = $params['method'] ?? QueryMethod::CREATE;
-        $upsert_conditions = $params['upsert_conditions'] ?: [];
-        $upsert = $params['upsert'] && !empty($upsert_conditions) ? true : false;
-        $isComposedMethod = Str::contains($method, '__') && \in_array(
-            Str::split($method, '__')[0],
-            [
-                QueryMethod::CREATE,
-                QueryMethod::INSERT_MANY,
-            ],
-            true
-        );
-        if (\is_string($method) && ((null !== ($params['relations'] ?? null)) || $isComposedMethod)) {
-            $keys = $params['relations'] ?? \array_slice(drewlabs_database_parse_dynamic_callback($method), 1) ?? [];
+        $upsert_conditions = $params['upsert_conditions'] ?? [];
+        $upsert = !empty($upsert_conditions);
+        if (isset($params['relations'])) {
+            $keys = $params['relations'] ?? [];
             // Creates a copy of the relation in order to maintain the state of the keys unchanged
             // accross changes that happen during execution
             $relations = [...$keys];
@@ -127,17 +92,9 @@ trait CreateQueryLanguage
             if (!empty($relations = array_values($relations))) {
                 TouchedModelRelationsHandler::new($instance)->create($relations, $attributes, $batch);
             }
-            $result = $this->select($instance->getKey(), ['*', ...$keys]);
-        } else {
-            $result = $this->proxy(
-                drewlabs_core_create_attribute_getter('model', null)($this),
-                $method,
-                // if Upserting, pass the upsertion condition first else, pass in the attributes
-                $upsert ? [$upsert_conditions, $this->parseAttributes($attributes)] : [$this->parseAttributes($attributes)]
-            );
+            return $callback($this->select($instance->getKey(), ['*', ...$keys]));
         }
-
-        return $callback($result);
+        return $callback($this->proxy(drewlabs_core_create_attribute_getter('model', null)($this), QueryMethod::CREATE, $upsert ? [$upsert_conditions, $this->parseAttributes($attributes)] : [$this->parseAttributes($attributes)]));
     }
 
     /**

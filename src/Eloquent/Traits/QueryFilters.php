@@ -15,8 +15,7 @@ namespace Drewlabs\Packages\Database\Eloquent\Traits;
 
 use Drewlabs\Core\Helpers\Arr;
 use Drewlabs\Packages\Database\Query\ConditionQuery;
-use Illuminate\Contracts\Database\Eloquent\Builder as EloquentBuilder;
-use Illuminate\Database\Query\Builder;
+use Illuminate\Contracts\Database\Query\Builder;
 
 trait QueryFilters
 {
@@ -56,20 +55,15 @@ trait QueryFilters
     private function where($builder, $filter)
     {
         if ($filter instanceof \Closure) {
-            $builder = $builder->where($filter);
-
-            return $builder;
+            return $builder->where($filter);
         }
-        $parser = new ConditionQuery();
 
-        $builder = Arr::isList($result = $parser->parse($filter)) ? array_reduce($result, static function ($builder, array $query) {
+        return Arr::isList($result = (new ConditionQuery())->parse($filter)) ? array_reduce($result, static function ($builder, array $query) {
             return \is_array($query) ? $builder->where(...array_values($query)) : $builder->where($query);
         }, $builder) : $builder->where(...$result);
-
-        return $builder;
     }
 
-    private function whereHas(EloquentBuilder $builder, $filter)
+    private function whereHas($builder, $filter)
     {
         $filter = array_filter($filter, 'is_array') === $filter ? $filter : [$filter];
         foreach ($filter as $value) {
@@ -157,45 +151,36 @@ trait QueryFilters
     private function orWhere($builder, $filter)
     {
         if ($filter instanceof \Closure) {
-            $builder = $builder->where($filter);
-
-            return $builder;
+            return $builder->where($filter);
         }
-        $parser = new ConditionQuery();
-        $builder = Arr::isList($result = $parser->parse($filter)) ? array_reduce($result, static function ($builder, array $query) {
+        
+        return Arr::isList($result = (new ConditionQuery())->parse($filter)) ? array_reduce($result, static function ($builder, array $query) {
             // In case the internal query is not an array, we simply pass it to the illuminate query builder
             // Which may throws if the parameters are not supported
             return \is_array($query) ? $builder->orWhere(...array_values($query)) : $builder->orWhere($query);
         }, $builder) : $builder->orWhere(...$result);
-
-        return $builder;
     }
 
     private function whereIn($builder, array $filter)
     {
-        $filter = array_filter($filter, 'is_array') === $filter ? $filter : [$filter];
-
-        return array_reduce($filter, static function ($carry, $curr) {
+        return array_reduce(array_filter($filter, 'is_array') === $filter ? $filter : [$filter], static function ($carry, $curr) {
             // To make sure the builder does not throw we ignore any in query providing invalid
             // arguments
             return \count($curr) >= 2 ? $carry->whereIn($curr[0], $curr[1]) : $carry;
         }, $builder);
     }
 
-    private function whereBetween(Builder $builder, array $filter)
+    private function whereBetween($builder, array $filter)
     {
         if (\count($filter) < 2) {
             return $builder;
         }
-
         return $builder->whereBetween(...array_values($filter));
     }
 
     private function whereNotIn($builder, array $filter)
     {
-        $filter = array_filter($filter, 'is_array') === $filter ? $filter : [$filter];
-
-        return array_reduce($filter, static function ($carry, $curr) {
+        return array_reduce(array_filter($filter, 'is_array') === $filter ? $filter : [$filter], static function ($carry, $curr) {
             // To make sure the builder does not throw we ignore any in query providing invalid
             // arguments
             return \count($curr) >= 2 ? $carry->whereNotIn($curr[0], $curr[1]) : $carry;
@@ -204,7 +189,6 @@ trait QueryFilters
 
     private function orderBy($builder, array $filters)
     {
-        $filters = Arr::isassoc($filters) ? [$filters] : $filters;
         $validate = static function ($values) {
             if (empty($values)) {
                 return false;
@@ -214,12 +198,11 @@ trait QueryFilters
                     return false;
                 }
             }
-
             return true;
         };
         // Case the filters is a data structure or type [['order' => '...', 'by' => '...']]
         // we apply the filters
-        if ($validate($filters)) {
+        if ($validate($filters = Arr::isassoc($filters) ? [$filters] : $filters)) {
             return array_reduce($filters, static function ($builder, $current) {
                 return $builder->orderBy($current['by'], $current['order']);
             }, $builder);
@@ -256,14 +239,12 @@ trait QueryFilters
         foreach ($result as $value) {
             $builder = $builder->{$method}(...$value);
         }
-
         return $builder;
     }
 
     private function whereNull($builder, $filter)
     {
         $filter = \is_array($filter) ? $filter : [$filter];
-
         return array_reduce($filter, static function ($carry, $current) {
             return $carry->whereNull($current);
         }, $builder);
@@ -272,7 +253,6 @@ trait QueryFilters
     private function whereNotNull($builder, $filter)
     {
         $filter = \is_array($filter) ? $filter : [$filter];
-
         return array_reduce($filter, static function ($carry, $current) {
             return $carry->whereNotNull($current);
         }, $builder);
@@ -281,18 +261,38 @@ trait QueryFilters
     private function orWhereNull($builder, $filter)
     {
         $filter = \is_array($filter) ? $filter : [$filter];
-
         return array_reduce($filter, static function ($carry, $current) {
             return $carry->orWhereNull($current);
         }, $builder);
     }
 
+    /**
+     * Apply `whereNotNull` query on the builder instance
+     * 
+     * @param Builder $builder 
+     * @param mixed $filter
+     * 
+     * @return Builder 
+     */
     private function orWhereNotNull($builder, $filter)
     {
         $filter = \is_array($filter) ? $filter : [$filter];
-
         return array_reduce($filter, static function ($carry, $current) {
             return $carry->orWhereNotNull($current);
         }, $builder);
+    }
+
+    /**
+     * Invoke `limit` query on the query builder
+     * 
+     * @param Builder $builder
+     * 
+     * @param int $limit
+     * 
+     * @return Builder 
+     */
+    public function limit($builder, int $limit)
+    {
+        return $builder->limit($limit);
     }
 }

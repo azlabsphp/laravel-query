@@ -136,14 +136,14 @@ final class QueryLanguage implements DMLProvider, QueryLanguageInterface
         );
     }
 
-    public function aggregate(array $query = [], string $method = AggregationMethods::COUNT)
+    public function aggregate(array $query = [], string $aggregation = AggregationMethods::COUNT)
     {
-        if (!\in_array($method, static::AGGREGATE_METHODS, true)) {
+        if (!\in_array($aggregation, static::AGGREGATE_METHODS, true)) {
             throw new \InvalidArgumentException('The provided method is not part of the aggregation framework supported methods');
         }
         $model = drewlabs_core_create_attribute_getter('model', null)($this);
 
-        return $this->proxy($this->builderFactory()($model, $query), $method, []);
+        return $this->proxy($this->builderFactory()($model, $query), $aggregation, []);
     }
 
     public function selectAggregate(array $query = [], string $aggregation = AggregationMethods::COUNT)

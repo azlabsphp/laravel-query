@@ -50,7 +50,7 @@ function SelectQueryResult($value)
  */
 function DMLManager($model)
 {
-    return new QueryLanguage(\is_string($model) ? $model : \get_class($model));
+    return new QueryLanguage($model);
 }
 
 /**

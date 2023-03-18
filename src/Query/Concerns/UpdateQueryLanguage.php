@@ -29,47 +29,26 @@ trait UpdateQueryLanguage
     {
         return $this->transactionManager->transaction(function () use ($args) {
             return $this->overload($args, [
-                'updateV1',
-                'updateV1_1',
-                'updateV2',
-                'updateV3',
-                'updateV4',
-                'updateV5',
+                function (array $query, $attributes, bool $batch = false) {
+                    return $this->executeUpdateQuery($query, $attributes, $batch);
+                },
+                function (FiltersInterface $query, $attributes, bool $batch = false) {
+                    return $this->executeUpdateQuery($query, $attributes, $batch);
+                },
+                function (int $id, $attributes, \Closure $callback = null) {
+                    return $this->updateCommand((string) $id, $attributes, [], $callback);
+                },
+                function (int $id, $attributes, array $params, \Closure $callback = null) {
+                    return $this->updateCommand((string) $id, $attributes, $params, $callback);
+                },
+                function (string $id, $attributes, \Closure $callback = null) {
+                    return $this->updateCommand((string) $id, $attributes, [], $callback);
+                },
+                function (string $id, $attributes, array $params, \Closure $callback = null) {
+                    return $this->updateCommand($id, $attributes, $params, $callback);
+                },
             ]);
         });
-    }
-
-    private function updateV1(array $query, $attributes, bool $batch = false)
-    {
-        return $this->updateByQueryCommand($query, $attributes, $batch);
-    }
-
-    private function updateV1_1(FiltersInterface $query, $attributes, bool $batch = false)
-    {
-        return $this->updateByQueryCommand($query, $attributes, $batch);
-    }
-
-    private function updateV2(
-        int $id,
-        $attributes,
-        \Closure $callback = null
-    ) {
-        return $this->updateCommand((string) $id, $attributes, [], $callback);
-    }
-
-    private function updateV3(int $id, $attributes, $params, \Closure $callback = null)
-    {
-        return $this->updateCommand((string) $id, $attributes, $params, $callback);
-    }
-
-    private function updateV4(string $id, $attributes, \Closure $callback = null)
-    {
-        return $this->updateCommand((string) $id, $attributes, [], $callback);
-    }
-
-    private function updateV5(string $id, $attributes, $params, \Closure $callback = null)
-    {
-        return $this->updateCommand($id, $attributes, $params, $callback);
     }
 
     /**
@@ -80,13 +59,9 @@ trait UpdateQueryLanguage
      *
      * @return mixed
      */
-    private function updateByQueryCommand(
-        $query,
-        $attributes,
-        bool $batch = false
-    ) {
+    private function executeUpdateQuery($query, $attributes, bool $batch = false)
+    {
         $attributes = $this->attributesToArray($attributes);
-
         return $batch ? $this->proxy(
             $this->builderFactory()(drewlabs_core_create_attribute_getter('model', null)($this), $query),
             QueryMethod::UPDATE,
@@ -94,26 +69,20 @@ trait UpdateQueryLanguage
         ) : array_reduce(
             $this->select($query)->all(),
             function ($carry, $value) use ($attributes) {
-                $this->proxy(
-                    $value,
-                    QueryMethod::UPDATE,
-                    [$this->parseAttributes(($attributes instanceof Model) ? $attributes->toArray() : $attributes)]
-                );
+                $this->proxy($value, QueryMethod::UPDATE, [$this->parseAttributes(($attributes instanceof Model) ? $attributes->toArray() : $attributes)]);
                 ++$carry;
-
                 return $carry;
             },
             0
         );
     }
 
-    private function updateCommand($id, $attributes, $params, \Closure $callback = null)
+    private function updateCommand($id, $attributes, array $params, \Closure $callback = null)
     {
         $callback = $callback ?? static function ($value) {
             return $value;
         };
         $attributes = $this->attributesToArray($attributes);
-        // $that = $this;
         // region Update Handler func
         // TODO : Add an update handler func that update the model
         // The Call the callback passed if one passed in
@@ -129,7 +98,7 @@ trait UpdateQueryLanguage
                 $callback
             ) {
                 $model = drewlabs_core_create_attribute_getter('model', null)($self);
-                $this->updateByQueryCommand(['where' => [$model->getPrimaryKey(), $key]], $values);
+                $this->executeUpdateQuery(['where' => [$model->getPrimaryKey(), $key]], $values);
                 // Select the updated model
                 $model_ = $this->select($key);
                 // If there is a callable, call the callable, passing in updated model first and the other
@@ -146,31 +115,12 @@ trait UpdateQueryLanguage
         };
         // endregion update handler fund
         // Parse the params in order to get the method and upsert value
-        $params = drewlabs_database_parse_update_handler_params($params);
-        $method = $params['method'];
         $upsert = $params['upsert'] ?? true;
-        $isComposedMethod = Str::contains($method, '__') && \in_array(Str::split($method, '__')[0], [QueryMethod::UPDATE], true);
 
-        return \is_string($method) && ((null !== ($params['relations'] ?? null)) || $isComposedMethod) ?
-            $update_model_func(
-                $this,
-                $id,
-                $attributes
-            )(static function (Model $model) use (
-                $attributes,
-                $upsert,
-                $method,
-                $params
-            ) {
-                return $upsert ? TouchedModelRelationsHandler::new($model)
-                    ->update(
-                        $params['relations'] ?? \array_slice(drewlabs_database_parse_dynamic_callback($method), 1),
-                        $attributes,
-                    ) : TouchedModelRelationsHandler::new($model)
-                    ->refresh(
-                        $params['relations'] ?? \array_slice(drewlabs_database_parse_dynamic_callback($method), 1),
-                        $attributes,
-                    );
+        return isset($params['relations']) ?
+            $update_model_func($this, $id, $attributes)(static function (Model $model) use ($attributes, $upsert, $params) {
+                return $upsert ? TouchedModelRelationsHandler::new($model)->update($params['relations'] ?? [], $attributes) :
+                    TouchedModelRelationsHandler::new($model)->refresh($params['relations'] ?? [], $attributes);
             }) : $update_model_func($this, $id, $attributes)();
     }
 }

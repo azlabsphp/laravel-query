@@ -274,7 +274,7 @@ $request = new \Illuminate\Http\Request([
     'label' => 'Are you there ?',
     'id' => 320
 ]);
-$filters = \drewlabs_databse_parse_client_request_query(new TestModelStub, $request);
+$filters = \Drewlabs\Packages\Database\QueryFiltersBuilder::for(new TestModelStub)->build($request);
 ```
 
 - Here is a list of query methods supported by the package:
