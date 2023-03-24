@@ -26,7 +26,8 @@ class QueryColumns
      */
     public static function asTuple($values = ['*'], array $declared_columns = [], array $model_relations = [])
     {
-        $values = $values ?? [];
+        // We flatten the list of column due to bug related to found on 2023-03-24
+        $values = self::flatten($values ?? []);
 
         // Get the list of top level declared relations
         $top_level_relations = array_map(static function ($relation) {
@@ -37,7 +38,6 @@ class QueryColumns
             if (Str::contains($relation, '.')) {
                 return \in_array(Str::before('.', $relation), $top_level_relations, true) || \in_array($relation, $model_relations, true);
             }
-
             return \in_array($relation, $top_level_relations, true);
         });
         // Create the actual list of model column to be selected from the database
@@ -50,4 +50,27 @@ class QueryColumns
         // Return the tuple of column and relations
         return [$columns, $relations];
     }
+
+
+    /**
+     * Flatten list of values into a 1 dimensional array
+     * 
+     * @param array $values 
+     * @return array 
+     */
+	private static function flatten(array $values)
+	{
+		$generator = function ($values, &$output) use (&$generator) {
+			foreach ($values as $value) {
+				if (is_iterable($value)) {
+					$generator($value, $output);
+					continue;
+				}
+				$output[] = $value;
+			}
+		};
+		$out = [];
+		$generator($values, $out);
+		return $out;
+	}
 }
