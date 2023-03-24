@@ -26,7 +26,7 @@ class QueryColumns
      */
     public static function asTuple($values = ['*'], array $declared_columns = [], array $model_relations = [])
     {
-        $values = $values ?? [];
+        $values = self::flatten($values ?? []);
 
         // Get the list of top level declared relations
         $top_level_relations = array_map(static function ($relation) {
@@ -50,4 +50,26 @@ class QueryColumns
         // Return the tuple of column and relations
         return [$columns, $relations];
     }
+
+    /**
+     * Flatten list of values into a 1 dimensional array
+     * 
+     * @param array $values 
+     * @return array 
+     */
+	private static function flatten(array $values)
+	{
+		$generator = function ($values, &$output) use (&$generator) {
+			foreach ($values as $value) {
+				if (is_iterable($value)) {
+					$generator($value, $output);
+					continue;
+				}
+				$output[] = $value;
+			}
+		};
+		$out = [];
+		$generator($values, $out);
+		return $out;
+	}
 }
