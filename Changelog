@@ -71,3 +71,7 @@
 
 - Added support for query insensitive query method
 - Add match for `exists`, `in`, `notin`, `notnull`, `ornotnull`, `isnull`, `sort` query methods
+
+## [2.5.4] 2023-03-24
+
+- Bug fix in QueryColumns asTuple implementatation
