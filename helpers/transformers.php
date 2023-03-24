@@ -12,13 +12,13 @@ declare(strict_types=1);
  */
 
 use Drewlabs\Contracts\Data\EnumerableQueryResult as ContractsEnumerableQueryResult;
+use Drewlabs\Core\Helpers\Arr;
+use Drewlabs\Core\Helpers\Iter;
 use Drewlabs\Packages\Database\EnumerableQueryResult;
 
 use function Drewlabs\Support\Proxy\Collection;
-use Illuminate\Container\Container;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator as ContractsLengthAwarePaginator;
 use Illuminate\Contracts\Pagination\Paginator;
-use Illuminate\Http\Request;
 
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -30,26 +30,16 @@ if (!function_exists('drewlabs_database_paginator_apply_callback')) {
      */
     function drewlabs_database_paginator_apply_callback(Paginator $item, $callback)
     {
-        $request = class_exists(Request::class) ? Container::getInstance()->make('request') : null;
-
         return new LengthAwarePaginator(
-            iterator_to_array(
-                drewlabs_core_iter_filter(
-                    drewlabs_core_iter_map(
-                        new ArrayIterator($item->items()),
-                        $callback
-                    ),
-                    static function ($v) {
-                        return isset($v);
-                    },
-                    false
-                )
-            ),
+            Arr::create(Iter::filter(Iter::map(new ArrayIterator($item->items()), $callback), static function ($v) {
+                return isset($v);
+            }, false)),
             call_user_func([$item, 'total']),
             $item->perPage(),
             $item->currentPage(),
             [
-                'path' => $request ? $request->url() : null,
+                'path' => $item->path() ?? '/',
+                'fragment' => $item->fragment(),
                 'query' => [
                     'page' => $item->currentPage(),
                 ],
@@ -66,15 +56,14 @@ if (!function_exists('drewlabs_database_paginator_apply_to_all')) {
      */
     function drewlabs_database_paginator_apply_to_all(Paginator $item, callable $callback)
     {
-        $request = class_exists(Request::class) ? Container::getInstance()->make('request') : null;
-
         return new LengthAwarePaginator(
             call_user_func($callback, collect($item->items())),
             $item instanceof ContractsLengthAwarePaginator ? $item->total() : count($transformed ?? []),
             $item->perPage(),
             $item->currentPage(),
             [
-                'path' => $request ? $request->url() : null,
+                'path' => $item->path() ?? '/',
+                'fragment' => $item->fragment(),
                 'query' => [
                     'page' => $item->currentPage(),
                 ],
@@ -100,7 +89,6 @@ if (!function_exists('drewlabs_database_map_query_result')) {
         if ($item instanceof Paginator) {
             return drewlabs_database_paginator_apply_callback($item, $callback);
         }
-
         return new EnumerableQueryResult(
             $item->map($callback)
                 ->filter(static function ($current) {
