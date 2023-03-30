@@ -17,19 +17,19 @@ use Drewlabs\Packages\Database\Contracts\ORMModel;
 use Drewlabs\Packages\Database\Traits\Model as TraitsModel;
 use Illuminate\Database\Eloquent\Model;
 
-class Post extends Model implements ORMModel
+class PostType extends Model implements ORMModel
 {
     use TraitsModel;
 
     /**
      * @var array
      */
-    public $relation_methods = ['comments'];
+    public $relation_methods = ['posts'];
 
     /**
      * @var string
      */
-    protected $table = 'posts';
+    protected $table = 'post_types';
 
     /**
      * @var string
@@ -47,28 +47,23 @@ class Post extends Model implements ORMModel
     protected $appends = [];
 
     /**
+     * @var bool
+     */
+    public $timestamps = false;
+
+    /**
      * @var array
      */
     protected $fillable = [
         'id',
-        'body',
-        'title',
-        'post_type_id'
+        'label'
     ];
 
     /**
-     * Get all of the post's comments.
+     * Get all of the post type posts.
      */
-    public function comments()
+    public function posts()
     {
-        return $this->morphMany(Comment::class, 'commentable');
-    }
-
-    /**
-     * Get all of the tags for the post.
-     */
-    public function tags()
-    {
-        return $this->morphToMany(Tag::class, 'taggable');
+        return $this->hasMany(Post::class, 'post_type_id', 'id');
     }
 }

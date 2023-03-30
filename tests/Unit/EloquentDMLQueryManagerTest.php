@@ -18,6 +18,7 @@ use Drewlabs\Contracts\Data\Model\Model;
 use Drewlabs\Packages\Database\AggregationMethods;
 use function Drewlabs\Packages\Database\Proxy\DMLManager;
 use Drewlabs\Packages\Database\Tests\Stubs\Person;
+use Drewlabs\Packages\Database\Tests\Stubs\PostType;
 use Drewlabs\Packages\Database\Tests\Stubs\Profil;
 use Drewlabs\Packages\Database\Tests\TestCase;
 use Illuminate\Contracts\Pagination\Paginator;
@@ -37,6 +38,61 @@ class EloquentDMLQueryManagerTest extends TestCase
             'sex' => 'M',
         ]);
         $this->assertTrue('EKPEH' === $person->lastname, 'Expect the created person lastname to equals EKPEH');
+    }
+
+    public function test_create_post_types_with_posts_and_comments()
+    {
+        $result = DMLManager(PostType::class)->create(
+            [
+                'label' => 'MyPostType',
+                'posts' => [
+                    [
+                        'title' => 'Environments',
+                        'body' => 'Environment Lorem Ipsum',
+                        'comments' => [
+                            [
+                                'body' => 'Enviroments comments'
+                            ],
+                            [
+                                'body' => 'I Love environments'
+                            ]
+                        ]
+                    ]
+                ]
+            ],
+            [
+                'relations' => [
+                    'posts',
+                    'posts.comments'
+                ],
+            ]
+        );
+        $this->assertTrue($result->posts->count() === 1);
+        $this->assertTrue($result->posts->first()->comments->count() === 2);
+    }
+
+    public function test_create_post_types_with_post_and_comment()
+    {
+        $result = DMLManager(PostType::class)->create(
+            [
+                'label' => 'MyPostType',
+                'posts' => [
+                    'title' => 'Environments',
+                    'body' => 'Environment Lorem Ipsum',
+                    'comments' => [
+                        'body' => 'Enviroments comments'
+                    ]
+                ]
+            ],
+            [
+                'relations' => [
+                    'posts',
+                    'posts.comments'
+                ],
+            ]
+        );
+        $this->assertTrue($result->posts->count() === 1);
+        $this->assertTrue($result->posts->first()->comments->count() === 1);
     }
 
     public function test_create_with_params_method()
@@ -165,7 +221,7 @@ class EloquentDMLQueryManagerTest extends TestCase
         });
         $this->assertIsArray($person, 'Expect the returned person to be and array');
         $person = $manager->select(1);
-        $this->assertInstanceOf(Model::class, $person, 'Expect $person to be an instance of '.Model::class);
+        $this->assertInstanceOf(Model::class, $person, 'Expect $person to be an instance of ' . Model::class);
         $list = $manager->select(
             [
                 'where' => [
@@ -177,7 +233,7 @@ class EloquentDMLQueryManagerTest extends TestCase
             ],
             ['firstname', 'addresses']
         );
-        $this->assertInstanceOf(EnumerableQueryResult::class, $list, 'Expect the returned result to be an instance of '.EnumerableQueryResult::class);
+        $this->assertInstanceOf(EnumerableQueryResult::class, $list, 'Expect the returned result to be an instance of ' . EnumerableQueryResult::class);
         $this->assertSame($list->count(), 2, 'Expect the total returned row to equals 2');
         $list = $manager->select(
             [
@@ -281,8 +337,8 @@ class EloquentDMLQueryManagerTest extends TestCase
             'person_id' => $person->getKey(),
         ]);
         $profil = $this->profilFactory()->create([
-           'person_id' => $person->getKey(),
-           'url' => 'https://picsum.photos/id/1/200/300',
+            'person_id' => $person->getKey(),
+            'url' => 'https://picsum.photos/id/1/200/300',
         ]);
         $profiles = DMLManager(Profil::class)->select($profil->getKey(), ['*', 'person.addresses']);
         $this->assertSame($profiles->person->getKey(), $person->getKey());

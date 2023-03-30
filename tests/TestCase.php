@@ -116,10 +116,15 @@ class TestCase extends FrameworkTestCase
         });
 
         // #region Post - Video - Comments
+        Manager::schema()->create('post_types', function(Blueprint $table) {
+            $table->smallIncrements('id');
+            $table->string('label', 100);
+        });
         Manager::schema()->create('posts', static function (Blueprint $table) {
             $table->increments('id');
             $table->string('title');
             $table->text('body');
+            $table->unsignedSmallInteger('post_type_id')->nullable();
             $table->timestamps();
         });
 
