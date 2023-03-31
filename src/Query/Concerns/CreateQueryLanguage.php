@@ -23,13 +23,13 @@ use function Drewlabs\Packages\Database\Proxy\DMLManager;
 use Drewlabs\Packages\Database\TouchedModelRelationsHandler;
 
 /**
- * @property TransactionManagerInterface transactionManager
+ * @property TransactionManagerInterface transactions
  */
 trait CreateQueryLanguage
 {
     public function create(...$args)
     {
-        return $this->transactionManager->transaction(function () use ($args) {
+        return $this->transactions->transaction(function () use ($args) {
             return $this->overload($args, [
                 function ($attributes, \Closure $callback = null) {
                     $callback = $callback ?: static function ($param) {

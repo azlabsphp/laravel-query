@@ -95,7 +95,7 @@ final class QueryLanguage implements DMLProvider, QueryLanguageInterface
     /**
      * @var TransactionManagerInterface
      */
-    private $transactionManager;
+    private $transactions;
 
     /**
      * @param Model|string $blueprint
@@ -110,7 +110,7 @@ final class QueryLanguage implements DMLProvider, QueryLanguageInterface
         }
         $this->model = \is_string($blueprint) ? self::createResolver($blueprint)() : $blueprint;
         $this->model_class = \is_string($blueprint) ? $blueprint : \get_class($blueprint);
-        $this->transactionManager = TransactionManager::new($this->model);
+        $this->transactions = TransactionManager::new($this->model);
         $this->setBuilderFactory($this->defaultBuilderFactory());
     }
 

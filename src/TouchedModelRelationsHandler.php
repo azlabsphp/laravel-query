@@ -16,6 +16,8 @@ namespace Drewlabs\Packages\Database;
 use Closure;
 use Drewlabs\Core\Helpers\Arr;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Query\Builder;
 use LogicException;
 
 /**
@@ -57,12 +59,7 @@ class TouchedModelRelationsHandler
         if (empty($relations)) {
             return;
         }
-        // #region We filter the componsed relation from default relations to recursively set create model relations
-        $composed = array_filter($relations, function ($current) {
-            return is_string($current) && (false !== strpos($current, '.'));
-        });
-        $relations = array_diff($relations, $composed);
-        // #endregion We filter the componsed relation from default relations to recursively set create model relations
+        list($relations, $composed) = $this->groupRelations($relations);
         foreach ($relations as $relation) {
             if (!(method_exists($this->model, $relation) && !empty($attributes[$relation] ?? []))) {
                 continue;
@@ -83,11 +80,17 @@ class TouchedModelRelationsHandler
      */
     public function update(array $relations, array $attributes)
     {
+        if (empty($relations)) {
+            return;
+        }
+        // list($relations, $composed) = $this->groupRelations($relations);
         foreach ($relations as $relation) {
-            if (method_exists($this->model, $relation) && !empty($attributes[$relation] ?? [])) {
-                $this->updateRelations($this->model->$relation(), $attributes[$relation]);
+            $exists = method_exists($this->model, $relation) && !empty($attributes[$relation] ?? []);
+            if (!$exists) {
+                continue;
             }
-            continue;
+            //  $this->resolveRelations($composed, $relation)
+            $this->updateRelation($this->model->$relation(), $attributes[$relation]);
         }
     }
 
@@ -99,36 +102,39 @@ class TouchedModelRelationsHandler
      */
     public function refresh(array $relations, array $attributes)
     {
+        list($relations, $composed) = $this->groupRelations($relations);
         foreach ($relations as $relation) {
-            if (!(method_exists($this->model, $relation) && !empty($attributes[$relation] ?? []))) {
+            $exists = method_exists($this->model, $relation) && !empty($attributes[$relation] ?? []);
+            if (!$exists) {
                 continue;
             }
-            $this->refreshRelations($this->model->$relation(), $attributes[$relation]);
+            $this->refreshRelation($this->model->$relation(), $attributes[$relation], $this->resolveRelations($composed, $relation));
         }
     }
 
     /**
-     * @param mixed $nextInstance
-     *
-     * @throws \LogicException
-     *
-     * @return mixed
+     * Call update or create method on the model instance
+     * 
+     * @param Builder|Relation $query 
+     * @param array $value 
+     * @return mixed 
+     * @throws LogicException 
      */
-    private static function updateOrCreate($nextInstance, array $value = [])
+    private static function updateOrCreate($query, array $value = [])
     {
         if (1 < \count($value)) {
-            return $nextInstance->updateOrCreate(
+            return $query->updateOrCreate(
                 ...static::formatUpsertAttributes(
-                    $nextInstance,
+                    $query,
                     $value[0],
                     $value[1]
                 )
             );
         }
         if (1 === \count($value)) {
-            return $nextInstance->updateOrCreate(
+            return $query->updateOrCreate(
                 ...static::formatUpsertAttributes(
-                    $nextInstance,
+                    $query,
                     $value[0],
                     $value[0]
                 )
@@ -138,13 +144,15 @@ class TouchedModelRelationsHandler
     }
 
     /**
-     * @param mixed $nextInstance
-     *
-     * @return array
+     * Format attributes for create many query
+     * 
+     * @param Relation $instance 
+     * @param array $attributes 
+     * @return array 
      */
-    private static function formatCreateManyAttributes($nextInstance, array $attributes = [])
+    private static function formatCreateManyAttributes($instance, array $attributes = [])
     {
-        if ($nextInstance instanceof BelongsToMany) {
+        if ($instance instanceof BelongsToMany) {
             $out = [];
             foreach ($attributes as $value) {
                 $pivot = $value['pivot'] ?? $value['joining'] ?? [];
@@ -152,7 +160,6 @@ class TouchedModelRelationsHandler
                 $out[0][] = $attribute;
                 $out[1][] = $pivot;
             }
-
             return $out;
         }
 
@@ -162,7 +169,7 @@ class TouchedModelRelationsHandler
     /**
      * Format attribute before insert action
      * 
-     * @param mixed $instance 
+     * @param Relation $instance 
      * @param array $attributes 
      * @return array 
      */
@@ -174,7 +181,7 @@ class TouchedModelRelationsHandler
     /**
      * Format attribute before upserting
      * 
-     * @param mixed $instance 
+     * @param Relation $instance 
      * @param array $attributes 
      * @param array $values 
      * @return array 
@@ -185,45 +192,49 @@ class TouchedModelRelationsHandler
     }
 
     /**
-     * @param mixed $instance
-     *
-     * @throws \LogicException
-     *
-     * @return void
+     * Update model relation
+     * 
+     * @param Relation $instance 
+     * @param array $values 
+     * @param array $relations 
+     * @return void 
+     * @throws LogicException 
      */
-    private function updateRelations($instance, array $values)
+    private function updateRelation($instance, array $values)
     {
         if (Arr::isassoc($values)) {
-            $instance->update($values);
+            $this->getInstanceCopy($instance)->update($values);
             return;
         }
         foreach (Arr::isnotassoclist($values[0] ?? []) ? $values : [$values] as $value) {
-            static::updateOrCreate(clone $instance, $value);
+            static::updateOrCreate($this->getInstanceCopy($instance), $value);
         }
     }
 
     /**
-     * @param mixed $instance
-     *
-     * @return void
+     * Refresh model relations
+     * @param Relation $instance 
+     * @param array $values 
+     * @param array $relations 
+     * @return void 
      */
-    private function refreshRelations($instance, array $values)
+    private function refreshRelation($instance, array $values, array $relations = [])
     {
         if (Arr::isnotassoclist($values)) {
-            // TODO : Instead of deleting previous relation, find a best implementation
-            // that insert new instance and update existing ones
-            (clone $instance)->delete();
-            (clone $instance)->createMany(...static::formatCreateManyAttributes($instance, $values));
+            $this->getInstanceCopy($instance)->delete();
+            $this->getInstanceCopy($instance)->createMany(...static::formatCreateManyAttributes($instance, $values));
         } else {
-            (clone $instance)->delete();
-            (clone $instance)->create(...static::formatCreateAttributes($instance, $values));
+            $this->getInstanceCopy($instance)->delete();
+            $this->createOne($instance, $values, $relations);
         }
     }
 
     private function createMany($instance, array $attributes, array $relations)
     {
         foreach ($attributes as $current) {
-            $result = Arr::isnotassoclist($current) ? static::updateOrCreate(clone $instance, $current) : $instance->create(...static::formatCreateAttributes($instance, $current));
+            $result = Arr::isnotassoclist($current) ?
+                static::updateOrCreate($this->getInstanceCopy($instance), $current) :
+                $this->getInstanceCopy($instance)->create(...static::formatCreateAttributes($instance, $current));
             // Recursively execute the create implementation relations attached to the model
             self::new($result)->create($relations, $current);
         }
@@ -231,19 +242,19 @@ class TouchedModelRelationsHandler
 
     /**
      * Insert values in database in batches
-     * @param mixed $instance 
+     * @param Relation $instance 
      * @param array $attributes 
      * @return void 
      */
     private function createManyBatch($instance, array $attributes)
     {
-        $instance->createMany(...static::formatCreateManyAttributes($instance, $attributes));
+        $this->getInstanceCopy($instance)->createMany(...static::formatCreateManyAttributes($instance, $attributes));
     }
 
     /**
      * Insert row into database table
      * 
-     * @param mixed $instance 
+     * @param Relation $instance 
      * @param array $attributes 
      * @param array $relations 
      * @return void 
@@ -251,9 +262,30 @@ class TouchedModelRelationsHandler
      */
     private function createOne($instance, array $attributes, array $relations)
     {
-        $result = $instance->create(...static::formatCreateAttributes($instance, $attributes));
+        $result = $this->getInstanceCopy($instance)->create(...static::formatCreateAttributes($instance, $attributes));
         // Recursively execute the create implementation relations attached to the model
         self::new($result)->create($relations, $attributes);
+    }
+
+    /**
+     * Creates or Returns a copy of the query builder instance of the relation
+     * 
+     * @param Relation $instance 
+     * @return Builder|Relation
+     */
+    private function getInstanceCopy(Relation $instance)
+    {
+        return clone $instance;
+    }
+
+    private function groupRelations(array $relations)
+    {
+        // #region We filter the componsed relation from default relations to recursively set create model relations
+        $composed = array_filter($relations, function ($current) {
+            return is_string($current) && (false !== strpos($current, '.'));
+        });
+        // #endregion We filter the componsed relation from default relations to recursively set create model relations
+        return [array_diff($relations, $composed), $composed];
     }
 
     /**

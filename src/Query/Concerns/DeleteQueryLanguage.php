@@ -18,42 +18,28 @@ use Drewlabs\Packages\Database\Contracts\TransactionManagerInterface;
 use Drewlabs\Packages\Database\Eloquent\QueryMethod;
 
 /**
- * @property TransactionManagerInterface transactionManager
+ * @property TransactionManagerInterface transactions
  */
 trait DeleteQueryLanguage
 {
     public function delete(...$args)
     {
-        return $this->transactionManager->transaction(function () use ($args) {
+        return $this->transactions->transaction(function () use ($args) {
             return $this->overload($args, [
-                'deleteV1',
-                'deleteV2',
-                'deleteV3',
-                'deleteV4',
+                function (int $id) {
+                    return 1 === (int) $this->deleteCommand(['where' => [drewlabs_core_create_attribute_getter('model', null)($this)->getPrimaryKey(), $id]], false);
+                },
+                function (string $id) {
+                    return 1 === (int) $this->deleteCommand(['where' => [drewlabs_core_create_attribute_getter('model', null)($this)->getPrimaryKey(), $id]], false);
+                },
+                function (array $query, ?bool $batch = false) {
+                    return $this->deleteCommand($query, $batch);
+                },
+                function (FiltersInterface $query, ?bool $batch = false) {
+                    return $this->deleteCommand($query, $batch);
+                },
             ]);
         });
-    }
-
-    private function deleteV1(int $id)
-    {
-        return $this->deleteV2((string) $id);
-    }
-
-    private function deleteV2(string $id)
-    {
-        return 1 === (int) ($this->deleteV3([
-            'where' => [drewlabs_core_create_attribute_getter('model', null)($this)->getPrimaryKey(), $id],
-        ])) ? true : false;
-    }
-
-    private function deleteV3(array $query, ?bool $batch = false)
-    {
-        return $this->deleteCommand($query, $batch);
-    }
-
-    private function deleteV4(FiltersInterface $query, ?bool $batch = false)
-    {
-        return $this->deleteCommand($query, $batch);
     }
 
     private function deleteCommand($query, bool $batch = false)
