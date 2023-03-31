@@ -207,24 +207,20 @@ class ModelRelationsHandlerTest extends TestCase
             ]
         );
 
-        DMLManager(Person::class)->update(
-            $person->getKey(),
-            [
-                'addresses' => [
-                    [
-                        ['email' => 'KatherineWSykora@dayrep.com'],
-                        ['postal_code' => 'Montezuma, GA 31063', 'email' => 'LuanneCCardillo@armyspy.com'],
-                    ],
-                    [
-                        ['email' => 'lordfera2@gmail.com'],
-                        ['postal_code' => 'Longmont, CO 80501'],
-                    ],
+        DMLManager(Person::class)->update($person->getKey(), [
+            'addresses' => [
+                [
+                    ['email' => 'KatherineWSykora@dayrep.com'],
+                    ['postal_code' => 'Montezuma, GA 31063', 'email' => 'LuanneCCardillo@armyspy.com'],
+                ],
+                [
+                    ['email' => 'lordfera2@gmail.com'],
+                    ['postal_code' => 'Longmont, CO 80501'],
                 ],
             ],
-            [
-                'relations' => ['addresses'],
-            ]
-        );
+        ], [
+            'relations' => ['addresses']
+        ]);
         $this->assertTrue(
             null !== Address::where('postal_code', 'Montezuma, GA 31063')
                 ->where('email', 'LuanneCCardillo@armyspy.com')

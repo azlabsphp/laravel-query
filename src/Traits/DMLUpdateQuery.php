@@ -85,7 +85,6 @@ trait DMLUpdateQuery
         bool $batch = false
     ) {
         $attributes = $this->attributesToArray($attributes);
-
         return $batch ? $this->proxy(
             $this->prepareQueryBuilder(drewlabs_core_create_attribute_getter('model', null)($this), $query),
             EloquentQueryBuilderMethods::UPDATE,
@@ -149,7 +148,6 @@ trait DMLUpdateQuery
         $method = $params['method'];
         $upsert = $params['upsert'] ?? true;
         $isComposedMethod = Str::contains($method, '__') && \in_array(Str::split($method, '__')[0], [EloquentQueryBuilderMethods::UPDATE], true);
-
         return \is_string($method) && ((null !== ($params['relations'] ?? null)) || $isComposedMethod) ?
             $update_model_func(
                 $this,
