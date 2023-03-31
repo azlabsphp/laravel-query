@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Individual extends Model implements ORMModel
 {
-    use TraitsModel;
+    use TraitsModel, Compat;
 
     /**
      * @var array
@@ -59,10 +59,5 @@ class Individual extends Model implements ORMModel
     public function member()
     {
         return $this->morphOne(Member::class, 'distinctable');
-    }
-
-    public function getFillables()
-    {
-        return $this->getFillable();
     }
 }

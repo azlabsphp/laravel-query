@@ -17,41 +17,53 @@ use Drewlabs\Packages\Database\Contracts\ORMModel;
 use Drewlabs\Packages\Database\Traits\Model as TraitsModel;
 use Illuminate\Database\Eloquent\Model;
 
-class Profil extends Model implements ORMModel
+class PostType extends Model implements ORMModel
 {
     use TraitsModel, Compat;
 
     /**
-     * Model referenced table.
-     *
-     * @var string
+     * @var array
      */
-    protected $table = 'profiles';
+    public $relation_methods = ['posts'];
 
     /**
-     * Unique identifier of table referenced by model.
-     *
+     * @var string
+     */
+    protected $table = 'post_types';
+
+    /**
      * @var string
      */
     protected $primaryKey = 'id';
 
     /**
-     * List of fillable properties of the current model.
-     *
+     * @var array
+     */
+    protected $hidden = [];
+
+    /**
+     * @var array
+     */
+    protected $appends = [];
+
+    /**
+     * @var bool
+     */
+    public $timestamps = false;
+
+    /**
      * @var array
      */
     protected $fillable = [
-        // ... Add fillable properties
-        'url',
-        'person_id',
+        'id',
+        'label'
     ];
 
-    protected $relation_methods = [
-        'person',
-    ];
-
-    public function person()
+    /**
+     * Get all of the post type posts.
+     */
+    public function posts()
     {
-        return $this->belongsTo(Person::class, 'person_id', 'id');
+        return $this->hasMany(Post::class, 'post_type_id', 'id');
     }
 }

@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Person extends Model implements ORMModel
 {
-    use TraitsModel;
+    use TraitsModel, Compat;
 
     /**
      * Model relations definitions.

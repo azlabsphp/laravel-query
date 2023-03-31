@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Taggable extends Model implements ORMModel
 {
-    use TraitsModel;
+    use TraitsModel, Compat;
 
     /**
      * @var array
@@ -61,10 +61,5 @@ class Taggable extends Model implements ORMModel
      */
     public function tags()
     {
-    }
-
-    public function getFillables()
-    {
-        return $this->getFillable();
     }
 }

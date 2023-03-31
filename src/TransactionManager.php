@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database;
 
-use Doctrine\Common\Cache\Psr6\InvalidArgument;
 use Drewlabs\Packages\Database\Contracts\TransactionClientInterface;
 use Drewlabs\Packages\Database\Contracts\TransactionManagerInterface;
 use Drewlabs\Packages\Database\Eloquent\TransactionClient;
@@ -52,7 +51,7 @@ class TransactionManager implements TransactionManagerInterface
         if ($arg instanceof TransactionClientInterface) {
             return new static($arg);
         }
-        throw new InvalidArgument('Cannot build a transaction manager from the provided instance, '.\gettype($arg));
+        throw new \InvalidArgumentException('Cannot build a transaction manager from the provided instance, '.\gettype($arg));
     }
 
     public function transaction(\Closure $callback)

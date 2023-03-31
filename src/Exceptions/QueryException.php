@@ -13,11 +13,38 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Exceptions;
 
+use Throwable;
+
 class QueryException extends \RuntimeException
 {
-    public function __construct($message = null, $code = 500, \Throwable $trace)
+    /**
+     * 
+     * @var int|string
+     */
+    private $queryErrorCode;
+
+    /**
+     * Creates exception instance
+     * 
+     * @param string $message 
+     * @param int $code 
+     * @param null|Throwable $trace 
+     * @return void 
+     */
+    public function __construct($message = null, $code = 500, \Throwable $trace = null)
     {
         $message = $message ? sprintf('Error %d: %s', $code, $message) : sprintf('Unknown Error %d', $code);
-        parent::__construct($message, $code, $trace);
+        parent::__construct($message, 500, $trace);
+        $this->queryErrorCode = $code;
+    }
+
+    /**
+     * Returns the db query error code
+     * 
+     * @return int|string 
+     */
+    public function getQueryErrorCode()
+    {
+        return $this->queryErrorCode;
     }
 }

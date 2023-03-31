@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Comment extends Model implements ORMModel
 {
-    use TraitsModel;
+    use TraitsModel, Compat;
 
     /**
      * @var array
@@ -62,10 +62,5 @@ class Comment extends Model implements ORMModel
     public function commentable()
     {
         return $this->morphTo();
-    }
-
-    public function getFillables()
-    {
-        return $this->getFillable();
     }
 }

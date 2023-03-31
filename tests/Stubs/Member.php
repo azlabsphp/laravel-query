@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Member extends Model implements ORMModel
 {
-    use TraitsModel;
+    use TraitsModel, Compat;
 
     /**
      * @var array
@@ -61,10 +61,5 @@ class Member extends Model implements ORMModel
     public function distinctable()
     {
         return $this->morphTo(__FUNCTION__, 'distinctable_type', 'distinctable_id');
-    }
-
-    public function getFillables()
-    {
-        return $this->getFillable();
     }
 }

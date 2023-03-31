@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class PersonManager extends Model implements ORMModel
 {
-    use TraitsModel;
+    use TraitsModel, Compat;
 
     /**
      * @var array
@@ -70,10 +70,5 @@ class PersonManager extends Model implements ORMModel
     public function manager()
     {
         return $this->belongsTo(Manager::class, 'manager_id', 'id');
-    }
-
-    public function getFillables()
-    {
-        return $this->getFillable();
     }
 }

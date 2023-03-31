@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Address extends Model implements ORMModel
 {
-    use TraitsModel;
+    use TraitsModel, Compat;
 
     /**
      * Model referenced table.
@@ -52,9 +52,4 @@ class Address extends Model implements ORMModel
         'email',
         'person_id',
     ];
-
-    public function getFillables()
-    {
-        return $this->getFillable();
-    }
 }

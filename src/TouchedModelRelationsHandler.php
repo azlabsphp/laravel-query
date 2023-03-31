@@ -13,9 +13,10 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database;
 
+use Closure;
 use Drewlabs\Core\Helpers\Arr;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use LogicException;
 
 /**
  * The goal of the model relation handler implementation class is to
@@ -53,17 +54,25 @@ class TouchedModelRelationsHandler
      */
     public function create(array $relations, array $attributes = [], bool $batch = false)
     {
+        if (empty($relations)) {
+            return;
+        }
+        // #region We filter the componsed relation from default relations to recursively set create model relations
+        $composed = array_filter($relations, function ($current) {
+            return is_string($current) && (false !== strpos($current, '.'));
+        });
+        $relations = array_diff($relations, $composed);
+        // #endregion We filter the componsed relation from default relations to recursively set create model relations
         foreach ($relations as $relation) {
             if (!(method_exists($this->model, $relation) && !empty($attributes[$relation] ?? []))) {
                 continue;
             }
             Arr::isnotassoclist($attributes[$relation] ?? []) ?
-                (
-                    $batch ?
+                ($batch ?
                     $this->createManyBatch($this->model->$relation(), $attributes[$relation]) :
-                    $this->createMany($this->model->$relation(), $attributes[$relation])
+                    $this->createMany($this->model->$relation(), $attributes[$relation], $this->resolveRelations($composed, $relation))
                 ) :
-                $this->createOne($this->model->$relation(), $attributes[$relation]);
+                $this->createOne($this->model->$relation(), $attributes[$relation], $this->resolveRelations($composed, $relation));
         }
     }
 
@@ -75,10 +84,10 @@ class TouchedModelRelationsHandler
     public function update(array $relations, array $attributes)
     {
         foreach ($relations as $relation) {
-            if (!(method_exists($this->model, $relation) && !empty($attributes[$relation] ?? []))) {
-                continue;
+            if (method_exists($this->model, $relation) && !empty($attributes[$relation] ?? [])) {
+                $this->updateRelations($this->model->$relation(), $attributes[$relation]);
             }
-            $this->updateRelations($this->model->$relation(), $attributes[$relation]);
+            continue;
         }
     }
 
@@ -125,7 +134,7 @@ class TouchedModelRelationsHandler
                 )
             );
         }
-        throw new \LogicException('Expected '.__METHOD__.' to receive an array of 1 or 2 array values');
+        throw new \LogicException('Expected ' . __METHOD__ . ' to receive an array of 1 or 2 array values');
     }
 
     /**
@@ -151,37 +160,28 @@ class TouchedModelRelationsHandler
     }
 
     /**
-     * @param mixed $nextInstance
-     *
-     * @return array
+     * Format attribute before insert action
+     * 
+     * @param mixed $instance 
+     * @param array $attributes 
+     * @return array 
      */
-    private static function formatCreateAttributes($nextInstance, array $attributes = [])
+    private static function formatCreateAttributes($instance, array $attributes = [])
     {
-        if ($nextInstance instanceof BelongsToMany) {
-            $pivot = $attributes['pivot'] ?? $attributes['joining'] ?? [];
-            $attribute = Arr::except($attributes, ['pivot', 'joining']);
-
-            return [$attribute, $pivot];
-        }
-
-        return [$attributes];
+        return $instance instanceof BelongsToMany ? [Arr::except($attributes, ['pivot', 'joining']), $attributes['pivot'] ?? $attributes['joining'] ?? []] : [$attributes];
     }
 
     /**
-     * @param mixed $nextInstance
-     *
-     * @return array
+     * Format attribute before upserting
+     * 
+     * @param mixed $instance 
+     * @param array $attributes 
+     * @param array $values 
+     * @return array 
      */
-    private static function formatUpsertAttributes($nextInstance, array $attributes, array $values = [])
+    private static function formatUpsertAttributes($instance, array $attributes, array $values = [])
     {
-        if ($nextInstance instanceof BelongsToMany) {
-            $pivot = $values['pivot'] ?? $values['joining'] ?? [];
-            $attribute = Arr::except($values, ['pivot', 'joining']);
-
-            return [$attributes, $attribute, $pivot];
-        }
-
-        return [$attributes, $values];
+        return $instance instanceof BelongsToMany ? [$attributes, Arr::except($values, ['pivot', 'joining']), $values['pivot'] ?? $values['joining'] ?? []] : [$attributes, $values];
     }
 
     /**
@@ -195,11 +195,9 @@ class TouchedModelRelationsHandler
     {
         if (Arr::isassoc($values)) {
             $instance->update($values);
-            // We return after calling update on the child model
             return;
         }
-        $values = Arr::isnotassoclist($values[0] ?? []) ? $values : [$values];
-        foreach ($values as $value) {
+        foreach (Arr::isnotassoclist($values[0] ?? []) ? $values : [$values] as $value) {
             static::updateOrCreate(clone $instance, $value);
         }
     }
@@ -222,25 +220,72 @@ class TouchedModelRelationsHandler
         }
     }
 
-    private function createMany($instance, array $attributes)
+    private function createMany($instance, array $attributes, array $relations)
     {
-        return new Collection(
-            array_map(static function ($current) use ($instance) {
-                // When looping through relation values, if the element is an array list
-                // update or create the relation
-                return Arr::isnotassoclist($current) ?
-                    static::updateOrCreate(clone $instance, $current) : (clone $instance)->create(...static::formatCreateAttributes($instance, $current));
-            }, $attributes)
-        );
+        foreach ($attributes as $current) {
+            $result = Arr::isnotassoclist($current) ? static::updateOrCreate(clone $instance, $current) : $instance->create(...static::formatCreateAttributes($instance, $current));
+            // Recursively execute the create implementation relations attached to the model
+            self::new($result)->create($relations, $current);
+        }
     }
 
+    /**
+     * Insert values in database in batches
+     * @param mixed $instance 
+     * @param array $attributes 
+     * @return void 
+     */
     private function createManyBatch($instance, array $attributes)
     {
-        (clone $instance)->createMany(...static::formatCreateManyAttributes($instance, $attributes));
+        $instance->createMany(...static::formatCreateManyAttributes($instance, $attributes));
     }
 
-    private function createOne($instance, array $attributes)
+    /**
+     * Insert row into database table
+     * 
+     * @param mixed $instance 
+     * @param array $attributes 
+     * @param array $relations 
+     * @return void 
+     * @throws LogicException 
+     */
+    private function createOne($instance, array $attributes, array $relations)
     {
-        (clone $instance)->create(...static::formatCreateAttributes($instance, $attributes));
+        $result = $instance->create(...static::formatCreateAttributes($instance, $attributes));
+        // Recursively execute the create implementation relations attached to the model
+        self::new($result)->create($relations, $attributes);
+    }
+
+    /**
+     * Get relations that has the $relation value as parent relation 
+     * 
+     * @param array $relations 
+     * @param mixed $relation 
+     * @return array 
+     */
+    private function resolveRelations(array $relations, string $relation)
+    {
+        return iterator_to_array($this->findAll($relations, function ($iterator) use ($relation) {
+            return "$relation." === substr($iterator, 0, strlen("$relation."));
+        }, function ($value) use ($relation) {
+            return substr($value, strlen("$relation."));
+        }));
+    }
+
+    /**
+     * Find all values matching user provided callback
+     * 
+     * @param array $list 
+     * @param Closure(T $value, $key):bool $callback 
+     * @param Closure(T $value, $key):mixed $callback
+     * @return \Traversable<T>
+     */
+    private function findAll(array $list, \Closure $callback, \Closure $project = null)
+    {
+        foreach ($list as $key => $value) {
+            if ($callback($value, $key)) {
+                yield $key => $project ? $project($value) : $value;
+            }
+        }
     }
 }

@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Tag extends Model implements ORMModel
 {
-    use TraitsModel;
+    use TraitsModel, Compat;
 
     /**
      * @var array
@@ -68,10 +68,5 @@ class Tag extends Model implements ORMModel
     public function videos()
     {
         return $this->morphedByMany(Video::class, 'taggable');
-    }
-
-    public function getFillables()
-    {
-        return $this->getFillable();
     }
 }

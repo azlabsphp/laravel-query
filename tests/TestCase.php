@@ -16,12 +16,12 @@ namespace Drewlabs\Packages\Database\Tests;
 use Drewlabs\Contracts\Data\Filters\FiltersInterface;
 use Drewlabs\Contracts\Data\Parser\ModelAttributeParser as ModelAttributesParserContract;
 use Drewlabs\Packages\Database\Contracts\TransactionUtils;
+use Drewlabs\Packages\Database\DatabaseTransactionManager;
+use Drewlabs\Packages\Database\EloquentBuilderQueryFilters;
 use Drewlabs\Packages\Database\ModelAttributesParser;
-use Drewlabs\Packages\Database\QueryFilters;
 use Drewlabs\Packages\Database\Tests\Stubs\Address;
 use Drewlabs\Packages\Database\Tests\Stubs\Person;
 use Drewlabs\Packages\Database\Tests\Stubs\Profil;
-use Drewlabs\Packages\Database\TransactionManager;
 use Illuminate\Container\Container;
 use Illuminate\Database\Capsule\Manager;
 use Illuminate\Database\Connectors\ConnectionFactory;
@@ -209,9 +209,9 @@ class TestCase extends FrameworkTestCase
             return new DatabaseManager($app, $app['db.factory']);
         });
         $app->singleton(TransactionUtils::class, static function ($app) {
-            return new TransactionManager();
+            return new DatabaseTransactionManager();
         });
-        $app->bind(FiltersInterface::class, QueryFilters::class);
+        $app->bind(FiltersInterface::class, EloquentBuilderQueryFilters::class);
         $app->bind(ModelAttributesParserContract::class, ModelAttributesParser::class);
     }
 

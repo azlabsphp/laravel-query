@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Post extends Model implements ORMModel
 {
-    use TraitsModel;
+    use TraitsModel, Compat;
 
     /**
      * @var array
@@ -53,6 +53,7 @@ class Post extends Model implements ORMModel
         'id',
         'body',
         'title',
+        'post_type_id'
     ];
 
     /**
@@ -69,10 +70,5 @@ class Post extends Model implements ORMModel
     public function tags()
     {
         return $this->morphToMany(Tag::class, 'taggable');
-    }
-
-    public function getFillables()
-    {
-        return $this->getFillable();
     }
 }
