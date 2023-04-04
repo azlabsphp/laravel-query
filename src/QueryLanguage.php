@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database;
 
+use BadMethodCallException;
 use Closure;
 use Drewlabs\Contracts\Data\DML\DMLProvider;
 use Drewlabs\Contracts\Data\Filters\FiltersInterface;
@@ -31,6 +32,8 @@ use Drewlabs\Packages\Database\Query\Concerns\UpdateQueryLanguage;
 use Drewlabs\Packages\Database\Traits\ContainerAware;
 use Drewlabs\Support\Traits\MethodProxy;
 use Drewlabs\Support\Traits\Overloadable;
+use InvalidArgumentException;
+use Error;
 
 /**
  * @method \Drewlabs\Contracts\Data\Model\Model|mixed           create(array $attributes, \Closure $callback = null)
@@ -136,19 +139,41 @@ final class QueryLanguage implements DMLProvider, QueryLanguageInterface
         );
     }
 
-    public function aggregate(array $query = [], string $aggregation = AggregationMethods::COUNT)
+    /**
+     * Provides an aggregation interface definition
+     * 
+     * @param array $query 
+     * @param string $aggregation 
+     * @param mixed $args 
+     * @return int|mixed 
+     * @throws InvalidArgumentException 
+     * @throws Error 
+     * @throws BadMethodCallException 
+     */
+    public function aggregate(array $query = [], string $aggregation = AggregationMethods::COUNT, ...$args)
     {
         if (!\in_array($aggregation, static::AGGREGATE_METHODS, true)) {
             throw new \InvalidArgumentException('The provided method is not part of the aggregation framework supported methods');
         }
         $model = drewlabs_core_create_attribute_getter('model', null)($this);
 
-        return $this->proxy($this->builderFactory()($model, $query), $aggregation, []);
+        return $this->proxy($this->builderFactory()($model, $query), $aggregation, [...$args]);
     }
 
-    public function selectAggregate(array $query = [], string $aggregation = AggregationMethods::COUNT)
+    /**
+     * Provides an aggregation interface implementation
+     * 
+     * @param array $query 
+     * @param string $aggregation 
+     * @param mixed $args 
+     * @return int|mixed 
+     * @throws InvalidArgumentException 
+     * @throws Error 
+     * @throws BadMethodCallException 
+     */
+    public function selectAggregate(array $query = [], string $aggregation = AggregationMethods::COUNT, ...$args)
     {
-        return $this->aggregate($query, $aggregation);
+        return $this->aggregate($query, $aggregation, ...$args);
     }
 
     /**

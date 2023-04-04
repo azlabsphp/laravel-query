@@ -70,8 +70,8 @@ trait Queryable
         return DMLManager($this->getModel())->update(...$args);
     }
 
-    public function aggregate(array $query = [], string $method = 'count')
+    public function aggregate(array $query = [], string $method = 'count', ...$args)
     {
-        return DMLManager($this->getModel())->selectAggregate($query, $method);
+        return DMLManager($this->getModel())->aggregate($query, $method, ...$args);
     }
 }

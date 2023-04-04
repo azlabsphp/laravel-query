@@ -227,6 +227,11 @@ class QueryableTest extends TestCase
         $this->assertSame(2, $this->getQueryable()->aggregate([], AggregationMethods::COUNT));
     }
 
+    public function test_select_aggregate_sum()
+    {
+        $this->assertSame(52, $this->getQueryable()->aggregate([], AggregationMethods::SUM, 'age'));
+    }
+
     private function getQueryable()
     {
         return new PersonViewModelStub();

@@ -65,8 +65,11 @@ interface QueryLanguageInterface
 
     /**
      * Run an aggregation method on a query builder result.
-     *
-     * @return int|mixed
+     * 
+     * @param array $query 
+     * @param string $aggregation 
+     * @param mixed ...$args 
+     * @return mixed 
      */
-    public function aggregate(array $query = [], string $aggregation = 'count');
+    public function aggregate(array $query = [], string $aggregation = 'count', ...$args);
 }
