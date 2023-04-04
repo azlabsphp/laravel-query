@@ -75,3 +75,7 @@
 ## [2.5.4] 2023-03-24
 
 - Bug fix in QueryColumns asTuple implementatation
+
+## [2.7.1] 2023-04-04
+
+- Fixed bug adding support for parameters in aggregation function
