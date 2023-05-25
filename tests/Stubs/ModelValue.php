@@ -18,6 +18,7 @@ use Drewlabs\Packages\Database\Traits\URLRoutableModelAware;
 class ModelValue
 {
     use URLRoutableModelAware;
+
     private $model;
 
     public function __construct($model = null)

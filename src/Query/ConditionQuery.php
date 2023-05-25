@@ -16,8 +16,6 @@ namespace Drewlabs\Packages\Database\Query;
 use Drewlabs\Contracts\Data\Parser\QueryParser;
 use Drewlabs\Core\Helpers\Iter;
 
-use function Drewlabs\Packages\Database\Proxy\QueryParam;
-
 class ConditionQuery implements QueryParser
 {
     public function parse(array $params)
@@ -45,9 +43,7 @@ class ConditionQuery implements QueryParser
         // Insure that where not working with associative arrays
         $params = array_values($params);
         // If the first value of the array is an array, parse it else return it
-        $params[0] = \is_array($params[0]) && (isset($params[0]['model']) && $params[0]['column']) ?
-            (string) QueryParam($params[0]) :
-            $params[0];
+        $params[0] = \is_array($params[0]) && (isset($params[0]['model']) && $params[0]['column']) ? (new QueryAttribute($params[0]))->__toString() : $params[0];
 
         return $params;
     }

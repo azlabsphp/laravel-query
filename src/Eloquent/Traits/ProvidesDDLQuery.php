@@ -27,12 +27,12 @@ trait ProvidesDDLQuery
      */
     public static function tableExists()
     {
-        $self = self::newInstanceWithoutConstructor();
+        $instance = self::newInstanceWithoutConstructor();
 
-        return $self
+        return $instance
             ->getConnection()
             ->getSchemaBuilder()
-            ->hasTable($self->getTable());
+            ->hasTable($instance->getTable());
     }
 
     /**
@@ -45,12 +45,12 @@ trait ProvidesDDLQuery
      */
     public static function hasColumn(string $column)
     {
-        $self = self::newInstanceWithoutConstructor();
+        $instance = self::newInstanceWithoutConstructor();
 
-        return $self
+        return $instance
             ->getConnection()
             ->getSchemaBuilder()
-            ->hasColumn($self->getTable(), $column);
+            ->hasColumn($instance->getTable(), $column);
     }
 
     /**
@@ -65,12 +65,12 @@ trait ProvidesDDLQuery
      */
     public static function hasColumns($columns = [])
     {
-        $self = self::newInstanceWithoutConstructor();
+        $instance = self::newInstanceWithoutConstructor();
 
-        return $self
+        return $instance
             ->getConnection()
             ->getSchemaBuilder()
-            ->hasColumns($self->getTable(), \is_array($columns) ? $columns : \func_get_args());
+            ->hasColumns($instance->getTable(), \is_array($columns) ? $columns : \func_get_args());
     }
 
     /**
