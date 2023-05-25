@@ -319,6 +319,12 @@ class EloquentDMLQueryManagerTest extends TestCase
         $this->assertSame(2, $manager->selectAggregate([], AggregationMethods::COUNT));
     }
 
+    public function test_select_aggregate_sum()
+    {
+        $manager = DMLManager(Person::class);
+        $this->assertSame(52, $manager->selectAggregate([], AggregationMethods::SUM, 'age'));
+    }
+
     public function test_select_relations_as_columns()
     {
         $person = $this->personFactory()->create([

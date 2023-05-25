@@ -119,8 +119,7 @@ class QueryFiltersBuilder
     }
 
     /**
-     * Creates Query filters from parameter bag. The parameter bag can be
-     * an instance of {@see \Drewlabs\Contracts\Validator\ViewModel}|Laravel Http
+     * Creates Query filters from parameter bag
      * request.
      *
      * @param mixed $parametersBag

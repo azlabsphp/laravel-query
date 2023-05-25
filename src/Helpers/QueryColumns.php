@@ -37,7 +37,6 @@ class QueryColumns
             if (Str::contains($relation, '.')) {
                 return \in_array(Str::before('.', $relation), $top_level_relations, true) || \in_array($relation, $model_relations, true);
             }
-
             return \in_array($relation, $top_level_relations, true);
         });
         // Create the actual list of model column to be selected from the database
