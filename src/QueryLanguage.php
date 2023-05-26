@@ -112,7 +112,7 @@ final class QueryLanguage implements QueryLanguageInterface
         }
         $this->queryable = \is_string($blueprint) ? new $blueprint() : $blueprint;
         $this->blueprint = \is_string($blueprint) ? $blueprint : \get_class($blueprint);
-        $this->transactions = new TransactionManager(new TransactionClient($this->queryable));
+        $this->transactions = new TransactionManager(new TransactionClient($this->queryable->getConnection()));
         $this->setBuilderFactory($this->defaultBuilderFactory());
     }
 
