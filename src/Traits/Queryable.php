@@ -15,7 +15,7 @@ namespace Drewlabs\Packages\Database\Traits;
 
 use Drewlabs\Core\Helpers\Arr;
 
-trait Model
+trait Queryable
 {
     public function getRelations()
     {
@@ -30,16 +30,7 @@ trait Model
     public function setKey($value)
     {
         $this->{$this->getPrimaryKey()} = $value;
-
         return $this;
-    }
-
-    /**
-     * @deprecated v2.x.0 use {@see getDeclaredRelations()} instead
-     */
-    public function getModelRelationLoadersNames()
-    {
-        return $this->getDeclaredRelations();
     }
 
     public function getDeclaredRelations()
@@ -51,11 +42,7 @@ trait Model
     {
         // Get table primary key
         $primaryKey = $this->getPrimaryKey();
-        if (\is_bool($primaryKey)) {
-            print_r(__CLASS__);
-            exit();
-        }
-        // Get list of fillables
+
         return Arr::unique(array_merge(
             $this->getFillable() ?? [],
             $this->getGuarded() ?? [],

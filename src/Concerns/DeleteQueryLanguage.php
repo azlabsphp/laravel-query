@@ -11,11 +11,10 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Database\Query\Concerns;
+namespace Drewlabs\Packages\Concerns;
 
-use Drewlabs\Contracts\Data\Filters\FiltersInterface;
-use Drewlabs\Packages\Database\Contracts\TransactionManagerInterface;
-use Drewlabs\Packages\Database\Eloquent\QueryMethod;
+use Drewlabs\Query\Contracts\FiltersInterface;
+use Drewlabs\Query\Contracts\TransactionManagerInterfac;
 
 /**
  * @property TransactionManagerInterface transactions
@@ -27,10 +26,10 @@ trait DeleteQueryLanguage
         return $this->transactions->transaction(function () use ($args) {
             return $this->overload($args, [
                 function (int $id) {
-                    return 1 === (int) $this->deleteCommand(['where' => [drewlabs_core_create_attribute_getter('model', null)($this)->getPrimaryKey(), $id]], false);
+                    return 1 === (int) $this->deleteCommand(['where' => [$this->queryable->getPrimaryKey(), $id]], false);
                 },
                 function (string $id) {
-                    return 1 === (int) $this->deleteCommand(['where' => [drewlabs_core_create_attribute_getter('model', null)($this)->getPrimaryKey(), $id]], false);
+                    return 1 === (int) $this->deleteCommand(['where' => [$this->queryable->getPrimaryKey(), $id]], false);
                 },
                 function (array $query, ?bool $batch = false) {
                     return $this->deleteCommand($query, $batch);
@@ -44,14 +43,9 @@ trait DeleteQueryLanguage
 
     private function deleteCommand($query, bool $batch = false)
     {
-        return $batch ? $this->proxy(
-            $this->builderFactory()(drewlabs_core_create_attribute_getter('model', null)($this), $query),
-            QueryMethod::DELETE,
-            []
-        ) : array_reduce($this->select($query)->all(), function ($carry, $value) {
-            $this->proxy($value, QueryMethod::DELETE, []);
+        return $batch ? $this->builderFactory()($this->queryable, $query)->delete() : array_reduce($this->select($query)->all(), function ($carry, $instance) {
+            $instance->delete();
             ++$carry;
-
             return $carry;
         }, 0);
     }

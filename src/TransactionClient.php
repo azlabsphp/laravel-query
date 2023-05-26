@@ -11,9 +11,9 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Database\Eloquent;
+namespace Drewlabs\Packages\Database;
 
-use Drewlabs\Packages\Database\Contracts\TransactionClientInterface;
+use Drewlabs\Query\Contracts\TransactionClientInterface;
 use Illuminate\Database\ConnectionInterface;
 
 class TransactionClient implements TransactionClientInterface

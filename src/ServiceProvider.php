@@ -13,7 +13,8 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database;
 
-use Drewlabs\Contracts\Data\Filters\FiltersInterface;
+use Drewlabs\Packages\Database\Eloquent\QueryFilters;
+use Drewlabs\Query\Contracts\FiltersInterface;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
 class ServiceProvider extends BaseServiceProvider

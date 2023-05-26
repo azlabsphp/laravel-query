@@ -38,7 +38,6 @@ trait HasHiddenAttributes
     public function setHidden(array $attributes)
     {
         $this->hidden = $attributes;
-
         return $this;
     }
 }

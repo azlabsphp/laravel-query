@@ -11,14 +11,18 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Database\Eloquent\Traits;
+namespace Drewlabs\Packages\Database;
 
+use Drewlabs\Query\Contracts\FiltersInterface;
+use Drewlabs\Query\JoinQuery;
 use Drewlabs\Core\Helpers\Arr;
-use Drewlabs\Packages\Database\Query\ConditionQuery;
+use Drewlabs\Query\ConditionQuery;
 use Illuminate\Contracts\Database\Query\Builder;
 
-trait QueryFilters
+
+final class EloquentQueryFilters implements FiltersInterface
 {
+
     /**
      * Query filters dictionary.
      *
@@ -32,6 +36,16 @@ trait QueryFilters
      * @var object
      */
     private $model;
+
+    /**
+     * Creates class instance
+     * 
+     * @param array|null $filters 
+     */
+    public function __construct(array $filters = null)
+    {
+        $this->setQueryFilters($filters ?? []);
+    }
 
     public function apply($builder)
     {
@@ -58,7 +72,7 @@ trait QueryFilters
             return $builder->where($filter);
         }
 
-        return Arr::isList($result = (new ConditionQuery())->parse($filter)) ? array_reduce($result, static function ($builder, array $query) {
+        return Arr::isList($result = (new ConditionQuery())->compile($filter)) ? array_reduce($result, static function ($builder, array $query) {
             return \is_array($query) ? $builder->where(...array_values($query)) : $builder->where($query);
         }, $builder) : $builder->where(...$result);
     }
@@ -153,8 +167,8 @@ trait QueryFilters
         if ($filter instanceof \Closure) {
             return $builder->where($filter);
         }
-        
-        return Arr::isList($result = (new ConditionQuery())->parse($filter)) ? array_reduce($result, static function ($builder, array $query) {
+
+        return Arr::isList($result = (new ConditionQuery())->compile($filter)) ? array_reduce($result, static function ($builder, array $query) {
             // In case the internal query is not an array, we simply pass it to the illuminate query builder
             // Which may throws if the parameters are not supported
             return \is_array($query) ? $builder->orWhere(...array_values($query)) : $builder->orWhere($query);
@@ -234,7 +248,7 @@ trait QueryFilters
 
     private function sqlApplyJoinQueries($builder, $filter, $method = 'join')
     {
-        $result = $this->joinQuery->parse($filter);
+        $result = (new JoinQuery)->compile($filter);
         $result = Arr::isList($result) ? $result : [$result];
         foreach ($result as $value) {
             $builder = $builder->{$method}(...$value);
@@ -294,5 +308,15 @@ trait QueryFilters
     public function limit($builder, int $limit)
     {
         return $builder->limit($limit);
+    }
+
+    public function __call(string $method, $builder, $args)
+    {
+        // TODO : Provide implementation
+    }
+
+    public function invoke(string $method, $builder, $args)
+    {
+        // TODO : Provide implementation
     }
 }

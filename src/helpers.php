@@ -11,13 +11,13 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-use Drewlabs\Contracts\Data\EnumerableQueryResult as ContractsEnumerableQueryResult;
+use Drewlabs\Query\Contracts\EnumerableResultInterface;
 use Drewlabs\Core\Helpers\Arr;
 use Drewlabs\Core\Helpers\Iter;
-use Drewlabs\Packages\Database\EnumerableQueryResult;
+use Drewlabs\Query\EnumerableResult;
 
 use function Drewlabs\Support\Proxy\Collection;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator as ContractsLengthAwarePaginator;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator as AbstractLengthAwarePaginator;
 use Illuminate\Contracts\Pagination\Paginator;
 
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -58,7 +58,7 @@ if (!function_exists('drewlabs_database_paginator_apply_to_all')) {
     {
         return new LengthAwarePaginator(
             call_user_func($callback, collect($item->items())),
-            $item instanceof ContractsLengthAwarePaginator ? $item->total() : count($transformed ?? []),
+            $item instanceof AbstractLengthAwarePaginator ? $item->total() : count($transformed ?? []),
             $item->perPage(),
             $item->currentPage(),
             [
@@ -76,25 +76,23 @@ if (!function_exists('drewlabs_database_map_query_result')) {
     /**
      * Apply transformation to response object on a get all request.
      *
-     * @param Paginator|ContractsEnumerableQueryResult $item
+     * @param Paginator|EnumerableResultInterface $item
      *
      * @return mixed
      */
     function drewlabs_database_map_query_result($item, callable $callback)
     {
-        $item = $item instanceof ContractsEnumerableQueryResult ? $item->getCollection() : $item;
+        $item = $item instanceof EnumerableResultInterface ? $item->getCollection() : $item;
         if (is_array($item)) {
             $item = Collection($item['data'] ?? []);
         }
         if ($item instanceof Paginator) {
             return drewlabs_database_paginator_apply_callback($item, $callback);
         }
-        return new EnumerableQueryResult(
-            $item->map($callback)
-                ->filter(static function ($current) {
-                    return isset($current);
-                })
-        );
+        return new EnumerableResult($item->map($callback)
+            ->filter(static function ($current) {
+                return isset($current);
+            }));
     }
 }
 
@@ -104,11 +102,11 @@ if (!function_exists('drewlabs_database_apply')) {
      *
      * @param Paginator|array|mixed $item
      *
-     * @return Paginator|ContractsEnumerableQueryResult
+     * @return Paginator|EnumerableResultInterface
      */
     function drewlabs_database_apply($item, callable $callback)
     {
-        $item = $item instanceof ContractsEnumerableQueryResult ? $item->getCollection() : $item;
+        $item = $item instanceof EnumerableResultInterface ? $item->getCollection() : $item;
         if (is_array($item)) {
             $item = Collection($item['data'] ?? []);
         }
@@ -116,9 +114,7 @@ if (!function_exists('drewlabs_database_apply')) {
             return drewlabs_database_paginator_apply_to_all($item, $callback);
         }
 
-        return new EnumerableQueryResult(
-            call_user_func($callback, null === $item ? Collection($item) : $item)
-        );
+        return new EnumerableResult(call_user_func($callback, null === $item ? Collection($item) : $item));
     }
 }
 

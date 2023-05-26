@@ -13,11 +13,11 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Tests\Stubs;
 
-use Drewlabs\Packages\Database\Traits\URLRoutableModelAware;
+use Drewlabs\Packages\Database\Traits\URLRoutableAware;
 
 class ModelValue
 {
-    use URLRoutableModelAware;
+    use URLRoutableAware;
 
     private $model;
 

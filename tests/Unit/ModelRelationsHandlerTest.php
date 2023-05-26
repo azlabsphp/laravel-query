@@ -23,7 +23,7 @@ use Drewlabs\Packages\Database\Tests\Stubs\Person;
 use Drewlabs\Packages\Database\Tests\Stubs\Post;
 use Drewlabs\Packages\Database\Tests\Stubs\Video;
 use Drewlabs\Packages\Database\Tests\TestCase;
-use Drewlabs\Packages\Database\TouchedModelRelationsHandler;
+use Drewlabs\Packages\Database\QueryableRelations;
 
 use Illuminate\Database\Eloquent\Collection;
 
@@ -40,7 +40,7 @@ class ModelRelationsHandlerTest extends TestCase
             'address' => '1237 McDonald Avenue',
             'sex' => 'M',
         ]);
-        $model = TouchedModelRelationsHandler::new($model)->create(['member'], [
+        $model = QueryableRelations::new($model)->create(['member'], [
             'firstname' => 'David',
             'lastname' => 'P. Thompson',
             'address' => '1237 McDonald Avenue',
@@ -63,7 +63,7 @@ class ModelRelationsHandlerTest extends TestCase
             'label' => 'AZLAB\'s Ltd.',
             'address' => '3378 West Fork Drive',
         ]);
-        $model = TouchedModelRelationsHandler::new($model)->create(['member'], [
+        $model = QueryableRelations::new($model)->create(['member'], [
             'label' => 'AZLAB\'s Ltd.',
             'address' => '3378 West Fork Drive',
             'member' => [
@@ -81,7 +81,7 @@ class ModelRelationsHandlerTest extends TestCase
             'title' => 'Lorem Ipsum is simply dummy text of the printing and typesetting industry',
             'body' => 'Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.',
         ]);
-        TouchedModelRelationsHandler::new($post)->create(['comments'], [
+        QueryableRelations::new($post)->create(['comments'], [
             'comments' => [
                 [
                     'body' => 'it is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using \'Content here, content here\', making it look like readable English.',
@@ -102,7 +102,7 @@ class ModelRelationsHandlerTest extends TestCase
             'url' => 'https://tinyurl.com/2p99ztyj',
         ]);
 
-        TouchedModelRelationsHandler::new($video)->create(['comments'], [
+        QueryableRelations::new($video)->create(['comments'], [
             'comments' => [
                 [
                     'body' => 'Contrary to popular belief, Lorem Ipsum is not simply random text. It has roots in a piece of classical Latin literature from 45 BC, making it over 2000 years old',
@@ -123,7 +123,7 @@ class ModelRelationsHandlerTest extends TestCase
             'title' => 'Lorem Ipsum is simply dummy text of the printing and typesetting industry',
             'body' => 'Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.',
         ]);
-        TouchedModelRelationsHandler::new($post)->create(['tags'], [
+        QueryableRelations::new($post)->create(['tags'], [
             'tags' => [
                 [
                     'name' => 'warning',
@@ -155,7 +155,7 @@ class ModelRelationsHandlerTest extends TestCase
             'address' => '1237 McDonald Avenue',
             'sex' => 'M',
         ]);
-        TouchedModelRelationsHandler::new($model)->create(['member'], [
+        QueryableRelations::new($model)->create(['member'], [
             'firstname' => 'David',
             'lastname' => 'P. Thompson',
             'address' => '1237 McDonald Avenue',
@@ -165,7 +165,7 @@ class ModelRelationsHandlerTest extends TestCase
                 'email' => 'DavidPThompson@dayrep.com',
             ],
         ]);
-        TouchedModelRelationsHandler::new($model)->update(['member'], [
+        QueryableRelations::new($model)->update(['member'], [
             'member' => [
                 'email' => 'KatherineWSykora@dayrep.com',
             ],

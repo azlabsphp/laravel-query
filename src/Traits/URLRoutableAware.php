@@ -13,16 +13,15 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Traits;
 
-trait URLRoutableModelAware
-{
-    use ContainerAware;
+use Illuminate\Contracts\Routing\UrlRoutable;
 
+trait URLRoutableAware
+{
     public function getRouteKey()
     {
         if ($instance = $this->getInstance()) {
             return $instance->getRouteKey();
         }
-
         return null;
     }
 
@@ -31,7 +30,6 @@ trait URLRoutableModelAware
         if ($instance = $this->getInstance()) {
             return $instance->getRouteKeyName();
         }
-
         return null;
     }
 
@@ -44,45 +42,28 @@ trait URLRoutableModelAware
     {
         if ($instance = $this->getInstance()) {
             $value = $instance->resolveRouteBinding($value, $field);
-
             return $value ? new self($value) : $value;
         }
 
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @return self|null
-     */
     public function resolveChildRouteBinding($childType, $value, $field)
     {
         if ($instance = $this->getInstance()) {
             $value = $instance->resolveChildRouteBinding($childType, $value, $field);
-
             return $value ? new self($value) : $value;
         }
 
         return null;
     }
 
-    /**
-     * @return \Illuminate\Contracts\Routing\UrlRoutable|mixed|null
-     */
     protected function getInstance()
     {
-        // We assume composition class provide a getModel() method declaration
-        // If `getModel()` method does not exists, instead of failing with a BadMethodAllocation
-        // We simply returns null
         try {
-            $value = $this->getModel();
-            $implementation = \Illuminate\Contracts\Routing\UrlRoutable::class;
-
-            return (null === $value) || !($value instanceof $implementation) ? null : $value;
+            return (null === $value = $this->getModel()) || !($value instanceof UrlRoutable) ? null : $value;
         } catch (\Exception $e) {
             trigger_error(sprintf('%s - %s', $e->getMessage(), 'Composed class required getModel() definition'), \E_USER_WARNING);
-
             return null;
         }
     }

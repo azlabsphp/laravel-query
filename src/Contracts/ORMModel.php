@@ -18,11 +18,12 @@ use Drewlabs\Contracts\Data\Model\HasRelations;
 use Drewlabs\Contracts\Data\Model\HidesAttributes;
 use Drewlabs\Contracts\Data\Model\Model;
 use Drewlabs\Contracts\Data\Model\Parseable;
+use Drewlabs\Query\Contracts\Queryable;
 
 /**
  * Interface definition arround methods provided by Laravel Eloquent ORM
  * along with some useful method.
  */
-interface ORMModel extends Model, HidesAttributes, Parseable, HasRelations, GuardedModel
+interface ORMModel extends Model, HidesAttributes, Parseable, HasRelations, GuardedModel, Queryable
 {
 }

@@ -89,7 +89,7 @@ class EloquentDMLSelectQueryColumnsTest extends TestCase
     public function test_select_one_method_parameters()
     {
         $manager = DMLManager(Person::class);
-        $result = $manager->selectOne(
+        $result = $manager->selectFirst(
             [
                 'where' => [
                     'firstname', 'BENJAMIN',
@@ -99,7 +99,7 @@ class EloquentDMLSelectQueryColumnsTest extends TestCase
         );
         $this->assertTrue($result->relationLoaded('addresses'), 'Expect the addresses relation to be loaded');
         $this->assertInstanceOf(Person::class, $result);
-        $result = $manager->selectOne(
+        $result = $manager->selectFirst(
             static function ($value) {
                 return $value->toArray();
             }

@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace Drewlabs\Packages\Database\Tests\Stubs;
 
 use Drewlabs\Packages\Database\Contracts\ORMModel;
-use Drewlabs\Packages\Database\Traits\Model as TraitsModel;
+use Drewlabs\Packages\Database\Traits\Queryable as TraitsModel;
 use Illuminate\Database\Eloquent\Model;
 
 class Address extends Model implements ORMModel

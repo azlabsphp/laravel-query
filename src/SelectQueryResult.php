@@ -11,18 +11,18 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Database\Helpers;
+namespace Drewlabs\Packages\Database;
 
-use Drewlabs\Contracts\Data\EnumerableQueryResult as ContractsEnumerableQueryResult;
-use Drewlabs\Packages\Database\EnumerableQueryResult;
 use Illuminate\Contracts\Container\BindingResolutionException;
+use Drewlabs\Query\Contracts\EnumerableResultInterface;
+use Drewlabs\Query\EnumerableResult;
 
 class SelectQueryResult
 {
     /**
-     * @var ContractsEnumerableQueryResult|mixed
+     * @var EnumerableResultInterface
      */
-    private $value_;
+    private $value;
 
     /**
      * Instance initializer.
@@ -33,7 +33,7 @@ class SelectQueryResult
      */
     public function __construct($value)
     {
-        $this->value_ = $value ?? new EnumerableQueryResult();
+        $this->value = $value ?? new EnumerableResult();
     }
 
     /**
@@ -45,11 +45,7 @@ class SelectQueryResult
      */
     public function map(callable $callback)
     {
-        $this->value_ = drewlabs_database_map_query_result(
-            $this->value_ ?? new EnumerableQueryResult(),
-            $callback
-        );
-
+        $this->value = drewlabs_database_map_query_result($this->value ?? new EnumerableResult(), $callback);
         return $this;
     }
 
@@ -62,16 +58,17 @@ class SelectQueryResult
      */
     public function all(callable $callback)
     {
-        $this->value_ = drewlabs_database_apply(
-            $this->value_ ?? new EnumerableQueryResult(),
-            $callback
-        );
-
+        $this->value = drewlabs_database_apply($this->value ?? new EnumerableResult(),$callback);
         return $this;
     }
 
-    public function value()
+    /**
+     * Return the wrapped query result instance
+     * 
+     * @return EnumerableResultInterface 
+     */
+    public function get()
     {
-        return $this->value_;
+        return $this->value;
     }
 }

@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database\Traits;
 
-use Drewlabs\Packages\Database\QueryFiltersBuilder;
+use Drewlabs\Query\QueryFiltersBuilder;
 
 trait CreatesFilters
 {
@@ -28,16 +28,16 @@ trait CreatesFilters
      */
     public function makeFilters(array $defaults = [])
     {
-        return QueryFiltersBuilder::for($this->resolveModel())->build($this, $defaults ?? []);
+        return QueryFiltersBuilder::new($this->resolveModel())->build($this, $defaults ?? []);
     }
 
     /**
      * Creates an instance of the attached model.
      *
-     * @return StorageClient
+     * @return mixed
      */
     public function resolveModel()
     {
-        return \is_string($model = $this->getModel()) ? self::createResolver($model)() : $model;
+        return \is_string($model = $this->getModel()) ? new $model : $model;
     }
 }

@@ -11,16 +11,13 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Database\Query\Concerns;
+namespace Drewlabs\Packages\Concerns;
 
-use Drewlabs\Contracts\Data\DataProviderHandlerParamsInterface;
 use Drewlabs\Core\Helpers\Str;
-use Drewlabs\Packages\Database\Contracts\TransactionManagerInterface;
-
-use Drewlabs\Packages\Database\Eloquent\QueryMethod;
+use Drewlabs\Query\Contracts\TransactionManagerInterface;
 
 use function Drewlabs\Packages\Database\Proxy\DMLManager;
-use Drewlabs\Packages\Database\TouchedModelRelationsHandler;
+use Drewlabs\Packages\Database\QueryableRelations;
 
 /**
  * @property TransactionManagerInterface transactions
@@ -35,20 +32,12 @@ trait CreateQueryLanguage
                     $callback = $callback ?: static function ($param) {
                         return $param;
                     };
-                    return $callback(
-                        $this->proxy(drewlabs_core_create_attribute_getter('model', null)($this), QueryMethod::CREATE, [$this->parseAttributes($this->attributesToArray($attributes))])
-                    );
+                    return $callback($this->queryable->create($this->parseAttributes($this->attributesToArray($attributes))));
                 },
                 function ($attributes, array $params, \Closure $callback = null) {
-                    if (!(\is_array($params) || ($params instanceof DataProviderHandlerParamsInterface))) {
-                        throw new \InvalidArgumentException('Argument 2 of the create method must be an array or an instance of ' . DataProviderHandlerParamsInterface::class);
-                    }
                     return $this->executeCreateQuery($attributes, $params ?? [], false, $callback);
                 },
                 function ($attributes, array $params, bool $batch, \Closure $callback = null) {
-                    if (!(\is_array($params) || ($params instanceof DataProviderHandlerParamsInterface))) {
-                        throw new \InvalidArgumentException('Argument 2 of the create method must be an array or an instance of ' . DataProviderHandlerParamsInterface::class);
-                    }
                     return $this->executeCreateQuery($attributes, $params, $batch, $callback);
                 },
             ]);
@@ -70,31 +59,24 @@ trait CreateQueryLanguage
             return $param;
         };
         $attributes = $this->attributesToArray($attributes);
-        $upsert_conditions = $params['upsert_conditions'] ?? [];
-        $upsert = !empty($upsert_conditions);
-        if (isset($params['relations'])) {
-            $keys = $params['relations'] ?? [];
+        $upsertConditions = $params['upsert_conditions'] ?? [];
+        $keys = array_merge($params['relations']);
+        if (!empty($keys)) {
             // Creates a copy of the relation in order to maintain the state of the keys unchanged
             // accross changes that happen during execution
             $relations = [...$keys];
             // TODO: If the current model contains parent relations, create the parent relation
-            $instance = drewlabs_core_create_attribute_getter('model', null)($this);
-            $attributes = $this->createParentIfExists($instance, $attributes, $relations);
+            $attributes = $this->createParentIfExists($this->queryable, $attributes, $relations);
             // To avoid key index issues, we reset the relations array keys if any unset() call
             // was made on the relations variable
-            $instance = $this->proxy(
-                $instance,
-                $upsert ? QueryMethod::UPSERT : QueryMethod::CREATE,
-                // if Upserting, pass the upsertion condition first else, pass in the attributes
-                $upsert ? [$upsert_conditions, $this->parseAttributes($attributes)] : [$this->parseAttributes($attributes)]
-            );
+            $instance = !empty($upsertConditions) ?  $this->queryable->updateOrCreate($upsertConditions, $this->parseAttributes($attributes)) : $this->queryable->create($this->parseAttributes($attributes));
             // For the touched model, we create the attached relations provided by the library user
             if (!empty($relations = array_values($relations))) {
-                TouchedModelRelationsHandler::new($instance)->create($relations, $attributes, $batch);
+                QueryableRelations::new($instance)->create($relations, $attributes, $batch);
             }
             return $callback($this->select($instance->getKey(), ['*', ...$keys]));
         }
-        return $callback($this->proxy(drewlabs_core_create_attribute_getter('model', null)($this), QueryMethod::CREATE, $upsert ? [$upsert_conditions, $this->parseAttributes($attributes)] : [$this->parseAttributes($attributes)]));
+        return $callback(!empty($upsertConditions) ? $this->queryable->updateOrCreate($upsertConditions, $this->parseAttributes($attributes)) : $this->queryable->create($this->parseAttributes($attributes)));
     }
 
     /**

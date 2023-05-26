@@ -13,11 +13,9 @@ declare(strict_types=1);
 
 namespace Drewlabs\Packages\Database;
 
-use Drewlabs\Packages\Database\Contracts\TransactionClientInterface;
-use Drewlabs\Packages\Database\Contracts\TransactionManagerInterface;
-use Drewlabs\Packages\Database\Eloquent\TransactionClient;
-use Drewlabs\Packages\Database\Exceptions\QueryException;
-use Illuminate\Database\Eloquent\Model;
+use Drewlabs\Query\Contracts\TransactionClientInterface;
+use Drewlabs\Query\Contracts\TransactionManagerInterface;
+use Drewlabs\Query\Exceptions\QueryException;
 
 class TransactionManager implements TransactionManagerInterface
 {
@@ -27,31 +25,13 @@ class TransactionManager implements TransactionManagerInterface
     private $db;
 
     /**
-     * Creates a database transaction management instance.
-     *
-     * @throws \Exception
-     *
-     * @return self
+     * Creates class instance
+     * 
+     * @param TransactionClientInterface $db 
      */
     public function __construct(TransactionClientInterface $db)
     {
         $this->db = $db;
-    }
-
-    /**
-     * Creates a new instance from a model instance.
-     *
-     * @return static
-     */
-    public static function new($arg)
-    {
-        if ($arg instanceof Model) {
-            return new static(new TransactionClient($arg->getConnection()));
-        }
-        if ($arg instanceof TransactionClientInterface) {
-            return new static($arg);
-        }
-        throw new \InvalidArgumentException('Cannot build a transaction manager from the provided instance, '.\gettype($arg));
     }
 
     public function transaction(\Closure $callback)

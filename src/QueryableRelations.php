@@ -19,19 +19,25 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder;
 use LogicException;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * The goal of the model relation handler implementation class is to
  * provide an API for inserting a model relations values after model
  * was inserted into the database.
  */
-class TouchedModelRelationsHandler
+class QueryableRelations
 {
     /**
-     * @var mixed
+     * @var Model
      */
     private $model;
 
+    /**
+     * Creates class instance
+     * 
+     * @param mixed $model 
+     */
     private function __construct($model)
     {
         $this->model = $model;
@@ -42,7 +48,7 @@ class TouchedModelRelationsHandler
      *
      * @param mixed $model
      *
-     * @return TouchedModelRelationsHandler
+     * @return QueryableRelations
      */
     public static function new($model)
     {
@@ -232,9 +238,7 @@ class TouchedModelRelationsHandler
     private function createMany($instance, array $attributes, array $relations)
     {
         foreach ($attributes as $current) {
-            $result = Arr::isnotassoclist($current) ?
-                static::updateOrCreate($this->getInstanceCopy($instance), $current) :
-                $this->getInstanceCopy($instance)->create(...static::formatCreateAttributes($instance, $current));
+            $result = Arr::isnotassoclist($current) ? static::updateOrCreate($this->getInstanceCopy($instance), $current) : $this->getInstanceCopy($instance)->create(...static::formatCreateAttributes($instance, $current));
             // Recursively execute the create implementation relations attached to the model
             self::new($result)->create($relations, $current);
         }

@@ -15,60 +15,59 @@ namespace Drewlabs\Packages\Database;
 
 use BadMethodCallException;
 use Closure;
-use Drewlabs\Contracts\Data\DML\DMLProvider;
-use Drewlabs\Contracts\Data\Filters\FiltersInterface;
-use Drewlabs\Contracts\Data\Model\ActiveModel;
-use Drewlabs\Contracts\Data\Model\Model;
+use Drewlabs\Query\Contracts\FiltersInterface;
 use Drewlabs\Core\Helpers\Arr;
-use Drewlabs\Packages\Database\Contracts\QueryLanguageInterface;
-use Drewlabs\Packages\Database\Contracts\TransactionManagerInterface;
-use Drewlabs\Packages\Database\Eloquent\QueryMethod;
-use function Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;
+use Drewlabs\Overloadable\Overloadable;
+use Drewlabs\Packages\Database\TransactionClient;
 
 use Drewlabs\Packages\Database\Query\Concerns\CreateQueryLanguage;
 use Drewlabs\Packages\Database\Query\Concerns\DeleteQueryLanguage;
 use Drewlabs\Packages\Database\Query\Concerns\SelectQueryLanguage;
 use Drewlabs\Packages\Database\Query\Concerns\UpdateQueryLanguage;
-use Drewlabs\Packages\Database\Traits\ContainerAware;
+use Drewlabs\Packages\Database\Traits\ProvidesBuilderFactory;
+use Drewlabs\Query\AggregationMethods;
+use Drewlabs\Query\Contracts\QueryLanguageInterface;
 use Drewlabs\Support\Traits\MethodProxy;
-use Drewlabs\Support\Traits\Overloadable;
 use InvalidArgumentException;
 use Error;
+use Drewlabs\Query\Contracts\Queryable;
+use Illuminate\Database\Eloquent\Model;
+use Drewlabs\Query\Contracts\EnumerableResultInterface;
 
 /**
- * @method \Drewlabs\Contracts\Data\Model\Model|mixed           create(array $attributes, \Closure $callback = null)
- * @method \Drewlabs\Contracts\Data\Model\Model|mixed           create(array $attributes, $params, bool $batch, \Closure $callback = null)
- * @method \Drewlabs\Contracts\Data\Model\Model|mixed           create(array $attributes, $params = [], \Closure $callback)
+ * @method Queryable|mixed                                      create(array $attributes, \Closure $callback = null)
+ * @method Queryable|mixed                                      create(array $attributes, $params, bool $batch, \Closure $callback = null)
+ * @method Queryable|mixed                                      create(array $attributes, $params = [], \Closure $callback)
  * @method bool                                                 delete(int $id)
  * @method bool                                                 delete(string $id)
  * @method int                                                  delete(array $query)
  * @method int                                                  delete(array $query, bool $batch)
- * @method \Drewlabs\Contracts\Data\EnumerableQueryResult|mixed select()
- * @method \Drewlabs\Contracts\Data\Model\Model|mixed           select(string $id, array $columns, \Closure $callback = null)
- * @method \Drewlabs\Contracts\Data\Model\Model|mixed           select(string $id, \Closure $callback = null)
- * @method \Drewlabs\Contracts\Data\Model\Model|mixed           select(int $id, array $columns, \Closure $callback = null)
- * @method \Drewlabs\Contracts\Data\Model\Model|mixed           select(int $id, \Closure $callback = null)
- * @method \Drewlabs\Contracts\Data\EnumerableQueryResult|mixed select(array $query, \Closure $callback = null)
- * @method \Drewlabs\Contracts\Data\EnumerableQueryResult|mixed select(array $query, array $columns, \Closure $callback = null)
+ * @method EnumerableResultInterface|mixed                      select()
+ * @method Queryable|mixed                                      select(string $id, array $columns, \Closure $callback = null)
+ * @method Queryable|mixed                                      select(string $id, \Closure $callback = null)
+ * @method Queryable|mixed                                      select(int $id, array $columns, \Closure $callback = null)
+ * @method Queryable|mixed                                      select(int $id, \Closure $callback = null)
+ * @method EnumerableResultInterface|mixed                      select(array $query, \Closure $callback = null)
+ * @method EnumerableResultInterface|mixed                      select(array $query, array $columns, \Closure $callback = null)
  * @method mixed                                                select(array $query, int $per_page, int $page = null, \Closure $callback = null)
  * @method mixed                                                select(array $query, int $per_page, array $columns, int $page = null, \Closure $callback = null)
  * @method int                                                  selectAggregate(array $query = [], string $aggregation = \Drewlabs\Packages\Database\AggregationMethods::COUNT)
  * @method int                                                  update(array $query, $attributes = [])
  * @method int                                                  update(array $query, $attributes = [], bool $bulkstatement)
- * @method \Drewlabs\Contracts\Data\Model\Model|mixed           update(int $id, $attributes, \Closure $dto_transform_fn = null)
- * @method \Drewlabs\Contracts\Data\Model\Model|mixed           update(int $id, $attributes, $params, \Closure $dto_transform_fn = null)
- * @method \Drewlabs\Contracts\Data\Model\Model|mixed           update(string $id, $attributes, \Closure $dto_transform_fn = null)
- * @method \Drewlabs\Contracts\Data\Model\Model|mixed           update(string $id, $attributes, $params, \Closure $dto_transform_fn = null)
+ * @method Queryable|mixed                                      update(int $id, $attributes, \Closure $dto_transform_fn = null)
+ * @method Queryable|mixed                                      update(int $id, $attributes, $params, \Closure $dto_transform_fn = null)
+ * @method Queryable|mixed                                      update(string $id, $attributes, \Closure $dto_transform_fn = null)
+ * @method Queryable|mixed                                      update(string $id, $attributes, $params, \Closure $dto_transform_fn = null)
  */
-final class QueryLanguage implements DMLProvider, QueryLanguageInterface
+final class QueryLanguage implements QueryLanguageInterface
 {
-    use ContainerAware;
     use CreateQueryLanguage;
     use DeleteQueryLanguage;
     use MethodProxy;
     use Overloadable;
     use SelectQueryLanguage;
     use UpdateQueryLanguage;
+    use ProvidesBuilderFactory;
 
     public const AGGREGATE_METHODS = [
         AggregationMethods::COUNT,
@@ -79,16 +78,15 @@ final class QueryLanguage implements DMLProvider, QueryLanguageInterface
     ];
 
     /**
-     * The Eloquent model class binded to the current DML provider.
      *
      * @var string
      */
-    private $model_class;
+    private $blueprint;
 
     /**
-     * @var Model|ActiveModel|mixed
+     * @var Queryable|Model
      */
-    private $model;
+    private $queryable;
 
     /**
      * @var \Closure(mixed, array|FiltersInterface): mixed
@@ -101,42 +99,43 @@ final class QueryLanguage implements DMLProvider, QueryLanguageInterface
     private $transactions;
 
     /**
-     * @param Model|string $blueprint
-     *
-     * @throws \Exception
-     * @throws \InvalidArgumentException
+     * Creates class instance
+     * 
+     * @param mixed $blueprint 
+     * @return void 
+     * @throws InvalidArgumentException 
      */
     public function __construct($blueprint)
     {
         if (!(\is_string($blueprint) || ($blueprint instanceof Model))) {
-            throw new \InvalidArgumentException('Constructor requires an instance of '.Model::class.', or a Model class name');
+            throw new \InvalidArgumentException('Constructor requires an instance of ' . Model::class . ', or a Model class name');
         }
-        $this->model = \is_string($blueprint) ? self::createResolver($blueprint)() : $blueprint;
-        $this->model_class = \is_string($blueprint) ? $blueprint : \get_class($blueprint);
-        $this->transactions = TransactionManager::new($this->model);
+        $this->queryable = \is_string($blueprint) ? new $blueprint() : $blueprint;
+        $this->blueprint = \is_string($blueprint) ? $blueprint : \get_class($blueprint);
+        $this->transactions = new TransactionManager(new TransactionClient($this->queryable));
         $this->setBuilderFactory($this->defaultBuilderFactory());
     }
 
-    public static function for($clazz)
+    /**
+     * Creates Query Language instance
+     * 
+     * @param mixed $blueprint
+     * 
+     * @return static 
+     */
+    public static function new($blueprint)
     {
-        return new static($clazz);
+        return new static($blueprint);
     }
 
     public function createMany(array $attributes)
     {
         if (!(array_filter($attributes, 'is_array') === $attributes)) {
-            throw new \InvalidArgumentException(__METHOD__.' requires an list of list items for insertion');
+            throw new \InvalidArgumentException(__METHOD__ . ' requires an list of list items for insertion');
         }
-
-        return $this->proxy(
-            drewlabs_core_create_attribute_getter('model', null)($this),
-            QueryMethod::INSERT_MANY,
-            [
-                array_map(function ($value) {
-                    return array_merge($this->parseAttributes($value), ['updated_at' => date('Y-m-d H:i:s'), 'created_at' => date('Y-m-d H:i:s')]);
-                }, $attributes),
-            ],
-        );
+        return $this->queryable->insert(array_map(function ($value) {
+            return array_merge($this->parseAttributes($value), ['updated_at' => date('Y-m-d H:i:s'), 'created_at' => date('Y-m-d H:i:s')]);
+        }, $attributes));
     }
 
     /**
@@ -155,9 +154,7 @@ final class QueryLanguage implements DMLProvider, QueryLanguageInterface
         if (!\in_array($aggregation, static::AGGREGATE_METHODS, true)) {
             throw new \InvalidArgumentException('The provided method is not part of the aggregation framework supported methods');
         }
-        $model = drewlabs_core_create_attribute_getter('model', null)($this);
-
-        return $this->proxy($this->builderFactory()($model, $query), $aggregation, [...$args]);
+        return $this->proxy($this->builderFactory()($this->queryable, $query), $aggregation, [...$args]);
     }
 
     /**
@@ -176,26 +173,10 @@ final class QueryLanguage implements DMLProvider, QueryLanguageInterface
         return $this->aggregate($query, $aggregation, ...$args);
     }
 
-    /**
-     * Query language builder factory getter.
-     *
-     * @return Closure(mixed $builder, array|FiltersInterface $query): mixed
-     */
-    public function builderFactory()
-    {
-        return $this->builderFactory;
-    }
 
-    /**
-     * Query Language builder factory setter method.
-     *
-     * @return self
-     */
-    public function setBuilderFactory(\Closure $factory)
+    public function getQueryable()
     {
-        $this->builderFactory = $factory;
-
-        return $this;
+        return $this->queryable;
     }
 
     /**
@@ -206,8 +187,8 @@ final class QueryLanguage implements DMLProvider, QueryLanguageInterface
     private function defaultBuilderFactory()
     {
         return static function ($builder, $query) {
-            return \is_array($query) ? array_reduce(Arr::isnotassoclist($query) ? $query : [$query], static function ($builder, $query) {
-                return ModelFiltersHandler($query)->apply($builder);
+            return \is_array($query) ? array_reduce((array_filter($query, 'is_array') === $query) && !(array_keys($query) !== range(0, \count($query) - 1)) ? $query : [$query], static function ($builder, $query) {
+                return (new EloquentQueryFilters($query))->apply($builder);
             }, $builder) : $query->apply($builder);
         };
     }
@@ -224,7 +205,6 @@ final class QueryLanguage implements DMLProvider, QueryLanguageInterface
         if (\is_array($attributes)) {
             return $attributes;
         }
-
         return Arr::create($attributes);
     }
 
@@ -235,27 +215,24 @@ final class QueryLanguage implements DMLProvider, QueryLanguageInterface
      */
     private function parseAttributes(array $attributes)
     {
-        $model = drewlabs_core_create_attribute_getter('model', null)($this);
-
-        // For models that does not defines `getFillable` method, we simply
-        // return the `attributes` parameter as we do not have any property
-        // that might helps in parsing input attributes
-        // Such models are not protected against mass assignement relates errors
-        if (!(method_exists($model, 'getFillable'))) {
-            return $attributes;
-        }
         // Get the value of the model fillable property
-        $fillable = $model->getFillable() ?? [];
+        $fillable = $this->queryable->getFillable() ?? [];
         // We assume that if developper do not provide fillable properties
         // the input from request should be passed to
         if (empty($fillable)) {
             return $attributes;
         }
-
-        return Arr::create($this->yieldAttributes($fillable, $attributes));
+        return iterator_to_array($this->filterQueryableAttributes($fillable, $attributes));
     }
 
-    private function yieldAttributes(array $properties, array $attributes)
+    /**
+     * Produces an array of properties that are supported by the queryable instance
+     * 
+     * @param array $properties 
+     * @param array $attributes 
+     * @return \Traversable<mixed, mixed, mixed, void> 
+     */
+    private function filterQueryableAttributes(array $properties, array $attributes)
     {
         foreach ($properties as $value) {
             if (\array_key_exists($value, $attributes)) {
