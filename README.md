@@ -1,39 +1,6 @@
-# Database package
+# Laravel Query Bindings
 
-This package provides wrapper arround Laravel Illuminate Database ORM. It provides a ModelRepository, a stable API for performing CRUD operations on a database abstracting away various methods for interacting with database.
-
-## Instalation
-
-```json
-// ...
-"require": {
-    // Other dependencies
-    "drewlabs/database": "^2.4",
-    "drewlabs/contracts": "^2.5",
-    "drewlabs/core-helpers": "^2.3",
-    "drewlabs/support": "^2.4"
-},
-// ...
-"repositories": [
-    //...
-    {
-        "type": "vcs",
-        "url": "git@github.com:liksoft/drewlabs-php-contracts.git"
-    },
-    {
-        "type": "vcs",
-        "url": "git@github.com:liksoft/drewlabs-php-core-helpers.git"
-    },
-    {
-        "type": "vcs",
-        "url": "git@github.com:liksoft/drewlabs-php-support.git"
-    },
-    {
-        "type": "vcs",
-        "url": "git@github.com:liksoft/drewlabs-php-packages-database.git"
-    }
-]
-```
+The laravel query package provides `drewlabs/query` library bindings for laravel based projects. It uses `Laravel` eloquent API for database queries.
 
 ## Usage
 
