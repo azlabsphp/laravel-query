@@ -1,6 +1,6 @@
 {
-    "name": "drewlabs/database",
-    "description": "Provides functionnalities for accessing and working with databases using eloquent, or NoSQL database providers",
+    "name": "drewlabs/laravel-query",
+    "description": "Provides drewlabs/query bindings for laravel framework",
     "type": "library",
     "license": "MIT",
     "authors": [{
