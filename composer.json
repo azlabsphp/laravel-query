@@ -16,7 +16,7 @@
         "drewlabs/contracts": "^0.2",
         "drewlabs/core-helpers": "^0.2",
         "drewlabs/support": "^0.2",
-        "drewlabs/query": "^0.2.1"
+        "drewlabs/query": "^0.2.8"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.0",
