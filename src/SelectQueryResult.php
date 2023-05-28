@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the Drewlabs package.
+ * This file is part of the drewlabs namespace.
  *
  * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
  *
@@ -11,11 +11,11 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Database;
+namespace Drewlabs\LaravelQuery;
 
-use Illuminate\Contracts\Container\BindingResolutionException;
 use Drewlabs\Query\Contracts\EnumerableResultInterface;
 use Drewlabs\Query\EnumerableResult;
+use Illuminate\Contracts\Container\BindingResolutionException;
 
 class SelectQueryResult
 {
@@ -46,6 +46,7 @@ class SelectQueryResult
     public function map(callable $callback)
     {
         $this->value = drewlabs_database_map_query_result($this->value ?? new EnumerableResult(), $callback);
+
         return $this;
     }
 
@@ -58,14 +59,15 @@ class SelectQueryResult
      */
     public function all(callable $callback)
     {
-        $this->value = drewlabs_database_apply($this->value ?? new EnumerableResult(),$callback);
+        $this->value = drewlabs_database_apply($this->value ?? new EnumerableResult(), $callback);
+
         return $this;
     }
 
     /**
-     * Return the wrapped query result instance
-     * 
-     * @return EnumerableResultInterface 
+     * Return the wrapped query result instance.
+     *
+     * @return EnumerableResultInterface
      */
     public function get()
     {

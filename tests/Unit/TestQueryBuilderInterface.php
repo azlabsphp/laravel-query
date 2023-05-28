@@ -11,12 +11,11 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\LaravelQuery\Tests\Stubs;
+namespace Drewlabs\LaravelQuery\Tests\Unit;
 
-trait Compat
+interface TestQueryBuilderInterface
 {
-    public function getFillables()
-    {
-        return $this->getFillable();
-    }
+    public function where($column, $operator = null, $value = null);
+
+    public function whereIn($column, array $values);
 }

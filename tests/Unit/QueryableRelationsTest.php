@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the Drewlabs package.
+ * This file is part of the drewlabs namespace.
  *
  * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
  *
@@ -11,23 +11,24 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Database\Tests\Unit;
+namespace Drewlabs\LaravelQuery\Tests\Unit;
 
-use function Drewlabs\Packages\Database\Proxy\DMLManager;
-use Drewlabs\Packages\Database\Tests\Stubs\Address;
-use Drewlabs\Packages\Database\Tests\Stubs\Individual;
-use Drewlabs\Packages\Database\Tests\Stubs\Manager;
-use Drewlabs\Packages\Database\Tests\Stubs\Member;
-use Drewlabs\Packages\Database\Tests\Stubs\Moral;
-use Drewlabs\Packages\Database\Tests\Stubs\Person;
-use Drewlabs\Packages\Database\Tests\Stubs\Post;
-use Drewlabs\Packages\Database\Tests\Stubs\Video;
-use Drewlabs\Packages\Database\Tests\TestCase;
-use Drewlabs\Packages\Database\QueryableRelations;
+use function Drewlabs\LaravelQuery\Proxy\DMLManager;
+
+use Drewlabs\LaravelQuery\QueryableRelations;
+use Drewlabs\LaravelQuery\Tests\Stubs\Address;
+use Drewlabs\LaravelQuery\Tests\Stubs\Individual;
+use Drewlabs\LaravelQuery\Tests\Stubs\Manager;
+use Drewlabs\LaravelQuery\Tests\Stubs\Member;
+use Drewlabs\LaravelQuery\Tests\Stubs\Moral;
+use Drewlabs\LaravelQuery\Tests\Stubs\Person;
+use Drewlabs\LaravelQuery\Tests\Stubs\Post;
+use Drewlabs\LaravelQuery\Tests\Stubs\Video;
+use Drewlabs\LaravelQuery\Tests\TestCase;
 
 use Illuminate\Database\Eloquent\Collection;
 
-class ModelRelationsHandlerTest extends TestCase
+class QueryableRelationsTest extends TestCase
 {
     public function test_model_relation_handler_create()
     {
@@ -219,7 +220,7 @@ class ModelRelationsHandlerTest extends TestCase
                 ],
             ],
         ], [
-            'relations' => ['addresses']
+            'relations' => ['addresses'],
         ]);
         $this->assertTrue(
             null !== Address::where('postal_code', 'Montezuma, GA 31063')

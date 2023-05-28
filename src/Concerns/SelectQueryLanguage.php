@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the Drewlabs package.
+ * This file is part of the drewlabs namespace.
  *
  * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
  *
@@ -11,15 +11,24 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Concerns;
+namespace Drewlabs\LaravelQuery\Concerns;
 
 use Drewlabs\Core\Helpers\Arr;
+
+use function Drewlabs\LaravelQuery\Proxy\SelectQueryResult;
+
 use Drewlabs\Query\Columns;
 use Drewlabs\Query\Contracts\FiltersInterface;
+use Drewlabs\Query\Contracts\Queryable;
 use Drewlabs\Query\EnumerableResult;
 
-use function Drewlabs\Packages\Database\Proxy\SelectQueryResult;
+use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @mixin \Drewlabs\LaravelQuery\Contracts\ProvidesFiltersFactory
+ *
+ * @property Queryable|Model queryable
+ */
 trait SelectQueryLanguage
 {
     public function select(...$args)
@@ -30,7 +39,8 @@ trait SelectQueryLanguage
                 $callback = $callback ?? static function ($value) {
                     return $value;
                 };
-                return $callback($this->createSelector(['where' => [$this->model->getPrimaryKey(), $id]], $columns ?? ['*'])(function ($builder, $columns) {
+
+                return $callback($this->createSelector(['and' => [$this->queryable->getPrimaryKey(), $id]], $columns ?? ['*'])(static function ($builder, $columns) {
                     return $builder->get($columns);
                 })->first());
             },
@@ -40,7 +50,8 @@ trait SelectQueryLanguage
                 $callback = $callback ?? static function ($value) {
                     return $value;
                 };
-                return $callback($this->createSelector(['where' => [$this->model->getPrimaryKey(), $id]], ['*'])(function ($builder, $columns) {
+
+                return $callback($this->createSelector(['and' => [$this->queryable->getPrimaryKey(), $id]], ['*'])(static function ($builder, $columns) {
                     return $builder->get($columns);
                 })->first());
             },
@@ -50,7 +61,8 @@ trait SelectQueryLanguage
                 $callback = $callback ?? static function ($value) {
                     return $value;
                 };
-                return $callback($this->createSelector(['where' => [$this->model->getPrimaryKey(), $id]], $columns ?? ['*'])(function ($builder, $columns) {
+
+                return $callback($this->createSelector(['and' => [$this->queryable->getPrimaryKey(), $id]], $columns ?? ['*'])(static function ($builder, $columns) {
                     return $builder->get($columns);
                 })->first());
             },
@@ -60,71 +72,71 @@ trait SelectQueryLanguage
                 $callback = $callback ?? static function ($value) {
                     return $value;
                 };
-                return $callback($this->createSelector(['where' => [$this->model->getPrimaryKey(), $id]], ['*'])(function ($builder, $columns) {
+
+                return $callback($this->createSelector(['and' => [$this->queryable->getPrimaryKey(), $id]], ['*'])(static function ($builder, $columns) {
                     return $builder->get($columns);
                 })->first());
             },
 
             // Overload
             function (array $query, \Closure $callback = null) {
-                return $this->createSelector($query, ['*'], $callback)(function ($builder, $columns) {
-                    return $$builder->get($columns);
+                return $this->createSelector($query, ['*'], $callback)(static function ($builder, $columns) {
+                    return $builder->get($columns);
                 });
             },
 
             // Overload
             function (array $query, array $columns, \Closure $callback = null) {
-                return $this->createSelector($query, $columns, $callback)(function ($builder, $columns) {
+                return $this->createSelector($query, $columns, $callback)(static function ($builder, $columns) {
                     return $builder->get($columns);
                 });
             },
 
             // Overload
             function (array $query, int $per_page, int $page = null, \Closure $callback = null) {
-                return $this->createSelector($query, ['*'], $callback)(function ($builder, $columns) use ($per_page, $page) {
+                return $this->createSelector($query, ['*'], $callback)(static function ($builder, $columns) use ($per_page, $page) {
                     return $builder->paginate($per_page, $columns, null, $page ?? 1);
                 });
             },
 
             // Overload
             function (array $query, int $per_page, array $columns, int $page = null, \Closure $callback = null) {
-                return $this->createSelector($query, $columns, $callback)(function ($builder, $columns) use ($per_page, $page) {
+                return $this->createSelector($query, $columns, $callback)(static function ($builder, $columns) use ($per_page, $page) {
                     return $builder->paginate($per_page, $columns, null, $page ?? 1);
                 });
             },
 
             // Overload
             function (FiltersInterface $query, \Closure $callback = null) {
-                return $this->createSelector($query, ['*'], $callback)(function ($builder, $columns) {
+                return $this->createSelector($query, ['*'], $callback)(static function ($builder, $columns) {
                     return $builder->get($columns);
                 });
             },
 
             // Overload
             function (FiltersInterface $query, array $columns, \Closure $callback = null) {
-                return $this->createSelector($query, $columns, $callback)(function ($builder, $columns) {
+                return $this->createSelector($query, $columns, $callback)(static function ($builder, $columns) {
                     return $builder->get($columns);
                 });
             },
 
             // Overload
             function (FiltersInterface $query, int $per_page, int $page = null, \Closure $callback = null) {
-                return $this->createSelector($query, ['*'], $callback)(function ($builder, $columns) use ($per_page, $page) {
+                return $this->createSelector($query, ['*'], $callback)(static function ($builder, $columns) use ($per_page, $page) {
                     return $builder->paginate($per_page, $columns, null, $page ?? 1);
                 });
             },
 
             // Overload
             function (FiltersInterface $query, int $per_page, array $columns, int $page = null, \Closure $callback = null) {
-                return $this->createSelector($query, $columns, $callback)(function ($builder, $columns) use ($per_page, $page) {
+                return $this->createSelector($query, $columns, $callback)(static function ($builder, $columns) use ($per_page, $page) {
                     return $builder->paginate($per_page, $columns, null, $page ?? 1);
                 });
             },
             function (\Closure $callback = null) {
-                $callback = $callback ?? static function ($value) {
-                    return $value;
-                };
-                return $callback($this->select__3([]));
+                return $this->createSelector([], ['*'], $callback)(static function ($builder, $columns) {
+                    return $builder->get($columns);
+                });
             },
         ]);
     }
@@ -138,24 +150,27 @@ trait SelectQueryLanguage
                     $callback = $callback ?? static function ($value) {
                         return $value;
                     };
-                    return $callback($this->createSelector($query, ['*'])(function ($builder, $columns) {
-                        return [$builder->first($columns)];
+
+                    return $callback($this->createSelector($query, ['*'])(static function ($builder, $columns) {
+                        return (null !== ($result = $builder->first($columns))) ? [$result] : [];
                     })->first());
                 },
                 function (array $query, array $columns, \Closure $callback = null) {
                     $callback = $callback ?? static function ($value) {
                         return $value;
                     };
-                    return $callback($this->createSelector($query, $columns)(function ($builder, $columns) {
-                        return [$builder->first($columns)];
+
+                    return $callback($this->createSelector($query, $columns)(static function ($builder, $columns) {
+                        return (null !== ($result = $builder->first($columns))) ? [$result] : [];
                     })->first());
                 },
                 function (\Closure $callback = null) {
                     $callback = $callback ?? static function ($value) {
                         return $value;
                     };
-                    return $callback($this->createSelector([], ['*'])(function ($builder, $columns) {
-                        return [$builder->first($columns)];
+
+                    return $callback($this->createSelector([], ['*'])(static function ($builder, $columns) {
+                        return (null !== ($result = $builder->first($columns))) ? [$result] : [];
                     })->first());
                 },
             ]
@@ -179,22 +194,22 @@ trait SelectQueryLanguage
             $declared = $this->queryable->getDeclaredColumns();
             $primaryKey = $this->queryable->getPrimaryKey();
             $exceptions = $this->queryable->getHidden();
-            [$columns_, $relations] = Columns::new($columns)->tuple($declared, $model_relations);
+            [$c, $r] = Columns::new($columns)->tuple($declared, $model_relations);
             // We prepare the query builder object
             $builder = $this->builderFactory()($this->queryable, $query);
 
             // Add relationship queries to the builder if the relationship array is not empty
-            if (!empty($relations)) {
-                $builder = $builder->with([$relations]);
+            if (!empty($r)) {
+                $builder = $builder->with($r);
             }
 
             // Create set columns that must not be included in the output result
-            $excepts = array_unique((!empty($columns_) && !\in_array('*', $columns_, true)) ? array_merge($exceptions, array_diff(Arr::filter($declared, static function ($column) use ($primaryKey) {
+            $excepts = array_unique((!empty($c) && !\in_array('*', $c, true)) ? array_merge($exceptions, array_diff(Arr::filter($declared, static function ($column) use ($primaryKey) {
                 return $column !== $primaryKey;
-            }), [...$columns_, '*'])) : $exceptions);
+            }), [...$c, '*'])) : $exceptions);
 
             return $callback(SelectQueryResult(
-                new EnumerableResult($selector($builder, empty($columns_) || !empty($relations) ? ['*'] : array_unique(array_merge($columns_ ?? [], [$primaryKey]))))
+                new EnumerableResult($selector($builder, empty($c) || !empty($r) ? ['*'] : array_unique(array_merge($c ?? [], [$primaryKey]))))
             )->map(static function ($value) use ($excepts) {
                 return $value->setHidden($excepts);
             })->get());

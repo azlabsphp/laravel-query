@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the Drewlabs package.
+ * This file is part of the drewlabs namespace.
  *
  * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
  *
@@ -11,16 +11,23 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Concerns;
+namespace Drewlabs\LaravelQuery\Concerns;
 
 use Drewlabs\Core\Helpers\Str;
+
+use function Drewlabs\LaravelQuery\Proxy\DMLManager;
+
+use Drewlabs\LaravelQuery\QueryableRelations;
+use Drewlabs\Query\Contracts\Queryable;
 use Drewlabs\Query\Contracts\TransactionManagerInterface;
 
-use function Drewlabs\Packages\Database\Proxy\DMLManager;
-use Drewlabs\Packages\Database\QueryableRelations;
+use Illuminate\Database\Eloquent\Model;
 
 /**
+ * @mixin \Drewlabs\LaravelQuery\Contracts\ProvidesFiltersFactory
+ *
  * @property TransactionManagerInterface transactions
+ * @property Queryable|Model             queryable
  */
 trait CreateQueryLanguage
 {
@@ -32,6 +39,7 @@ trait CreateQueryLanguage
                     $callback = $callback ?: static function ($param) {
                         return $param;
                     };
+
                     return $callback($this->queryable->create($this->parseAttributes($this->attributesToArray($attributes))));
                 },
                 function ($attributes, array $params, \Closure $callback = null) {
@@ -69,13 +77,15 @@ trait CreateQueryLanguage
             $attributes = $this->createParentIfExists($this->queryable, $attributes, $relations);
             // To avoid key index issues, we reset the relations array keys if any unset() call
             // was made on the relations variable
-            $instance = !empty($upsertConditions) ?  $this->queryable->updateOrCreate($upsertConditions, $this->parseAttributes($attributes)) : $this->queryable->create($this->parseAttributes($attributes));
+            $instance = !empty($upsertConditions) ? $this->queryable->updateOrCreate($upsertConditions, $this->parseAttributes($attributes)) : $this->queryable->create($this->parseAttributes($attributes));
             // For the touched model, we create the attached relations provided by the library user
             if (!empty($relations = array_values($relations))) {
                 QueryableRelations::new($instance)->create($relations, $attributes, $batch);
             }
+
             return $callback($this->select($instance->getKey(), ['*', ...$keys]));
         }
+
         return $callback(!empty($upsertConditions) ? $this->queryable->updateOrCreate($upsertConditions, $this->parseAttributes($attributes)) : $this->queryable->create($this->parseAttributes($attributes)));
     }
 

@@ -24,7 +24,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Drewlabs\\Packages\\Database\\": "src/"
+            "Drewlabs\\LaravelQuery\\": "src/"
         },
         "files": [
             "src/helpers.php",
@@ -33,7 +33,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Drewlabs\\Packages\\Database\\Tests\\": "tests/"
+            "Drewlabs\\LaravelQuery\\Tests\\": "tests/"
         }
     },
     "extra": {

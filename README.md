@@ -41,14 +41,13 @@ This package provides wrapper arround Laravel Illuminate Database ORM. It provid
 
 - Laravel
   When using Laravel framework the service provider is automatically registered.
-
 - Lumen
   For Lumen appliation you must manually register the providers in the bootstrap/app.php:
 
 ```php
 // bootstrap/app.php
 // ...
-$app->register(\Drewlabs\Packages\Database\ServiceProvider::class);
+$app->register(\Drewlabs\LaravelQuery\ServiceProvider::class);
 // ...
 ```
 
@@ -62,7 +61,7 @@ This component offer a unified language for quering the database using SELECT, C
 
 ```php
 // ...
-use function Drewlabs\Packages\Database\Proxy\DMLManager;
+use function Drewlabs\LaravelQuery\Proxy\DMLManager;
 
 // Example class
 use App\Models\Example;
@@ -121,7 +120,7 @@ $person = $ql->update(1, ['firstname' => '...']);
 $person = $ql->update("1", ['firstname' => '...']);
 
 // Update using query without mass update
-$count = $ql->update(['where' => ['name', '...']], ['firstname' => '...']);
+$count = $ql->update(['and' => ['name', '...']], ['firstname' => '...']);
 ```
 
 - Delete
@@ -134,7 +133,7 @@ $ql = DMLManager(Person::class);
 $result = $ql->delete(1);
 
     // DELET AN ITEM USING COMPLEX QUERY
-$result = $ql->delete(['where' => ['...', '...']], true);
+$result = $ql->delete(['and' => ['...', '...']], true);
 ```
 
 - Select
@@ -164,7 +163,7 @@ The package comes with a handy query filter class that provide implementation fo
 
 ```php
 
-use Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;
+use Drewlabs\LaravelQuery\Proxy\ModelFiltersHandler;
 
 /// Note: Each key is an eloquent model/Eloquent query builder method
 /// Parameters are passed in the order and the same way they are passed to the model method, but are specified as array
@@ -240,7 +239,7 @@ Request query filter handler is a global function for generating query filters f
 ```php
 
 // imports
-use Drewlabs\Packages\Database\Tests\Stubs\TestModelStub;
+use Drewlabs\LaravelQuery\Tests\Stubs\TestModelStub;
 
 // Create the request
 $request = new \Illuminate\Http\Request([
@@ -274,7 +273,7 @@ $request = new \Illuminate\Http\Request([
     'label' => 'Are you there ?',
     'id' => 320
 ]);
-$filters = \Drewlabs\Packages\Database\QueryFiltersBuilder::for(new TestModelStub)->build($request);
+$filters = \Drewlabs\LaravelQuery\QueryFiltersBuilder::for(new TestModelStub)->build($request);
 ```
 
 - Here is a list of query methods supported by the package:
@@ -314,14 +313,14 @@ $methods = [
 
 namespace App\Models\Patients;
 
-use Drewlabs\Packages\Database\Traits\Model as Trait;
-use Drewlabs\Packages\Database\Contracts\ORMModel;
+use Drewlabs\LaravelQuery\Traits\Queryable as QueryableTrait;
+use Drewlabs\Query\Contracts\Queryable;
 use Illuminate\Database\Eloquent\Model;
 
-final class Adresse extends Model implements ORMModel
+final class Adresse extends Model implements Queryable
 {
-    use Trait;
-    
+    use QueryableTrait;
+  
     /* ... */
 
 }
@@ -336,7 +335,7 @@ final class Adresse extends Model implements ORMModel
 - SelectQueryAction($id [, array $columns, \Closure $callback])
 
 ```php
-use function Drewlabs\Packages\Database\Proxy\SelectQueryAction;
+use function Drewlabs\LaravelQuery\Proxy\SelectQueryAction;
 
 // ...
 
@@ -348,7 +347,7 @@ $action = SelectQueryAction($id) // Creates a select by id query
 - SelectQueryAction(array $query, int $per_page [?int $page = null, array $columns, \Closure $callback])
 
 ```php
-use function Drewlabs\Packages\Database\Proxy\SelectQueryAction;
+use function Drewlabs\LaravelQuery\Proxy\SelectQueryAction;
 
 //...
 
@@ -365,8 +364,8 @@ $action = SelectQueryAction([
 - SelectQueryAction(FiltersInterface $query, int $per_page [?int $page = null, array $columns, \Closure $callback])
 
 ```php
-use function Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;
-use function Drewlabs\Packages\Database\Proxy\SelectQueryAction;
+use function Drewlabs\LaravelQuery\Proxy\ModelFiltersHandler;
+use function Drewlabs\LaravelQuery\Proxy\SelectQueryAction;
 
 // ...
 // Example
@@ -380,7 +379,7 @@ $action = SelectQueryAction(ModelFiltersHandler(...));
 - UpdateQueryAction($id, array|object $attributes [, \Closure $callback])
 
 ```php
-use function Drewlabs\Packages\Database\Proxy\UpdateQueryAction;
+use function Drewlabs\LaravelQuery\Proxy\UpdateQueryAction;
 
 // ...
 
@@ -391,7 +390,7 @@ $action = UpdateQueryAction($id, ['name' => 'John Doe'])
 - UpdateQueryAction(array $query, array|object $attributes [, \Closure $callback])
 
 ```php
-use function Drewlabs\Packages\Database\Proxy\UpdateQueryAction;
+use function Drewlabs\LaravelQuery\Proxy\UpdateQueryAction;
 
 // ...
 
@@ -402,8 +401,8 @@ $action = UpdateQueryAction(ModelFiltersHandler(...), ['name' => 'John Doe'])
 - UpdateQueryAction(FiltersInterface $query, array|object $attributes [, \Closure $callback])
 
 ```php
-use function Drewlabs\Packages\Database\Proxy\UpdateQueryAction;
-use function Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;
+use function Drewlabs\LaravelQuery\Proxy\UpdateQueryAction;
+use function Drewlabs\LaravelQuery\Proxy\ModelFiltersHandler;
 
 // ...
 
@@ -418,7 +417,7 @@ Creates a `DELETE` type query action using user provided by function user.
 - DeleteQueryAction($id [, \Closure $callback])
 
 ```php
-use function Drewlabs\Packages\Database\Proxy\DeleteQueryAction;
+use function Drewlabs\LaravelQuery\Proxy\DeleteQueryAction;
 
 // ...
 
@@ -429,7 +428,7 @@ $action = DeleteQueryAction($id)
 - DeleteQueryAction(array $query [, \Closure $callback])
 
 ```php
-use function Drewlabs\Packages\Database\Proxy\DeleteQueryAction;
+use function Drewlabs\LaravelQuery\Proxy\DeleteQueryAction;
 
 // ...
 
@@ -440,8 +439,8 @@ $action = DeleteQueryAction(['where' => ['id' => 3]])
 - DeleteQueryAction(FiltersInterface $query [, \Closure $callback])
 
 ```php
-use function Drewlabs\Packages\Database\Proxy\DeleteQueryAction;
-use function Drewlabs\Packages\Database\Proxy\ModelFiltersHandler;
+use function Drewlabs\LaravelQuery\Proxy\DeleteQueryAction;
+use function Drewlabs\LaravelQuery\Proxy\ModelFiltersHandler;
 
 // ...
 
@@ -456,7 +455,7 @@ Creates a `CREATE` type query action using user provided by function user
 - CreateQueryAction(array $attributes [, array $params, \Closure $callback])
 
 ```php
-use function Drewlabs\Packages\Database\Proxy\CreateQueryAction;
+use function Drewlabs\LaravelQuery\Proxy\CreateQueryAction;
 
 // ...
 
@@ -467,7 +466,7 @@ $action = CreateQueryAction([...])
 - CreateQueryAction(object $attributes, [, array $params , \Closure $callback])
 
 ```php
-use function Drewlabs\Packages\Database\Proxy\CreateQueryAction;
+use function Drewlabs\LaravelQuery\Proxy\CreateQueryAction;
 
 // ...
 
@@ -484,9 +483,9 @@ $action = CreateQueryAction($object);
 Provides a default action handler command object for database queries.
 
 ```php
-use function Drewlabs\Packages\Database\Proxy\useDMLQueryActionCommand;
-use function Drewlabs\Packages\Database\Proxy\DMLManager;
-use function Drewlabs\Packages\Database\Proxy\SelectQueryAction;
+use function Drewlabs\LaravelQuery\Proxy\useDMLQueryActionCommand;
+use function Drewlabs\LaravelQuery\Proxy\DMLManager;
+use function Drewlabs\LaravelQuery\Proxy\SelectQueryAction;
 
 $command = useDMLQueryActionCommand(DMLManager(Test::class));
 // Executing command with an action using `exec` method
@@ -504,8 +503,8 @@ To allow the creator function be more customizable, the function supports
 a second parameter that allow developpers to provides their own custom action handler.
 
 ```php
-use function Drewlabs\Packages\Database\Proxy\useDMLQueryActionCommand;
-use function Drewlabs\Packages\Database\Proxy\DMLManager;
+use function Drewlabs\LaravelQuery\Proxy\useDMLQueryActionCommand;
+use function Drewlabs\LaravelQuery\Proxy\DMLManager;
 use use Drewlabs\Contracts\Support\Actions\Action;
 
 $command = useDMLQueryActionCommand(DMLManager(Test::class), function(Action $action, ?\Closure $callback = null) {

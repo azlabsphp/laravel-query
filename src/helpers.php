@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the Drewlabs package.
+ * This file is part of the drewlabs namespace.
  *
  * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
  *
@@ -11,12 +11,12 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-use Drewlabs\Query\Contracts\EnumerableResultInterface;
+use Drewlabs\Collections\Collection;
 use Drewlabs\Core\Helpers\Arr;
 use Drewlabs\Core\Helpers\Iter;
+use Drewlabs\Query\Contracts\EnumerableResultInterface;
 use Drewlabs\Query\EnumerableResult;
 
-use function Drewlabs\Support\Proxy\Collection;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator as AbstractLengthAwarePaginator;
 use Illuminate\Contracts\Pagination\Paginator;
 
@@ -84,11 +84,12 @@ if (!function_exists('drewlabs_database_map_query_result')) {
     {
         $item = $item instanceof EnumerableResultInterface ? $item->getCollection() : $item;
         if (is_array($item)) {
-            $item = Collection($item['data'] ?? []);
+            $item = Collection::make($item['data'] ?? []);
         }
         if ($item instanceof Paginator) {
             return drewlabs_database_paginator_apply_callback($item, $callback);
         }
+
         return new EnumerableResult($item->map($callback)
             ->filter(static function ($current) {
                 return isset($current);
@@ -108,13 +109,13 @@ if (!function_exists('drewlabs_database_apply')) {
     {
         $item = $item instanceof EnumerableResultInterface ? $item->getCollection() : $item;
         if (is_array($item)) {
-            $item = Collection($item['data'] ?? []);
+            $item = Collection::make($item['data'] ?? []);
         }
         if ($item instanceof Paginator) {
             return drewlabs_database_paginator_apply_to_all($item, $callback);
         }
 
-        return new EnumerableResult(call_user_func($callback, null === $item ? Collection($item) : $item));
+        return new EnumerableResult(call_user_func($callback, null === $item ? Collection::make($item) : $item));
     }
 }
 

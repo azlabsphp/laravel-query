@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the Drewlabs package.
+ * This file is part of the drewlabs namespace.
  *
  * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
  *
@@ -11,20 +11,26 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Database\Tests\Stubs;
+namespace Drewlabs\LaravelQuery\Tests\Stubs;
 
-use Drewlabs\Packages\Database\Contracts\ORMModel;
-use Drewlabs\Packages\Database\Traits\Queryable as TraitsModel;
+use Drewlabs\LaravelQuery\Traits\Queryable as TraitsModel;
+use Drewlabs\Query\Contracts\Queryable;
 use Illuminate\Database\Eloquent\Model;
 
-class PostType extends Model implements ORMModel
+class PostType extends Model implements Queryable
 {
-    use TraitsModel, Compat;
+    use Compat;
+    use TraitsModel;
 
     /**
      * @var array
      */
     public $relation_methods = ['posts'];
+
+    /**
+     * @var bool
+     */
+    public $timestamps = false;
 
     /**
      * @var string
@@ -47,16 +53,11 @@ class PostType extends Model implements ORMModel
     protected $appends = [];
 
     /**
-     * @var bool
-     */
-    public $timestamps = false;
-
-    /**
      * @var array
      */
     protected $fillable = [
         'id',
-        'label'
+        'label',
     ];
 
     /**

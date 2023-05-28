@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the Drewlabs package.
+ * This file is part of the drewlabs namespace.
  *
  * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
  *
@@ -11,11 +11,11 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Database\Traits;
+namespace Drewlabs\LaravelQuery\Traits;
 
 use Illuminate\Database\Eloquent\Model;
 
-trait ProvidesDDLQuery
+trait ProvidesDDL
 {
     /**
      * Checks if the table configured for the current instance exists

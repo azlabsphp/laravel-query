@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the Drewlabs package.
+ * This file is part of the drewlabs namespace.
  *
  * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
  *
@@ -11,15 +11,16 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Database\Tests\Stubs;
+namespace Drewlabs\LaravelQuery\Tests\Stubs;
 
-use Drewlabs\Packages\Database\Contracts\ORMModel;
-use Drewlabs\Packages\Database\Traits\Queryable as TraitsModel;
+use Drewlabs\LaravelQuery\Traits\Queryable as TraitsModel;
+use Drewlabs\Query\Contracts\Queryable;
 use Illuminate\Database\Eloquent\Model;
 
-class Person extends Model implements ORMModel
+class Person extends Model implements Queryable
 {
-    use TraitsModel, Compat;
+    use Compat;
+    use TraitsModel;
 
     /**
      * Model relations definitions.
@@ -87,7 +88,7 @@ class Person extends Model implements ORMModel
     {
         parent::boot();
         static::updating(static function (self $model) {
-            exit();
+            exit;
         });
     }
 }

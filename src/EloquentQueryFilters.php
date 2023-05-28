@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the Drewlabs package.
+ * This file is part of the drewlabs namespace.
  *
  * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
  *
@@ -11,17 +11,19 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Database;
+namespace Drewlabs\LaravelQuery;
 
-use Drewlabs\Query\Contracts\FiltersInterface;
-use Drewlabs\Query\JoinQuery;
 use Drewlabs\Core\Helpers\Arr;
 use Drewlabs\Query\ConditionQuery;
-use Illuminate\Contracts\Database\Query\Builder;
-
+use Drewlabs\Query\Contracts\FiltersInterface;
+use Drewlabs\Query\JoinQuery;
+use Drewlabs\Support\Traits\MethodProxy;
+use Illuminate\Contracts\Database\Query\Builder as QueryBuilder;
+use Illuminate\Database\Eloquent\Builder;
 
 final class EloquentQueryFilters implements FiltersInterface
 {
+    use MethodProxy;
 
     /**
      * Query filters dictionary.
@@ -31,32 +33,54 @@ final class EloquentQueryFilters implements FiltersInterface
     private $filters = [];
 
     /**
-     * Query builder instance.
-     *
-     * @var object
+     * Creates class instance.
      */
-    private $model;
-
-    /**
-     * Creates class instance
-     * 
-     * @param array|null $filters 
-     */
-    public function __construct(array $filters = null)
+    public function __construct(array $values = null)
     {
-        $this->setQueryFilters($filters ?? []);
+        $this->setQueryFilters($values ?? []);
     }
 
-    public function apply($builder)
+    public function __call(string $method, $arguments)
     {
-        $object = clone $builder;
-        foreach ($this->filters ?? [] as $key => $value) {
-            if ((null !== $value) && method_exists($this, $key)) {
-                $object = $this->{$key}($object, $value);
+        [$builder, $args] = [$arguments[0] ?? null, \array_slice($arguments, 1)];
+
+        return $this->proxy($builder, $method, $args);
+    }
+
+    /**
+     * Creates new class instance.
+     *
+     * @return self
+     */
+    public static function new(array $values)
+    {
+        return new self($values);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return QueryBuilder|Builder
+     */
+    public function call($builder)
+    {
+        foreach ($this->filters ?? [] as $name => $value) {
+            if (null !== $value) {
+                $builder = \call_user_func([$this, $name], $builder, $value);
             }
         }
 
-        return $object;
+        return $builder;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return QueryBuilder|Builder
+     */
+    public function apply($builder)
+    {
+        return $this->call($builder);
     }
 
     public function setQueryFilters(array $list)
@@ -66,21 +90,47 @@ final class EloquentQueryFilters implements FiltersInterface
         return $this;
     }
 
-    private function where($builder, $filter)
+    public function invoke(string $method, $builder, $args)
     {
-        if ($filter instanceof \Closure) {
-            return $builder->where($filter);
+        return $this->{$method}($builder, $args);
+    }
+
+    /**
+     * apply `where` query on query builder.
+     *
+     * @param QueryBuilder|Builder $builder
+     * @param mixed                $params
+     *
+     * @throws \InvalidArgumentException
+     *
+     * @return QueryBuilder|Builder
+     */
+    private function and($builder, $params)
+    {
+        if ($params instanceof \Closure) {
+            return $builder->where(function ($query) use ($params) {
+                return $params($this, $query);
+            });
         }
 
-        return Arr::isList($result = (new ConditionQuery())->compile($filter)) ? array_reduce($result, static function ($builder, array $query) {
+        return Arr::isList($result = (new ConditionQuery())->compile($params)) ? array_reduce($result, static function ($builder, array $query) {
             return \is_array($query) ? $builder->where(...array_values($query)) : $builder->where($query);
         }, $builder) : $builder->where(...$result);
     }
 
-    private function whereHas($builder, $filter)
+    /**
+     * apply `whereHas` or `has` query on the builder instance.
+     *
+     * @param QueryBuilder|Builder $builder
+     * @param mixed                $params
+     *
+     * @return Builder|QueryBuilder
+     */
+    private function exists($builder, $params)
     {
-        $filter = array_filter($filter, 'is_array') === $filter ? $filter : [$filter];
-        foreach ($filter as $value) {
+        $params = array_filter($params, 'is_array') === $params ? $params : [$params];
+
+        foreach ($params as $value) {
             // To avoid query to throw, we check if the count of parameter isn't less than 2
             // Case it's less than 2 we skip to the next iteration
             if (!\is_array($value) || \count($value) < 2) {
@@ -92,10 +142,18 @@ final class EloquentQueryFilters implements FiltersInterface
         return $builder;
     }
 
-    private function whereDoesntHave($builder, $filter)
+    /**
+     * apply `whereDoesntHave` or `doesntHave` on builder instance.
+     *
+     * @param QueryBuilder|Builder $builder
+     * @param mixed                $params
+     *
+     * @return QueryBuilder|Builder
+     */
+    private function notExists($builder, $params)
     {
-        $filter = array_filter($filter, 'is_array') === $filter ? $filter : [$filter];
-        foreach ($filter as $value) {
+        $params = array_filter($params, 'is_array') === $params ? $params : [$params];
+        foreach ($params as $value) {
             // To avoid query to throw, we check if the count of parameter isn't less than 2
             // Case it's less than 2 we skip to the next iteration
             if (!\is_array($value) || \count($value) < 2) {
@@ -107,10 +165,18 @@ final class EloquentQueryFilters implements FiltersInterface
         return $builder;
     }
 
-    private function whereDate($builder, $filter)
+    /**
+     * apply `whereDate` on builder instance.
+     *
+     * @param QueryBuilder|Builder $builder
+     * @param mixed                $params
+     *
+     * @return QueryBuilder|Builder
+     */
+    private function date($builder, $params)
     {
-        $filter = array_filter($filter, 'is_array') === $filter ? $filter : [$filter];
-        foreach ($filter as $value) {
+        $params = array_filter($params, 'is_array') === $params ? $params : [$params];
+        foreach ($params as $value) {
             if (!\is_array($value)) {
                 continue;
             }
@@ -120,30 +186,40 @@ final class EloquentQueryFilters implements FiltersInterface
         return $builder;
     }
 
-    private function orWhereDate($builder, $filter)
+    /**
+     * apply `orWhereDate` on builder instance.
+     *
+     * @param QueryBuilder|Builder $builder
+     * @param mixed                $params
+     *
+     * @return QueryBuilder|Builder
+     */
+    private function orDate($builder, $params)
     {
-        $filter = array_filter($filter, 'is_array') === $filter ? $filter : [$filter];
-        foreach ($filter as $value) {
+        $params = array_filter($params, 'is_array') === $params ? $params : [$params];
+        foreach ($params as $value) {
             if (!\is_array($value)) {
                 continue;
             }
-            $builder = $builder->whereDate(...$value);
+            $builder = $builder->orWhereDate(...$value);
         }
 
         return $builder;
     }
 
-    private function has($builder, $filter)
+    // TODO : Merge with exists method
+
+    private function has($builder, $params)
     {
-        if (\is_string($filter)) {
-            return $builder->has($filter);
+        if (\is_string($params)) {
+            return $builder->has($params);
         }
         $operators = ['>=', '<=', '<', '>', '<>', '!='];
-        if (\is_array($filter) && (false !== Arr::search($filter[1] ?? null, $operators))) {
-            return $builder->has(...$filter);
+        if (\is_array($params) && (false !== Arr::search($params[1] ?? null, $operators))) {
+            return $builder->has(...$params);
         }
-        if (\is_array($filter)) {
-            foreach ($filter as $value) {
+        if (\is_array($params)) {
+            foreach ($params as $value) {
                 $builder = $builder->has($value);
             }
         }
@@ -151,57 +227,105 @@ final class EloquentQueryFilters implements FiltersInterface
         return $builder;
     }
 
-    private function doesntHave($builder, $filter)
+    /**
+     * @param QueryBuilder|Builder $builder
+     * @param mixed                $params
+     *
+     * @return mixed
+     */
+    private function doesntHave($builder, $params)
     {
-        $filter = \is_array($filter) ? $filter : [$filter];
-        foreach ($filter as $value) {
+        $params = \is_array($params) ? $params : [$params];
+        foreach ($params as $value) {
             $value = \is_array($value) ? $value : [$value];
             $builder = $builder->doesntHave(...array_values($value));
         }
 
         return $builder;
     }
+    // TODO : Merge with exists method
 
-    private function orWhere($builder, $filter)
+    /**
+     * apply `orWhere` on builder instance.
+     *
+     * @param QueryBuilder|Builder $builder
+     * @param mixed                $params
+     *
+     * @throws \InvalidArgumentException
+     *
+     * @return QueryBuilder|Builder
+     */
+    private function or($builder, $params)
     {
-        if ($filter instanceof \Closure) {
-            return $builder->where($filter);
+        if ($params instanceof \Closure) {
+            return $builder->where(function ($query) use ($params) {
+                return $params($this, $query);
+            });
         }
 
-        return Arr::isList($result = (new ConditionQuery())->compile($filter)) ? array_reduce($result, static function ($builder, array $query) {
+        return Arr::isList($result = (new ConditionQuery())->compile($params)) ? array_reduce($result, static function ($builder, array $query) {
             // In case the internal query is not an array, we simply pass it to the illuminate query builder
             // Which may throws if the parameters are not supported
             return \is_array($query) ? $builder->orWhere(...array_values($query)) : $builder->orWhere($query);
         }, $builder) : $builder->orWhere(...$result);
     }
 
-    private function whereIn($builder, array $filter)
+    /**
+     * apply `whereIn` on builder instance.
+     *
+     * @param QueryBuilder|Builder $builder
+     *
+     * @return QueryBuilder|Builder
+     */
+    private function in($builder, array $params)
     {
-        return array_reduce(array_filter($filter, 'is_array') === $filter ? $filter : [$filter], static function ($carry, $curr) {
+        return array_reduce(array_filter($params, 'is_array') === $params ? $params : [$params], static function ($carry, $curr) {
             // To make sure the builder does not throw we ignore any in query providing invalid
             // arguments
             return \count($curr) >= 2 ? $carry->whereIn($curr[0], $curr[1]) : $carry;
         }, $builder);
     }
 
-    private function whereBetween($builder, array $filter)
+    /**
+     * apply `whereBetween` on builder instance.
+     *
+     * @param QueryBuilder|Builder $builder
+     *
+     * @return QueryBuilder|Builder
+     */
+    private function between($builder, array $params)
     {
-        if (\count($filter) < 2) {
+        if (\count($params) < 2) {
             return $builder;
         }
-        return $builder->whereBetween(...array_values($filter));
+
+        return $builder->whereBetween(...array_values($params));
     }
 
-    private function whereNotIn($builder, array $filter)
+    /**
+     * apply `whereNotIn` on builder instance.
+     *
+     * @param QueryBuilder|Builder $builder
+     *
+     * @return QueryBuilder|Builder
+     */
+    private function noIn($builder, array $params)
     {
-        return array_reduce(array_filter($filter, 'is_array') === $filter ? $filter : [$filter], static function ($carry, $curr) {
+        return array_reduce(array_filter($params, 'is_array') === $params ? $params : [$params], static function ($carry, $curr) {
             // To make sure the builder does not throw we ignore any in query providing invalid
             // arguments
             return \count($curr) >= 2 ? $carry->whereNotIn($curr[0], $curr[1]) : $carry;
         }, $builder);
     }
 
-    private function orderBy($builder, array $filters)
+    /**
+     * apply `orderBy` on builder instance.
+     *
+     * @param QueryBuilder|Builder $builder
+     *
+     * @return QueryBuilder|Builder
+     */
+    private function sort($builder, array $params)
     {
         $validate = static function ($values) {
             if (empty($values)) {
@@ -212,12 +336,13 @@ final class EloquentQueryFilters implements FiltersInterface
                     return false;
                 }
             }
+
             return true;
         };
         // Case the filters is a data structure or type [['order' => '...', 'by' => '...']]
         // we apply the filters
-        if ($validate($filters = Arr::isassoc($filters) ? [$filters] : $filters)) {
-            return array_reduce($filters, static function ($builder, $current) {
+        if ($validate($params = Arr::isassoc($params) ? [$params] : $params)) {
+            return array_reduce($params, static function ($builder, $current) {
                 return $builder->orderBy($current['by'], $current['order']);
             }, $builder);
         }
@@ -226,97 +351,228 @@ final class EloquentQueryFilters implements FiltersInterface
         return $builder;
     }
 
-    private function groupBy($builder, $filter)
+    /**
+     * apply `groupBy` on builder instance.
+     *
+     * @param QueryBuilder|Builder $builder
+     * @param mixed                $params
+     *
+     * @return QueryBuilder|Builder
+     */
+    private function group($builder, $params)
     {
-        return \is_string($filter) ? $builder->groupBy($filter) : $builder->groupBy(...$filter);
+        return \is_string($params) ? $builder->groupBy($params) : $builder->groupBy(...$params);
     }
 
-    private function join($builder, $filter)
+    /**
+     * apply `join` query on builder instance.
+     *
+     * @param QueryBuilder|Builder $builder
+     * @param mixed                $params
+     *
+     * @throws \InvalidArgumentException
+     *
+     * @return QueryBuilder|Builder
+     */
+    private function join($builder, $params)
     {
-        return $this->sqlApplyJoinQueries($builder, $filter);
+        return $this->sql_Join($builder, $params);
     }
 
-    private function rightJoin($builder, $filter)
+    /**
+     * apply `right join` query on builder instance.
+     *
+     * @param QueryBuilder|Builder $builder
+     * @param mixed                $params
+     *
+     * @throws \InvalidArgumentException
+     *
+     * @return QueryBuilder|Builder
+     */
+    private function rightJoin($builder, $params)
     {
-        return $this->sqlApplyJoinQueries($builder, $filter, 'rightJoin');
+        return $this->sql_Join($builder, $params, 'rightJoin');
     }
 
-    private function leftJoin($builder, $filter)
+    /**
+     * apply `left join` query on builder instance.
+     *
+     * @param QueryBuilder|Builder $builder
+     * @param mixed                $params
+     *
+     * @throws \InvalidArgumentException
+     *
+     * @return QueryBuilder|Builder
+     */
+    private function leftJoin($builder, $params)
     {
-        return $this->sqlApplyJoinQueries($builder, $filter, 'leftJoin');
+        return $this->sql_Join($builder, $params, 'leftJoin');
     }
 
-    private function sqlApplyJoinQueries($builder, $filter, $method = 'join')
+    private function sql_Join($builder, $params, $method = 'join')
     {
-        $result = (new JoinQuery)->compile($filter);
+        $result = (new JoinQuery())->compile($params);
         $result = Arr::isList($result) ? $result : [$result];
         foreach ($result as $value) {
             $builder = $builder->{$method}(...$value);
         }
+
         return $builder;
     }
 
-    private function whereNull($builder, $filter)
+    /**
+     * apply `whereNull` query on builder instance.
+     *
+     * @param QueryBuilder|Builder $builder
+     * @param mixed                $params
+     *
+     * @return QueryBuilder|Builder
+     */
+    private function isNull($builder, $params)
     {
-        $filter = \is_array($filter) ? $filter : [$filter];
-        return array_reduce($filter, static function ($carry, $current) {
+        $params = \is_array($params) ? $params : [$params];
+
+        return array_reduce($params, static function ($carry, $current) {
             return $carry->whereNull($current);
         }, $builder);
     }
 
-    private function whereNotNull($builder, $filter)
+    /**
+     * apply `whereNotNull` query on builder instance.
+     *
+     * @param QueryBuilder|Builder $builder
+     * @param string|array         $params
+     *
+     * @return QueryBuilder|Builder
+     */
+    private function notNull($builder, $params)
     {
-        $filter = \is_array($filter) ? $filter : [$filter];
-        return array_reduce($filter, static function ($carry, $current) {
+        $params = \is_array($params) ? $params : [$params];
+
+        return array_reduce($params, static function ($carry, $current) {
             return $carry->whereNotNull($current);
         }, $builder);
     }
 
-    private function orWhereNull($builder, $filter)
+    /**
+     * apply `orWhereNull` query on builder instance.
+     *
+     * @param QueryBuilder|Builder $builder
+     * @param string|array         $params
+     *
+     * @return QueryBuilder|Builder
+     */
+    private function orIsNull($builder, $params)
     {
-        $filter = \is_array($filter) ? $filter : [$filter];
-        return array_reduce($filter, static function ($carry, $current) {
+        $params = \is_array($params) ? $params : [$params];
+
+        return array_reduce($params, static function ($carry, $current) {
             return $carry->orWhereNull($current);
         }, $builder);
     }
 
     /**
-     * Apply `whereNotNull` query on the builder instance
-     * 
-     * @param Builder $builder 
-     * @param mixed $filter
-     * 
-     * @return Builder 
+     * Apply `whereNotNull` query on the builder instance.
+     *
+     * @param Builder      $builder
+     * @param string|array $params
+     *
+     * @return Builder
      */
-    private function orWhereNotNull($builder, $filter)
+    private function orNotNull($builder, $params)
     {
-        $filter = \is_array($filter) ? $filter : [$filter];
-        return array_reduce($filter, static function ($carry, $current) {
+        $params = \is_array($params) ? $params : [$params];
+
+        return array_reduce($params, static function ($carry, $current) {
             return $carry->orWhereNotNull($current);
         }, $builder);
     }
 
     /**
-     * Invoke `limit` query on the query builder
-     * 
+     * Invoke `limit` query on the query builder.
+     *
      * @param Builder $builder
-     * 
-     * @param int $limit
-     * 
-     * @return Builder 
+     *
+     * @return Builder
      */
-    public function limit($builder, int $limit)
+    private function limit($builder, int $limit)
     {
         return $builder->limit($limit);
     }
 
-    public function __call(string $method, $builder, $args)
+    // #region Aggregation
+    /**
+     * apply `count` query on the builder.
+     *
+     * @param Builder $builder
+     *
+     * @return void
+     */
+    private function count($builder, $relations)
     {
-        // TODO : Provide implementation
+        return $builder->withAggregate(\is_array($relations) ? $relations : \func_get_args(), '*', 'count');
     }
 
-    public function invoke(string $method, $builder, $args)
+    /**
+     * apply `min` aggregation query on the builder.
+     *
+     * @param Builder $builder
+     * @param string  $relation
+     *
+     * @return void
+     */
+    private function min($builder, string $column, string $relation = null)
     {
-        // TODO : Provide implementation
+        return null !== $relation ? $builder->withAggregate($relation, $column, 'min') : $builder->addSelect([
+            sprintf('%s_min', $column) => $builder->clone()->min(),
+        ]);
     }
+
+    /**
+     * apply `max` aggregation query on the builder.
+     *
+     * @param Builder $builder
+     * @param string  $relation
+     *
+     * @return void
+     */
+    private function max($builder, string $column, string $relation = null)
+    {
+        return null !== $relation ? $builder->withAggregate($relation, $column, 'min') : $builder->addSelect([
+            sprintf('%s_max', $column) => $builder->clone()->max(),
+        ]);
+
+    }
+
+    /**
+     * apply `sum` aggregation query on the builder.
+     *
+     * @param Builder $builder
+     * @param string  $relation
+     *
+     * @return void
+     */
+    private function sum($builder, string $column, string $relation = null)
+    {
+        return null !== $relation ? $builder->withAggregate($relation, $column, 'sum') : $builder->addSelect([
+            sprintf('%s_sum', $column) => $builder->clone()->sum(),
+        ]);
+    }
+
+    /**
+     * apply `avg` aggregation query on the builder.
+     *
+     * @param Builder $builder
+     * @param string  $relation
+     *
+     * @return void
+     */
+    private function avg($builder, string $column, string $relation = null)
+    {
+        return null !== $relation ? $builder->withAggregate($relation, $column, 'avg') : $builder->addSelect([
+            sprintf('%s_avg', $column) => $builder->clone()->avg(),
+        ]);
+
+    }
+    // #endregion Aggregation
 }

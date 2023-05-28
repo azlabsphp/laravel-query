@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the Drewlabs package.
+ * This file is part of the drewlabs namespace.
  *
  * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
  *
@@ -11,55 +11,53 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Database;
+namespace Drewlabs\LaravelQuery;
 
-use BadMethodCallException;
 use Closure;
-use Drewlabs\Query\Contracts\FiltersInterface;
 use Drewlabs\Core\Helpers\Arr;
-use Drewlabs\Overloadable\Overloadable;
-use Drewlabs\Packages\Database\TransactionClient;
+use Drewlabs\LaravelQuery\Concerns\CreateQueryLanguage;
+use Drewlabs\LaravelQuery\Concerns\DeleteQueryLanguage;
 
-use Drewlabs\Packages\Database\Query\Concerns\CreateQueryLanguage;
-use Drewlabs\Packages\Database\Query\Concerns\DeleteQueryLanguage;
-use Drewlabs\Packages\Database\Query\Concerns\SelectQueryLanguage;
-use Drewlabs\Packages\Database\Query\Concerns\UpdateQueryLanguage;
-use Drewlabs\Packages\Database\Traits\ProvidesBuilderFactory;
+use Drewlabs\LaravelQuery\Concerns\SelectQueryLanguage;
+use Drewlabs\LaravelQuery\Concerns\UpdateQueryLanguage;
+use Drewlabs\LaravelQuery\Contracts\ProvidesFiltersFactory;
+use Drewlabs\Overloadable\Overloadable;
 use Drewlabs\Query\AggregationMethods;
-use Drewlabs\Query\Contracts\QueryLanguageInterface;
-use Drewlabs\Support\Traits\MethodProxy;
-use InvalidArgumentException;
-use Error;
-use Drewlabs\Query\Contracts\Queryable;
-use Illuminate\Database\Eloquent\Model;
 use Drewlabs\Query\Contracts\EnumerableResultInterface;
+use Drewlabs\Query\Contracts\FiltersInterface;
+use Drewlabs\Query\Contracts\Queryable;
+use Drewlabs\Query\Contracts\QueryLanguageInterface;
+use Drewlabs\Query\Contracts\TransactionManagerInterface;
+use Drewlabs\Support\Traits\MethodProxy;
+use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 /**
- * @method Queryable|mixed                                      create(array $attributes, \Closure $callback = null)
- * @method Queryable|mixed                                      create(array $attributes, $params, bool $batch, \Closure $callback = null)
- * @method Queryable|mixed                                      create(array $attributes, $params = [], \Closure $callback)
- * @method bool                                                 delete(int $id)
- * @method bool                                                 delete(string $id)
- * @method int                                                  delete(array $query)
- * @method int                                                  delete(array $query, bool $batch)
- * @method EnumerableResultInterface|mixed                      select()
- * @method Queryable|mixed                                      select(string $id, array $columns, \Closure $callback = null)
- * @method Queryable|mixed                                      select(string $id, \Closure $callback = null)
- * @method Queryable|mixed                                      select(int $id, array $columns, \Closure $callback = null)
- * @method Queryable|mixed                                      select(int $id, \Closure $callback = null)
- * @method EnumerableResultInterface|mixed                      select(array $query, \Closure $callback = null)
- * @method EnumerableResultInterface|mixed                      select(array $query, array $columns, \Closure $callback = null)
- * @method mixed                                                select(array $query, int $per_page, int $page = null, \Closure $callback = null)
- * @method mixed                                                select(array $query, int $per_page, array $columns, int $page = null, \Closure $callback = null)
- * @method int                                                  selectAggregate(array $query = [], string $aggregation = \Drewlabs\Packages\Database\AggregationMethods::COUNT)
- * @method int                                                  update(array $query, $attributes = [])
- * @method int                                                  update(array $query, $attributes = [], bool $bulkstatement)
- * @method Queryable|mixed                                      update(int $id, $attributes, \Closure $dto_transform_fn = null)
- * @method Queryable|mixed                                      update(int $id, $attributes, $params, \Closure $dto_transform_fn = null)
- * @method Queryable|mixed                                      update(string $id, $attributes, \Closure $dto_transform_fn = null)
- * @method Queryable|mixed                                      update(string $id, $attributes, $params, \Closure $dto_transform_fn = null)
+ * @method Queryable|mixed                 create(array $attributes, \Closure $callback = null)
+ * @method Queryable|mixed                 create(array $attributes, $params, bool $batch, \Closure $callback = null)
+ * @method Queryable|mixed                 create(array $attributes, $params = [], \Closure $callback)
+ * @method bool                            delete(int $id)
+ * @method bool                            delete(string $id)
+ * @method int                             delete(array $query)
+ * @method int                             delete(array $query, bool $batch)
+ * @method EnumerableResultInterface|mixed select()
+ * @method Queryable|mixed                 select(string $id, array $columns, \Closure $callback = null)
+ * @method Queryable|mixed                 select(string $id, \Closure $callback = null)
+ * @method Queryable|mixed                 select(int $id, array $columns, \Closure $callback = null)
+ * @method Queryable|mixed                 select(int $id, \Closure $callback = null)
+ * @method EnumerableResultInterface|mixed select(array $query, \Closure $callback = null)
+ * @method EnumerableResultInterface|mixed select(array $query, array $columns, \Closure $callback = null)
+ * @method mixed                           select(array $query, int $per_page, int $page = null, \Closure $callback = null)
+ * @method mixed                           select(array $query, int $per_page, array $columns, int $page = null, \Closure $callback = null)
+ * @method int                             selectAggregate(array $query = [], string $aggregation = \Drewlabs\LaravelQuery\AggregationMethods::COUNT)
+ * @method int                             update(array $query, $attributes = [])
+ * @method int                             update(array $query, $attributes = [], bool $bulkstatement)
+ * @method Queryable|mixed                 update(int $id, $attributes, \Closure $dto_transform_fn = null)
+ * @method Queryable|mixed                 update(int $id, $attributes, $params, \Closure $dto_transform_fn = null)
+ * @method Queryable|mixed                 update(string $id, $attributes, \Closure $dto_transform_fn = null)
+ * @method Queryable|mixed                 update(string $id, $attributes, $params, \Closure $dto_transform_fn = null)
  */
-final class QueryLanguage implements QueryLanguageInterface
+final class QueryLanguage implements QueryLanguageInterface, ProvidesFiltersFactory
 {
     use CreateQueryLanguage;
     use DeleteQueryLanguage;
@@ -67,7 +65,6 @@ final class QueryLanguage implements QueryLanguageInterface
     use Overloadable;
     use SelectQueryLanguage;
     use UpdateQueryLanguage;
-    use ProvidesBuilderFactory;
 
     public const AGGREGATE_METHODS = [
         AggregationMethods::COUNT,
@@ -78,7 +75,6 @@ final class QueryLanguage implements QueryLanguageInterface
     ];
 
     /**
-     *
      * @var string
      */
     private $blueprint;
@@ -99,29 +95,33 @@ final class QueryLanguage implements QueryLanguageInterface
     private $transactions;
 
     /**
-     * Creates class instance
-     * 
-     * @param mixed $blueprint 
-     * @return void 
-     * @throws InvalidArgumentException 
+     * @var \Closure(mixed|array): EloquentQueryFilters
      */
-    public function __construct($blueprint)
+    private $filtersFactory;
+
+    /**
+     * Creates class instance.
+     *
+     * @param Queryable|class-string<Queryable> $queryable
+     *
+     * @throws \InvalidArgumentException
+     */
+    public function __construct($queryable)
     {
-        if (!(\is_string($blueprint) || ($blueprint instanceof Model))) {
-            throw new \InvalidArgumentException('Constructor requires an instance of ' . Model::class . ', or a Model class name');
-        }
-        $this->queryable = \is_string($blueprint) ? new $blueprint() : $blueprint;
-        $this->blueprint = \is_string($blueprint) ? $blueprint : \get_class($blueprint);
-        $this->transactions = new TransactionManager(new TransactionClient($this->queryable->getConnection()));
+        // #region Set required properties value
+        $this->setQueryable($queryable);
+        $this->setTransactionManager($this->useDefaultTransactionManager());
         $this->setBuilderFactory($this->defaultBuilderFactory());
+        $this->setFiltersFactory($this->useDefaultQueryFactory());
+        // #endregion Set required properties value
     }
 
     /**
-     * Creates Query Language instance
-     * 
+     * Creates Query Language instance.
+     *
      * @param mixed $blueprint
-     * 
-     * @return static 
+     *
+     * @return static
      */
     public static function new($blueprint)
     {
@@ -131,52 +131,132 @@ final class QueryLanguage implements QueryLanguageInterface
     public function createMany(array $attributes)
     {
         if (!(array_filter($attributes, 'is_array') === $attributes)) {
-            throw new \InvalidArgumentException(__METHOD__ . ' requires an list of list items for insertion');
+            throw new \InvalidArgumentException(__METHOD__.' requires an list of list items for insertion');
         }
+
         return $this->queryable->insert(array_map(function ($value) {
             return array_merge($this->parseAttributes($value), ['updated_at' => date('Y-m-d H:i:s'), 'created_at' => date('Y-m-d H:i:s')]);
         }, $attributes));
     }
 
     /**
-     * Provides an aggregation interface definition
-     * 
-     * @param array $query 
-     * @param string $aggregation 
-     * @param mixed $args 
-     * @return int|mixed 
-     * @throws InvalidArgumentException 
-     * @throws Error 
-     * @throws BadMethodCallException 
+     * Provides an aggregation interface definition.
+     *
+     * @param mixed $args
+     *
+     * @throws \InvalidArgumentException
+     * @throws \Error
+     * @throws \BadMethodCallException
+     *
+     * @return int|mixed
      */
     public function aggregate(array $query = [], string $aggregation = AggregationMethods::COUNT, ...$args)
     {
         if (!\in_array($aggregation, static::AGGREGATE_METHODS, true)) {
             throw new \InvalidArgumentException('The provided method is not part of the aggregation framework supported methods');
         }
+
         return $this->proxy($this->builderFactory()($this->queryable, $query), $aggregation, [...$args]);
     }
 
     /**
-     * Provides an aggregation interface implementation
-     * 
-     * @param array $query 
-     * @param string $aggregation 
-     * @param mixed $args 
-     * @return int|mixed 
-     * @throws InvalidArgumentException 
-     * @throws Error 
-     * @throws BadMethodCallException 
+     * Provides an aggregation interface implementation.
+     *
+     * @param mixed $args
+     *
+     * @throws \InvalidArgumentException
+     * @throws \Error
+     * @throws \BadMethodCallException
+     *
+     * @return int|mixed
      */
     public function selectAggregate(array $query = [], string $aggregation = AggregationMethods::COUNT, ...$args)
     {
         return $this->aggregate($query, $aggregation, ...$args);
     }
 
-
     public function getQueryable()
     {
         return $this->queryable;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return self
+     */
+    public function setFiltersFactory(\Closure $factory)
+    {
+        $this->filtersFactory = $factory;
+
+        return $this;
+    }
+
+    /**
+     * Return the filters factory instance.
+     *
+     * @return Closure(mixed|array $queries): FiltersInterface
+     */
+    public function getFiltersFactory()
+    {
+        return $this->filtersFactory;
+    }
+
+    /**
+     * Query language builder factory getter.
+     *
+     * @return Closure(mixed $builder, array|FiltersInterface $query): Builder
+     */
+    public function builderFactory()
+    {
+        return $this->builderFactory;
+    }
+
+    /**
+     * Query Language builder factory setter method.
+     *
+     * @return self
+     */
+    public function setBuilderFactory(\Closure $factory)
+    {
+        $this->builderFactory = $factory;
+
+        return $this;
+    }
+
+    /**
+     * Set the transaction manager instance for the current object.
+     *
+     * @return self
+     */
+    public function setTransactionManager(TransactionManagerInterface $transactions)
+    {
+        $this->transactions = $transactions;
+
+        return $this;
+    }
+
+    /**
+     * Set the queryable instance on this object.
+     *
+     * @param mixed $queryable
+     *
+     * @throws \InvalidArgumentException
+     *
+     * @return $this
+     */
+    public function setQueryable($queryable)
+    {
+        [$instance, $blueprint] = \is_string($queryable) ? [new $queryable(), $queryable] : [$queryable, $queryable::class];
+        // Check for the type of queryable instance
+        if (!($instance instanceof Queryable)) {
+            throw new \InvalidArgumentException('constructor requires an instance of '.Queryable::class.', or a Queryable class string');
+        }
+        $this->queryable = $instance;
+        $this->blueprint = $blueprint;
+
+        // Return the current instance
+        return $this;
     }
 
     /**
@@ -186,10 +266,14 @@ final class QueryLanguage implements QueryLanguageInterface
      */
     private function defaultBuilderFactory()
     {
-        return static function ($builder, $query) {
-            return \is_array($query) ? array_reduce((array_filter($query, 'is_array') === $query) && !(array_keys($query) !== range(0, \count($query) - 1)) ? $query : [$query], static function ($builder, $query) {
-                return (new EloquentQueryFilters($query))->apply($builder);
-            }, $builder) : $query->apply($builder);
+        /*
+         * @param Builder                $builder
+         * @param array|FiltersInterface $query
+         */
+        return function ($builder, $query = []) {
+            return \is_array($query) ? array_reduce((array_filter($query, 'is_array') === $query) && !(array_keys($query) !== range(0, \count($query) - 1)) ? $query : [$query], function ($builder, $query) {
+                return $this->getFiltersFactory()($query)->call($builder);
+            }, $builder) : (null === $query ? $builder : $query->call($builder));
         };
     }
 
@@ -205,6 +289,7 @@ final class QueryLanguage implements QueryLanguageInterface
         if (\is_array($attributes)) {
             return $attributes;
         }
+
         return Arr::create($attributes);
     }
 
@@ -222,15 +307,14 @@ final class QueryLanguage implements QueryLanguageInterface
         if (empty($fillable)) {
             return $attributes;
         }
+
         return iterator_to_array($this->filterQueryableAttributes($fillable, $attributes));
     }
 
     /**
-     * Produces an array of properties that are supported by the queryable instance
-     * 
-     * @param array $properties 
-     * @param array $attributes 
-     * @return \Traversable<mixed, mixed, mixed, void> 
+     * Produces an array of properties that are supported by the queryable instance.
+     *
+     * @return \Traversable<mixed, mixed, mixed, void>
      */
     private function filterQueryableAttributes(array $properties, array $attributes)
     {
@@ -239,5 +323,27 @@ final class QueryLanguage implements QueryLanguageInterface
                 yield $value => $attributes[$value];
             }
         }
+    }
+
+    /**
+     * Use the eloquent query filter as default query filter.
+     *
+     * @return Closure(mixed|array $queries): EloquentQueryFilters
+     */
+    private function useDefaultQueryFactory()
+    {
+        return static function (array $queries) {
+            return new EloquentQueryFilters($queries);
+        };
+    }
+
+    /**
+     * Set the instance to use the default transaction manager.
+     *
+     * @return TransactionManager
+     */
+    private function useDefaultTransactionManager()
+    {
+        return new TransactionManager(new TransactionClient($this->queryable->getConnection()));
     }
 }

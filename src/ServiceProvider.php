@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the Drewlabs package.
+ * This file is part of the drewlabs namespace.
  *
  * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
  *
@@ -11,9 +11,9 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Database;
+namespace Drewlabs\LaravelQuery;
 
-use Drewlabs\Packages\Database\Eloquent\QueryFilters;
+use Drewlabs\LaravelQuery\Eloquent\QueryFilters;
 use Drewlabs\Query\Contracts\FiltersInterface;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 

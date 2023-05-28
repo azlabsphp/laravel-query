@@ -12,8 +12,8 @@
 
 - Added DMLManager::selectOne method for selecting single value even when query matches multiple row in table
 - Removes dependencies to core package
-- Add local implementation of `Drewlabs\Contracts\Data\Parser\ModelAttributeParser::interface` a.k.a `Drewlabs\Packages\Database\ModelAttributesParser::class`
-- Add local implementation of `Drewlabs\Contracts\Data\EnumerableQueryResult::interface` a.k.a `Drewlabs\Packages\Database\EnumerableQueryResult::class`
+- Add local implementation of `Drewlabs\Contracts\Data\Parser\ModelAttributeParser::interface` a.k.a `Drewlabs\LaravelQuery\ModelAttributesParser::class`
+- Add local implementation of `Drewlabs\Contracts\Data\EnumerableQueryResult::interface` a.k.a `Drewlabs\LaravelQuery\EnumerableQueryResult::class`
 
 ## [2.2.0] 2022-04-12
 
@@ -22,7 +22,7 @@
 
 ## [2.2.2] 2022-04-14
 
-- Added a useMapQueryResult transformation function to Drewlabs\Packages\Database\Proxy namespace
+- Added a useMapQueryResult transformation function to Drewlabs\LaravelQuery\Proxy namespace
 
 ## [2.3.0] 2022-05-05
 

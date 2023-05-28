@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the Drewlabs package.
+ * This file is part of the drewlabs namespace.
  *
  * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
  *
@@ -11,9 +11,9 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Database\Traits;
+namespace Drewlabs\LaravelQuery\Traits;
 
-use Drewlabs\Query\QueryFiltersBuilder;
+use Drewlabs\Query\PreparesFiltersBag;
 
 trait CreatesFilters
 {
@@ -28,7 +28,7 @@ trait CreatesFilters
      */
     public function makeFilters(array $defaults = [])
     {
-        return QueryFiltersBuilder::new($this->resolveModel())->build($this, $defaults ?? []);
+        return PreparesFiltersBag::new($this)->call($this->resolveModel(), $defaults ?? []);
     }
 
     /**
@@ -38,6 +38,6 @@ trait CreatesFilters
      */
     public function resolveModel()
     {
-        return \is_string($model = $this->getModel()) ? new $model : $model;
+        return \is_string($model = $this->getModel()) ? new $model() : $model;
     }
 }

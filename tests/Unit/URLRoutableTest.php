@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the Drewlabs package.
+ * This file is part of the drewlabs namespace.
  *
  * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
  *
@@ -11,12 +11,12 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Database\Tests\Unit;
+namespace Drewlabs\LaravelQuery\Tests\Unit;
 
-use Drewlabs\Packages\Database\Tests\Stubs\ModelValue;
-use Drewlabs\Packages\Database\Tests\TestCase;
+use Drewlabs\LaravelQuery\Tests\Stubs\ModelValue;
+use Drewlabs\LaravelQuery\Tests\TestCase;
 
-class ModelValueTest extends TestCase
+class URLRoutableTest extends TestCase
 {
     public function test_get_route_key()
     {

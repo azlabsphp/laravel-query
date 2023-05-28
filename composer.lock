@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "73356df84ad357022366d6d29c559755",
+    "content-hash": "502197b97f8a0c22079abe010d5e162f",
     "packages": [
         {
             "name": "brick/math",
@@ -676,16 +676,16 @@
         },
         {
             "name": "drewlabs/query",
-            "version": "v0.2.1",
+            "version": "v0.2.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/azlabsphp/query.git",
-                "reference": "2f1eedc99cd8f5b552cb6ce7d83f8b0a075df5d6"
+                "reference": "57c4f7b1270b0295776edf68a4c6ed4c273b1966"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/azlabsphp/query/zipball/2f1eedc99cd8f5b552cb6ce7d83f8b0a075df5d6",
-                "reference": "2f1eedc99cd8f5b552cb6ce7d83f8b0a075df5d6",
+                "url": "https://api.github.com/repos/azlabsphp/query/zipball/57c4f7b1270b0295776edf68a4c6ed4c273b1966",
+                "reference": "57c4f7b1270b0295776edf68a4c6ed4c273b1966",
                 "shasum": ""
             },
             "require": {
@@ -698,6 +698,9 @@
             },
             "type": "library",
             "autoload": {
+                "files": [
+                    "proxies.php"
+                ],
                 "psr-4": {
                     "Drewlabs\\Query\\": "src/"
                 }
@@ -719,22 +722,22 @@
             ],
             "support": {
                 "issues": "https://github.com/azlabsphp/query/issues",
-                "source": "https://github.com/azlabsphp/query/tree/v0.2.1"
+                "source": "https://github.com/azlabsphp/query/tree/v0.2.8"
             },
-            "time": "2023-05-25T21:41:31+00:00"
+            "time": "2023-05-28T17:57:01+00:00"
         },
         {
             "name": "drewlabs/support",
-            "version": "v0.2.0",
+            "version": "v0.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/azlabsphp/support.git",
-                "reference": "d785be003dfbbbd7714ecdb623e93068c9b1b208"
+                "reference": "3a3aa5881832e7dab099af92fd818f9c63a6be57"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/azlabsphp/support/zipball/d785be003dfbbbd7714ecdb623e93068c9b1b208",
-                "reference": "d785be003dfbbbd7714ecdb623e93068c9b1b208",
+                "url": "https://api.github.com/repos/azlabsphp/support/zipball/3a3aa5881832e7dab099af92fd818f9c63a6be57",
+                "reference": "3a3aa5881832e7dab099af92fd818f9c63a6be57",
                 "shasum": ""
             },
             "require": {
@@ -770,9 +773,9 @@
             "description": "Utility library for creating common objects like value object, collection, action creator etc...",
             "support": {
                 "issues": "https://github.com/azlabsphp/support/issues",
-                "source": "https://github.com/azlabsphp/support/tree/v0.2.0"
+                "source": "https://github.com/azlabsphp/support/tree/v0.2.2"
             },
-            "time": "2023-05-19T13:41:11+00:00"
+            "time": "2023-05-28T10:50:29+00:00"
         },
         {
             "name": "illuminate/collections",
@@ -2051,16 +2054,16 @@
         },
         {
             "name": "symfony/translation",
-            "version": "v6.2.8",
+            "version": "v6.2.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/translation.git",
-                "reference": "817535dbb1721df8b3a8f2489dc7e50bcd6209b5"
+                "reference": "64113df3e8b009f92fad63014f4ec647e65bc927"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/translation/zipball/817535dbb1721df8b3a8f2489dc7e50bcd6209b5",
-                "reference": "817535dbb1721df8b3a8f2489dc7e50bcd6209b5",
+                "url": "https://api.github.com/repos/symfony/translation/zipball/64113df3e8b009f92fad63014f4ec647e65bc927",
+                "reference": "64113df3e8b009f92fad63014f4ec647e65bc927",
                 "shasum": ""
             },
             "require": {
@@ -2129,7 +2132,7 @@
             "description": "Provides tools to internationalize your application",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/translation/tree/v6.2.8"
+                "source": "https://github.com/symfony/translation/tree/v6.2.11"
             },
             "funding": [
                 {
@@ -2145,7 +2148,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-03-31T09:14:44+00:00"
+            "time": "2023-05-19T12:37:14+00:00"
         },
         {
             "name": "symfony/translation-contracts",
@@ -4458,16 +4461,16 @@
         },
         {
             "name": "symfony/console",
-            "version": "v6.2.10",
+            "version": "v6.2.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/console.git",
-                "reference": "12288d9f4500f84a4d02254d4aa968b15488476f"
+                "reference": "5aa03db8ef0a5457c316ec580e69562d97734c77"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/console/zipball/12288d9f4500f84a4d02254d4aa968b15488476f",
-                "reference": "12288d9f4500f84a4d02254d4aa968b15488476f",
+                "url": "https://api.github.com/repos/symfony/console/zipball/5aa03db8ef0a5457c316ec580e69562d97734c77",
+                "reference": "5aa03db8ef0a5457c316ec580e69562d97734c77",
                 "shasum": ""
             },
             "require": {
@@ -4534,7 +4537,7 @@
                 "terminal"
             ],
             "support": {
-                "source": "https://github.com/symfony/console/tree/v6.2.10"
+                "source": "https://github.com/symfony/console/tree/v6.2.11"
             },
             "funding": [
                 {
@@ -4550,7 +4553,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-04-28T13:37:43+00:00"
+            "time": "2023-05-26T08:16:21+00:00"
         },
         {
             "name": "symfony/deprecation-contracts",
@@ -5062,16 +5065,16 @@
         },
         {
             "name": "symfony/process",
-            "version": "v6.2.10",
+            "version": "v6.2.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/process.git",
-                "reference": "b34cdbc9c5e75d45a3703e63a48ad07aafa8bf2e"
+                "reference": "97ae9721bead9d1a39b5650e2f4b7834b93b539c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/process/zipball/b34cdbc9c5e75d45a3703e63a48ad07aafa8bf2e",
-                "reference": "b34cdbc9c5e75d45a3703e63a48ad07aafa8bf2e",
+                "url": "https://api.github.com/repos/symfony/process/zipball/97ae9721bead9d1a39b5650e2f4b7834b93b539c",
+                "reference": "97ae9721bead9d1a39b5650e2f4b7834b93b539c",
                 "shasum": ""
             },
             "require": {
@@ -5103,7 +5106,7 @@
             "description": "Executes commands in sub-processes",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/process/tree/v6.2.10"
+                "source": "https://github.com/symfony/process/tree/v6.2.11"
             },
             "funding": [
                 {
@@ -5119,7 +5122,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-04-18T13:56:57+00:00"
+            "time": "2023-05-19T07:42:48+00:00"
         },
         {
             "name": "symfony/service-contracts",
@@ -5398,7 +5401,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=8.0"
+        "php": "^7.2|^7.3|^7.4|^8.0|^8.1|^8.2"
     },
     "platform-dev": [],
     "plugin-api-version": "2.2.0"

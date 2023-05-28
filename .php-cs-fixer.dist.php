@@ -3,7 +3,7 @@
 require __DIR__ . '/vendor/autoload.php';
 
 $header = <<<'HEADER'
-This file is part of the Drewlabs package.
+This file is part of the drewlabs namespace.
 
 (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
 
@@ -27,10 +27,8 @@ $rules = [
     'combine_consecutive_issets' => true,
     'combine_consecutive_unsets' => true,
     'compact_nullable_typehint' => true,
-    'global_namespace_import' => ['import_classes' => false, 'import_constants' => false, 'import_functions' => false],
-    'header_comment' => [
-        'header' => $header,
-    ],
+    'global_namespace_import' => ['import_classes' => false, 'import_constants' => true, 'import_functions' => false],
+    'header_comment' => ['header' => $header],
     'list_syntax' => ['syntax' => 'short'],
     'logical_operators' => true,
     'method_argument_space' => ['on_multiline' => 'ensure_fully_multiline'],
@@ -47,7 +45,7 @@ $rules = [
     'php_unit_strict' => true,
     'php_unit_test_annotation' => false,
     'phpdoc_order' => true,
-    'single_line_throw' => false,
+    'single_line_throw' => true,
     'static_lambda' => true,
     'strict_comparison' => true,
     'strict_param' => true,

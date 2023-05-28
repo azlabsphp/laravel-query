@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the Drewlabs package.
+ * This file is part of the drewlabs namespace.
  *
  * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
  *
@@ -11,17 +11,11 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Database\Tests;
+namespace Drewlabs\LaravelQuery\Tests;
 
-use Drewlabs\Contracts\Data\Filters\FiltersInterface;
-use Drewlabs\Contracts\Data\Parser\ModelAttributeParser as ModelAttributesParserContract;
-use Drewlabs\Packages\Database\Contracts\TransactionUtils;
-use Drewlabs\Packages\Database\DatabaseTransactionManager;
-use Drewlabs\Packages\Database\EloquentBuilderQueryFilters;
-use Drewlabs\Packages\Database\ModelAttributesParser;
-use Drewlabs\Packages\Database\Tests\Stubs\Address;
-use Drewlabs\Packages\Database\Tests\Stubs\Person;
-use Drewlabs\Packages\Database\Tests\Stubs\Profil;
+use Drewlabs\LaravelQuery\Tests\Stubs\Address;
+use Drewlabs\LaravelQuery\Tests\Stubs\Person;
+use Drewlabs\LaravelQuery\Tests\Stubs\Profil;
 use Illuminate\Container\Container;
 use Illuminate\Database\Capsule\Manager;
 use Illuminate\Database\Connectors\ConnectionFactory;
@@ -116,7 +110,7 @@ class TestCase extends FrameworkTestCase
         });
 
         // #region Post - Video - Comments
-        Manager::schema()->create('post_types', function(Blueprint $table) {
+        Manager::schema()->create('post_types', static function (Blueprint $table) {
             $table->smallIncrements('id');
             $table->string('label', 100);
         });
@@ -213,11 +207,6 @@ class TestCase extends FrameworkTestCase
         $app->singleton('db', static function ($app) {
             return new DatabaseManager($app, $app['db.factory']);
         });
-        $app->singleton(TransactionUtils::class, static function ($app) {
-            return new DatabaseTransactionManager();
-        });
-        $app->bind(FiltersInterface::class, EloquentBuilderQueryFilters::class);
-        $app->bind(ModelAttributesParserContract::class, ModelAttributesParser::class);
     }
 
     /**

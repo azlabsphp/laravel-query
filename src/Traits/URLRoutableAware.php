@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the Drewlabs package.
+ * This file is part of the drewlabs namespace.
  *
  * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
  *
@@ -11,7 +11,9 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Database\Traits;
+namespace Drewlabs\LaravelQuery\Traits;
+
+use const E_USER_WARNING;
 
 use Illuminate\Contracts\Routing\UrlRoutable;
 
@@ -22,6 +24,7 @@ trait URLRoutableAware
         if ($instance = $this->getInstance()) {
             return $instance->getRouteKey();
         }
+
         return null;
     }
 
@@ -30,6 +33,7 @@ trait URLRoutableAware
         if ($instance = $this->getInstance()) {
             return $instance->getRouteKeyName();
         }
+
         return null;
     }
 
@@ -42,6 +46,7 @@ trait URLRoutableAware
     {
         if ($instance = $this->getInstance()) {
             $value = $instance->resolveRouteBinding($value, $field);
+
             return $value ? new self($value) : $value;
         }
 
@@ -52,6 +57,7 @@ trait URLRoutableAware
     {
         if ($instance = $this->getInstance()) {
             $value = $instance->resolveChildRouteBinding($childType, $value, $field);
+
             return $value ? new self($value) : $value;
         }
 
@@ -63,7 +69,8 @@ trait URLRoutableAware
         try {
             return (null === $value = $this->getModel()) || !($value instanceof UrlRoutable) ? null : $value;
         } catch (\Exception $e) {
-            trigger_error(sprintf('%s - %s', $e->getMessage(), 'Composed class required getModel() definition'), \E_USER_WARNING);
+            trigger_error(sprintf('%s - %s', $e->getMessage(), 'Composed class required getModel() definition'), E_USER_WARNING);
+
             return null;
         }
     }

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the Drewlabs package.
+ * This file is part of the drewlabs namespace.
  *
  * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
  *
@@ -11,18 +11,19 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Database\Proxy;
+namespace Drewlabs\LaravelQuery\Proxy;
 
 use Closure;
-use Drewlabs\Packages\Database\SelectQueryResult;
-use Drewlabs\Packages\Database\QueryLanguage;
+use Drewlabs\LaravelQuery\QueryLanguage;
+use Drewlabs\LaravelQuery\SelectQueryResult;
 use Drewlabs\Query\Contracts\CommandInterface;
-use Drewlabs\Query\Contracts\QueryLanguageInterface;
 use Drewlabs\Query\Contracts\EnumerableResultInterface;
 use Drewlabs\Query\Contracts\Queryable;
-use Illuminate\Database\Eloquent\Model;
+use Drewlabs\Query\Contracts\QueryLanguageInterface;
 
 use function Drewlabs\Query\Proxy\useQueryCommand;
+
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * @param EnumerableResultInterface|mixed $value
@@ -47,7 +48,7 @@ function DMLManager($model)
 }
 
 /**
- * High order function to apply $closure to each item
+ * High order function to apply $closure to each item.
  *
  * @return \Closure
  */
@@ -59,11 +60,11 @@ function useMapQueryResult(\Closure $closure)
 }
 
 /**
- * High order function to apply a closure to a collection or list
+ * High order function to apply a closure to a collection or list.
  *
  * @return \Closure
  */
-function useApplyToQueryResult(\Closure $closure)
+function useCollectQueryResult(\Closure $closure)
 {
     return static function ($items) use ($closure) {
         return drewlabs_database_apply($items, $closure);
@@ -74,9 +75,9 @@ function useApplyToQueryResult(\Closure $closure)
  * Provides a default action handler for database queries.
  *
  * ```php
- * use function Drewlabs\Packages\Database\Proxy\useDMLQueryActionCommand;
- * use function Drewlabs\Packages\Database\Proxy\DMLManager;
- * use function Drewlabs\Packages\Database\Proxy\SelectQueryAction;
+ * use function Drewlabs\LaravelQuery\Proxy\useDMLQueryActionCommand;
+ * use function Drewlabs\LaravelQuery\Proxy\DMLManager;
+ * use function Drewlabs\LaravelQuery\Proxy\SelectQueryAction;
  *
  * $command = useDMLQueryActionCommand(DMLManager(Test::class));
  * // Executing command with an action using `exec` method
@@ -95,8 +96,8 @@ function useApplyToQueryResult(\Closure $closure)
  * a second parameter that allow developpers to provides their own custom action handler.
  *
  * ```php
- * use function Drewlabs\Packages\Database\Proxy\useDMLQueryActionCommand;
- * use function Drewlabs\Packages\Database\Proxy\DMLManager;
+ * use function Drewlabs\LaravelQuery\Proxy\useDMLQueryActionCommand;
+ * use function Drewlabs\LaravelQuery\Proxy\DMLManager;
  * use use Drewlabs\Contracts\Support\Actions\Action;
  *
  * $command = useDMLQueryActionCommand(DMLManager(Test::class), function(Action $action, ?\Closure $callback = null) {

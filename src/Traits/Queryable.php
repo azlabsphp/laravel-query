@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the Drewlabs package.
+ * This file is part of the drewlabs namespace.
  *
  * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
  *
@@ -11,17 +11,13 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Database\Traits;
+namespace Drewlabs\LaravelQuery\Traits;
 
 use Drewlabs\Core\Helpers\Arr;
 
 trait Queryable
 {
-    public function getRelations()
-    {
-        return $this->relations ?? [];
-    }
-
+    // #region primary keys
     public function getPrimaryKey()
     {
         return $this->primaryKey ?? 'id';
@@ -30,14 +26,12 @@ trait Queryable
     public function setKey($value)
     {
         $this->{$this->getPrimaryKey()} = $value;
+
         return $this;
     }
+    // #endregion primary keys
 
-    public function getDeclaredRelations()
-    {
-        return $this->relation_methods ?? [];
-    }
-
+    // #region Queryable columns
     public function getDeclaredColumns()
     {
         // Get table primary key
@@ -58,9 +52,36 @@ trait Queryable
     {
         return $this->guarded ?? [];
     }
+    // #endregion Queryable columns
+
+    // #region Hides attributes
+    public function getHidden()
+    {
+        return $this->hidden;
+    }
+
+    public function setHidden(array $attributes)
+    {
+        $this->hidden = $attributes;
+
+        return $this;
+    }
+    // #endregion Hides attributes
+
+    // #region relations
+    public function getRelations()
+    {
+        return $this->relations ?? [];
+    }
+
+    public function getDeclaredRelations()
+    {
+        return $this->relation_methods ?? [];
+    }
 
     protected function hasRelations()
     {
         return \is_array($this->getRelations()) ?: false;
     }
+    // #endregion relations
 }

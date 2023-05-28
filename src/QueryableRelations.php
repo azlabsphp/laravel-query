@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /*
- * This file is part of the Drewlabs package.
+ * This file is part of the drewlabs namespace.
  *
  * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
  *
@@ -11,15 +11,14 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\Packages\Database;
+namespace Drewlabs\LaravelQuery;
 
 use Closure;
 use Drewlabs\Core\Helpers\Arr;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Query\Builder;
-use LogicException;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * The goal of the model relation handler implementation class is to
@@ -31,16 +30,16 @@ class QueryableRelations
     /**
      * @var Model
      */
-    private $model;
+    private $queryable;
 
     /**
-     * Creates class instance
-     * 
-     * @param mixed $model 
+     * Creates class instance.
+     *
+     * @param mixed $model
      */
     private function __construct($model)
     {
-        $this->model = $model;
+        $this->queryable = $model;
     }
 
     /**
@@ -65,17 +64,18 @@ class QueryableRelations
         if (empty($relations)) {
             return;
         }
-        list($relations, $composed) = $this->groupRelations($relations);
+        [$relations, $composed] = $this->groupRelations($relations);
         foreach ($relations as $relation) {
-            if (!(method_exists($this->model, $relation) && !empty($attributes[$relation] ?? []))) {
+            if (!(method_exists($this->queryable, $relation) && !empty($attributes[$relation] ?? []))) {
                 continue;
             }
             Arr::isnotassoclist($attributes[$relation] ?? []) ?
-                ($batch ?
-                    $this->createManyBatch($this->model->$relation(), $attributes[$relation]) :
-                    $this->createMany($this->model->$relation(), $attributes[$relation], $this->resolveRelations($composed, $relation))
+                (
+                    $batch ?
+                    $this->createManyBatch($this->queryable->$relation(), $attributes[$relation]) :
+                    $this->createMany($this->queryable->$relation(), $attributes[$relation], $this->resolveRelations($composed, $relation))
                 ) :
-                $this->createOne($this->model->$relation(), $attributes[$relation], $this->resolveRelations($composed, $relation));
+                $this->createOne($this->queryable->$relation(), $attributes[$relation], $this->resolveRelations($composed, $relation));
         }
     }
 
@@ -91,12 +91,12 @@ class QueryableRelations
         }
         // list($relations, $composed) = $this->groupRelations($relations);
         foreach ($relations as $relation) {
-            $exists = method_exists($this->model, $relation) && !empty($attributes[$relation] ?? []);
+            $exists = method_exists($this->queryable, $relation) && !empty($attributes[$relation] ?? []);
             if (!$exists) {
                 continue;
             }
             //  $this->resolveRelations($composed, $relation)
-            $this->updateRelation($this->model->$relation(), $attributes[$relation]);
+            $this->updateRelation($this->queryable->$relation(), $attributes[$relation]);
         }
     }
 
@@ -108,23 +108,24 @@ class QueryableRelations
      */
     public function refresh(array $relations, array $attributes)
     {
-        list($relations, $composed) = $this->groupRelations($relations);
+        [$relations, $composed] = $this->groupRelations($relations);
         foreach ($relations as $relation) {
-            $exists = method_exists($this->model, $relation) && !empty($attributes[$relation] ?? []);
+            $exists = method_exists($this->queryable, $relation) && !empty($attributes[$relation] ?? []);
             if (!$exists) {
                 continue;
             }
-            $this->refreshRelation($this->model->$relation(), $attributes[$relation], $this->resolveRelations($composed, $relation));
+            $this->refreshRelation($this->queryable->$relation(), $attributes[$relation], $this->resolveRelations($composed, $relation));
         }
     }
 
     /**
-     * Call update or create method on the model instance
-     * 
-     * @param Builder|Relation $query 
-     * @param array $value 
-     * @return mixed 
-     * @throws LogicException 
+     * Call update or create method on the model instance.
+     *
+     * @param Builder|Relation $query
+     *
+     * @throws \LogicException
+     *
+     * @return mixed
      */
     private static function updateOrCreate($query, array $value = [])
     {
@@ -146,15 +147,15 @@ class QueryableRelations
                 )
             );
         }
-        throw new \LogicException('Expected ' . __METHOD__ . ' to receive an array of 1 or 2 array values');
+        throw new \LogicException('Expected '.__METHOD__.' to receive an array of 1 or 2 array values');
     }
 
     /**
-     * Format attributes for create many query
-     * 
-     * @param Relation $instance 
-     * @param array $attributes 
-     * @return array 
+     * Format attributes for create many query.
+     *
+     * @param Relation $instance
+     *
+     * @return array
      */
     private static function formatCreateManyAttributes($instance, array $attributes = [])
     {
@@ -166,6 +167,7 @@ class QueryableRelations
                 $out[0][] = $attribute;
                 $out[1][] = $pivot;
             }
+
             return $out;
         }
 
@@ -173,11 +175,11 @@ class QueryableRelations
     }
 
     /**
-     * Format attribute before insert action
-     * 
-     * @param Relation $instance 
-     * @param array $attributes 
-     * @return array 
+     * Format attribute before insert action.
+     *
+     * @param Relation $instance
+     *
+     * @return array
      */
     private static function formatCreateAttributes($instance, array $attributes = [])
     {
@@ -185,12 +187,11 @@ class QueryableRelations
     }
 
     /**
-     * Format attribute before upserting
-     * 
-     * @param Relation $instance 
-     * @param array $attributes 
-     * @param array $values 
-     * @return array 
+     * Format attribute before upserting.
+     *
+     * @param Relation $instance
+     *
+     * @return array
      */
     private static function formatUpsertAttributes($instance, array $attributes, array $values = [])
     {
@@ -198,18 +199,19 @@ class QueryableRelations
     }
 
     /**
-     * Update model relation
-     * 
-     * @param Relation $instance 
-     * @param array $values 
-     * @param array $relations 
-     * @return void 
-     * @throws LogicException 
+     * Update model relation.
+     *
+     * @param Relation $instance
+     *
+     * @throws \LogicException
+     *
+     * @return void
      */
     private function updateRelation($instance, array $values)
     {
         if (Arr::isassoc($values)) {
             $this->getInstanceCopy($instance)->update($values);
+
             return;
         }
         foreach (Arr::isnotassoclist($values[0] ?? []) ? $values : [$values] as $value) {
@@ -218,11 +220,11 @@ class QueryableRelations
     }
 
     /**
-     * Refresh model relations
-     * @param Relation $instance 
-     * @param array $values 
-     * @param array $relations 
-     * @return void 
+     * Refresh model relations.
+     *
+     * @param Relation $instance
+     *
+     * @return void
      */
     private function refreshRelation($instance, array $values, array $relations = [])
     {
@@ -245,10 +247,11 @@ class QueryableRelations
     }
 
     /**
-     * Insert values in database in batches
-     * @param Relation $instance 
-     * @param array $attributes 
-     * @return void 
+     * Insert values in database in batches.
+     *
+     * @param Relation $instance
+     *
+     * @return void
      */
     private function createManyBatch($instance, array $attributes)
     {
@@ -256,13 +259,13 @@ class QueryableRelations
     }
 
     /**
-     * Insert row into database table
-     * 
-     * @param Relation $instance 
-     * @param array $attributes 
-     * @param array $relations 
-     * @return void 
-     * @throws LogicException 
+     * Insert row into database table.
+     *
+     * @param Relation $instance
+     *
+     * @throws \LogicException
+     *
+     * @return void
      */
     private function createOne($instance, array $attributes, array $relations)
     {
@@ -272,9 +275,8 @@ class QueryableRelations
     }
 
     /**
-     * Creates or Returns a copy of the query builder instance of the relation
-     * 
-     * @param Relation $instance 
+     * Creates or Returns a copy of the query builder instance of the relation.
+     *
      * @return Builder|Relation
      */
     private function getInstanceCopy(Relation $instance)
@@ -285,35 +287,35 @@ class QueryableRelations
     private function groupRelations(array $relations)
     {
         // #region We filter the componsed relation from default relations to recursively set create model relations
-        $composed = array_filter($relations, function ($current) {
-            return is_string($current) && (false !== strpos($current, '.'));
+        $composed = array_filter($relations, static function ($current) {
+            return \is_string($current) && str_contains($current, '.');
         });
         // #endregion We filter the componsed relation from default relations to recursively set create model relations
         return [array_diff($relations, $composed), $composed];
     }
 
     /**
-     * Get relations that has the $relation value as parent relation 
-     * 
-     * @param array $relations 
-     * @param mixed $relation 
-     * @return array 
+     * Get relations that has the $relation value as parent relation.
+     *
+     * @param mixed $relation
+     *
+     * @return array
      */
     private function resolveRelations(array $relations, string $relation)
     {
-        return iterator_to_array($this->findAll($relations, function ($iterator) use ($relation) {
-            return "$relation." === substr($iterator, 0, strlen("$relation."));
-        }, function ($value) use ($relation) {
-            return substr($value, strlen("$relation."));
+        return iterator_to_array($this->findAll($relations, static function ($iterator) use ($relation) {
+            return "$relation." === substr($iterator, 0, \strlen("$relation."));
+        }, static function ($value) use ($relation) {
+            return substr($value, \strlen("$relation."));
         }));
     }
 
     /**
-     * Find all values matching user provided callback
-     * 
-     * @param array $list 
-     * @param Closure(T $value, $key):bool $callback 
+     * Find all values matching user provided callback.
+     *
+     * @param Closure(T $value, $key):bool $callback
      * @param Closure(T $value, $key):mixed $callback
+     *
      * @return \Traversable<T>
      */
     private function findAll(array $list, \Closure $callback, \Closure $project = null)
