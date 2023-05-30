@@ -13,20 +13,19 @@ declare(strict_types=1);
 
 use Drewlabs\Contracts\Support\Actions\ActionResult;
 use Drewlabs\Core\Helpers\Functional;
-use Drewlabs\LaravelQuery\EloquentQueryFilters;
 
+use function Drewlabs\LaravelQuery\Proxy\CreateQueryFilters;
 use function Drewlabs\LaravelQuery\Proxy\DMLManager;
+use function Drewlabs\LaravelQuery\Proxy\useActionQueryCommand;
 
 use Drewlabs\LaravelQuery\Tests\Stubs\Person;
 use Drewlabs\LaravelQuery\Tests\TestCase;
-use Drewlabs\Query\PreparesFiltersArray;
 
 use function Drewlabs\Query\Proxy\CreateQueryAction;
 use function Drewlabs\Query\Proxy\DeleteQueryAction;
 use function Drewlabs\Query\Proxy\SelectQueryAction;
 
 use function Drewlabs\Query\Proxy\UpdateQueryAction;
-use function Drewlabs\Query\Proxy\useQueryCommand;
 
 class CommandQueriesTest extends TestCase
 {
@@ -42,7 +41,7 @@ class CommandQueriesTest extends TestCase
     public function test_select_query_action_on_query_filters()
     {
         $person = $this->createPerson('Stacey', 'Lowe', '(615) 804-1735', 65);
-        $query = EloquentQueryFilters::new(PreparesFiltersArray::new(['where' => ['firstname', 'Stacey']])->call());
+        $query = CreateQueryFilters(['where' => ['firstname', 'Stacey']]);
         $action = SelectQueryAction($query, Functional::compose(
             static function ($result) {
                 return $result->first();
@@ -102,7 +101,7 @@ class CommandQueriesTest extends TestCase
     {
         $person = $this->createPerson('Mildred', 'Brown', '(702) 959-3715', 40);
         $obj = ['lastname' => 'Welch', 'phonenumber' => '(610) 535-4895'];
-        $action = UpdateQueryAction(EloquentQueryFilters::new(PreparesFiltersArray::new(['where' => ['firstname', 'Mildred']])->call()), $obj);
+        $action = UpdateQueryAction(CreateQueryFilters(['where' => ['firstname', 'Mildred']]), $obj);
         $result = DMLManager(Person::class)->update(...$action->payload()->toArray());
         $this->assertSame(1, $result);
         $p = DMLManager(Person::class)->select($person->getKey());
@@ -113,7 +112,7 @@ class CommandQueriesTest extends TestCase
     public function test_delete_query_action_on_filters()
     {
         $person = $this->createPerson('Mildred', 'Brown', '(702) 959-3715', 40);
-        $action = DeleteQueryAction(EloquentQueryFilters::new(PreparesFiltersArray::new(['where' => ['firstname', 'Mildred']])->call()));
+        $action = DeleteQueryAction(CreateQueryFilters(['where' => ['firstname', 'Mildred']]));
         $result = DMLManager(Person::class)->delete(...$action->payload()->toArray());
         $this->assertSame(1, $result);
         $p = DMLManager(Person::class)->select($person->getKey());
@@ -133,7 +132,7 @@ class CommandQueriesTest extends TestCase
     public function test_use_dml_query_action_command_function()
     {
         $this->createPerson('Mildred', 'Brown', '(702) 959-3715', 40);
-        $command = useQueryCommand(DMLManager(Person::class));
+        $command = useActionQueryCommand(Person::class);
         $result = $command(SelectQueryAction(['and' => ['firstname', 'Mildred']]), static function ($result) {
             return $result->first();
         });
@@ -143,7 +142,7 @@ class CommandQueriesTest extends TestCase
 
     public function test_use_dml_query_action_override_hanlder()
     {
-        $result = useQueryCommand(DMLManager(Person::class), static function ($action) {
+        $result = useActionQueryCommand(Person::class, static function ($action) {
             return $action->payload();
         })(SelectQueryAction(2));
         $this->assertInstanceOf(ActionResult::class, $result);

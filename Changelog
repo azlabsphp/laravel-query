@@ -57,7 +57,7 @@
 
 - Add implementation that simplify action handlers implementation for DML queries
 - Added `SelectQueryAction`, `DeleteQueryAction`, `UpdateQueryAction` and `CreateQueryAction` functions for creating action of type `SELECT`, `DELETE`, `UPDATE`, `CREATE` to avoid typo error when creating database quer actions.
-- Added `DMLQueryCommandInterface` returned by `useDMLQueryActionCommand` proxy function
+- Added `DMLQueryCommandInterface` returned by `useActionQueryCommand` proxy function
 - Added `InvalidDMLQueryActionException` exception class
 - Added support for `FiltersInterface` in `select()`, `update()` and `delete()` method of the `DMLManager`
 - Added support for attributes as `object`, `viewModel` in `create()` and `update()` method of `DMLManager`

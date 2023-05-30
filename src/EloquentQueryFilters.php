@@ -295,11 +295,12 @@ final class EloquentQueryFilters implements FiltersInterface
      */
     private function between($builder, array $params)
     {
-        if (\count($params) < 2) {
-            return $builder;
-        }
-
-        return $builder->whereBetween(...array_values($params));
+        return array_reduce(array_filter($params, 'is_array') === $params ? $params : [$params], static function ($builder, $curr) {
+            if (\count($curr) < 2) {
+                return $builder;
+            }
+            return $builder->whereBetween(...array_values($curr));
+        }, $builder);
     }
 
     /**

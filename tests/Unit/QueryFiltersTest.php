@@ -11,12 +11,12 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-use Drewlabs\LaravelQuery\EloquentQueryFilters;
 use Drewlabs\LaravelQuery\Tests\Unit\TestQueryBuilderInterface;
 use Drewlabs\LaravelQuery\Tests\Unit\WithConsecutiveCalls;
-use Drewlabs\Query\PreparesFiltersArray;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+
+use function Drewlabs\LaravelQuery\Proxy\CreateQueryFilters;
 
 // 'or' => ['lastname', 'like', '%AZOMEDOH%'],
 // 'exists' => [
@@ -41,7 +41,7 @@ class QueryFiltersTest extends TestCase
          * @var MockObject
          */
         $mockObject = $this->createMock(TestQueryBuilderInterface::class);
-        $queryFilters = EloquentQueryFilters::new(PreparesFiltersArray::new(['where' => ['age', 28]])->call());
+        $queryFilters = CreateQueryFilters(['where' => ['age', 28]]);
 
         $mockObject
             ->expects($this->once(2))
@@ -58,7 +58,7 @@ class QueryFiltersTest extends TestCase
          * @var MockObject
          */
         $mockObject = $this->createMock(TestQueryBuilderInterface::class);
-        $queryFilters = EloquentQueryFilters::new(PreparesFiltersArray::new(['where' => [['age', 28], ['name', 'like', '%azandrew%']]])->call());
+        $queryFilters = CreateQueryFilters(['where' => [['age', 28], ['name', 'like', '%azandrew%']]]);
 
         $mockObject
             ->expects($this->exactly(2))
@@ -75,7 +75,7 @@ class QueryFiltersTest extends TestCase
          * @var MockObject
          */
         $mockObject = $this->createMock(TestQueryBuilderInterface::class);
-        $queryFilters = EloquentQueryFilters::new(PreparesFiltersArray::new(['where' => ['method' => 'in', 'params' => ['ratings', [3, 5]]]])->call());
+        $queryFilters = CreateQueryFilters(['where' => ['method' => 'in', 'params' => ['ratings', [3, 5]]]]);
 
         $mockObject
             ->expects($this->any())

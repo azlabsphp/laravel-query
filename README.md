@@ -20,11 +20,11 @@ $app->register(\Drewlabs\LaravelQuery\ServiceProvider::class);
 
 ### Components
 
-#### The Database Query Language (DMLManager::class)
+#### The Query Language
 
-This component offer a unified language for quering the database using SELECT, CREATE, UPDATE and DELETE METHOD. It heavily makes use of PHP dictionnary a.k.a arrays for various operations.
+This component offer a unified language for quering the database using SELECT, CREATE, UPDATE and DELETE methods. It heavily makes use of PHP dictionnary a.k.a arrays for various operations.
 
-- Creating instance of the DMLManager
+##### Creating instance of the DMLManager
 
 ```php
 // ...
@@ -37,22 +37,21 @@ use App\Models\Example;
 $ql = DMLManager(Example::class);
 ```
 
-- Create
+
+##### `Create` API
 
 The method takes in the attributes to insert into the database table as a row.
 
 ```php
-$ql = DMLManager(Example::class);
-
 // Insert single values to the database
-$example = $dmlManager->create([/* ... */]);
+$example = DMLManager(Example::class)->create([/* ... */]);
 ```
 
 Note:
 In it complex form, the create method takes in the attributes to insert and a set of parameters:
 
 ```php
-$person = $dmlManager->create([
+$person = DMLManager(Example::class)->create([
         /* ... */
         'addresses' => [ [/* ... */] ],
         'profile' => [/* ... */]
@@ -68,56 +67,59 @@ The create method also takes in a 3rd parameter `PHP Closure` that can be execut
 Examples:
 
 ```php
-$ql = DMLManager(Example::class);
-
 // Insert single values to the database
-$example = $dmlManager->create([/* ... */], function($value) {
+$example = DMLManager(Example::class)->create([/* ... */], function($value) {
     // Do something with the created value
 });
 ```
 
-- Update
+
+##### `Update` API
 
 As the `create` method, the `update` method also provides overloaded method implementations for interacting with the database.
 
+
 ```php
-$person = $ql->update(1, ['firstname' => '...']);
+$person = DMLManager(Example::class)->update(1, ['firstname' => '...']);
 
 // Update by ID String
-$person = $ql->update("1", ['firstname' => '...']);
+$person = DMLManager(Example::class)->update("1", ['firstname' => '...']);
 
 // Update using query without mass update
-$count = $ql->update(['and' => ['name', '...']], ['firstname' => '...']);
+$count = DMLManager(Example::class)->update(['and' => ['name', '...']], ['firstname' => '...']);
 ```
 
-- Delete
+
+##### `Delete` API
 
 Delete provides an interface for deleting items based on there id or a complex query.
 
-```php
-$ql = DMLManager(Person::class);
-    // DELETE AN ITEM BY ID
-$result = $ql->delete(1);
 
-    // DELET AN ITEM USING COMPLEX QUERY
-$result = $ql->delete(['and' => ['...', '...']], true);
+```php
+// DELETE AN ITEM BY ID
+$result = DMLManager(Example::class)->delete(1);
+
+// DELET AN ITEM USING QUERY FILTERS
+$result = DMLManager(Example::class)->delete(['and' => ['...', '...']], true);
 ```
 
-- Select
 
-`select` method of the DMLManger, provides a single method for querying rows in the database using either a complex query array for which each key correspond to a laravel eloquent model methods.
+##### `Select` API
+
+`select` method of the DMLManger, provides a single method for querying rows in the database using either query filters.
 
 ```php
-$ql = DMLManager(Person::class);
-    $person = $ql->select("1", ['*'], function ($model) {
-        return $model->toArray();
-    });
-    // Select by ID
-    $person = $ql->select(1);
-    $list = $ql->select([/* ... */],['firstname', 'addresses']);
+$person = DMLManager(Person::class)->select("1", ['*'], function ($model) {
+    return $model->toArray();
+});
 
-    // Select using complex where and orWhere queries
-    $list = $ql->select([/* ... */], 15, ['addresses', 'profile'], 1);
+// Select by ID
+$person = DMLManager(Person::class)->select(1);
+
+$list = DMLManager(Person::class)->select([/* ... */],['firstname', 'addresses']);
+
+// Select using query filters
+$list = DMLManager(Person::class)->select([/* ... */], 15, ['addresses', 'profile'], 1);
 ```
 
 #### Query filters
@@ -445,16 +447,16 @@ $object->notes = 67;
 $action = CreateQueryAction($object);
 ```
 
-### useDMLQueryActionCommand
+### useActionQueryCommand
 
 Provides a default action handler command object for database queries.
 
 ```php
-use function Drewlabs\LaravelQuery\Proxy\useDMLQueryActionCommand;
+use function Drewlabs\LaravelQuery\Proxy\useActionQueryCommand;
 use function Drewlabs\LaravelQuery\Proxy\DMLManager;
 use function Drewlabs\LaravelQuery\Proxy\SelectQueryAction;
 
-$command = useDMLQueryActionCommand(DMLManager(Test::class));
+$command = useActionQueryCommand(DMLManager(Test::class));
 // Executing command with an action using `exec` method
 $result = $command->exec(SelectQueryAction($id));
 
@@ -462,7 +464,7 @@ $result = $command->exec(SelectQueryAction($id));
 $result = $command(SelectQueryAction($id));
 
 // Creatating and executing action in a single line
-useDMLQueryActionCommand(DMLManager(Test::class))(SelectQueryAction($id));
+useActionQueryCommand(DMLManager(Test::class))(SelectQueryAction($id));
 ```
 
 **Note**
@@ -470,11 +472,11 @@ To allow the creator function be more customizable, the function supports
 a second parameter that allow developpers to provides their own custom action handler.
 
 ```php
-use function Drewlabs\LaravelQuery\Proxy\useDMLQueryActionCommand;
+use function Drewlabs\LaravelQuery\Proxy\useActionQueryCommand;
 use function Drewlabs\LaravelQuery\Proxy\DMLManager;
 use use Drewlabs\Contracts\Support\Actions\Action;
 
-$command = useDMLQueryActionCommand(DMLManager(Test::class), function(Action $action, ?\Closure $callback = null) {
+$command = useActionQueryCommand(DMLManager(Test::class), function(Action $action, ?\Closure $callback = null) {
      // Provides custom action handlers
 });
 ```
