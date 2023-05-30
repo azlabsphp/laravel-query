@@ -37,7 +37,6 @@ use App\Models\Example;
 $ql = DMLManager(Example::class);
 ```
 
-
 ##### `Create` API
 
 The method takes in the attributes to insert into the database table as a row.
@@ -73,11 +72,9 @@ $example = DMLManager(Example::class)->create([/* ... */], function($value) {
 });
 ```
 
-
 ##### `Update` API
 
 As the `create` method, the `update` method also provides overloaded method implementations for interacting with the database.
-
 
 ```php
 $person = DMLManager(Example::class)->update(1, ['firstname' => '...']);
@@ -89,11 +86,9 @@ $person = DMLManager(Example::class)->update("1", ['firstname' => '...']);
 $count = DMLManager(Example::class)->update(['and' => ['name', '...']], ['firstname' => '...']);
 ```
 
-
 ##### `Delete` API
 
 Delete provides an interface for deleting items based on there id or a complex query.
-
 
 ```php
 // DELETE AN ITEM BY ID
@@ -102,7 +97,6 @@ $result = DMLManager(Example::class)->delete(1);
 // DELET AN ITEM USING QUERY FILTERS
 $result = DMLManager(Example::class)->delete(['and' => ['...', '...']], true);
 ```
-
 
 ##### `Select` API
 
@@ -124,19 +118,18 @@ $list = DMLManager(Person::class)->select([/* ... */], 15, ['addresses', 'profil
 
 #### Query filters
 
-Query filters provides a way to easily apply database select query using PHP array mapping keys of the array of a given method of the framework ORM, and each values to the list of parameters.
+Filters provides a uniform interface to perform database queries.
 
-- Default query filter
+- `CreateQueryFilters` API
 
-The package comes with a handy query filter class that provide implementation for applying queries to an illuminate model. The default query filter take advantage of PHP dynamic call on object to apply the query params to eloquent model.
+`CreateQueryFilters` is a factory function which when called create a filters binding for laravel database library.
 
 ```php
-
-use Drewlabs\LaravelQuery\Proxy\ModelFiltersHandler;
+use Drewlabs\LaravelQuery\Proxy\CreateQueryFilters;
 
 /// Note: Each key is an eloquent model/Eloquent query builder method
 /// Parameters are passed in the order and the same way they are passed to the model method, but are specified as array
-$filter = ModelFiltersHandler([
+$filter = CreateQueryFilters([
     // Creatigng a where query
     'where' => [
         ['label', '<LabelValue>'],
@@ -177,38 +170,27 @@ $filter = ModelFiltersHandler([
     // Join query
     'join' => [
         Folder::class,
-        [
-            'model' => UploadedFile::class,
-            'column' => 'folder_id'
-        ],
-        [
-            'model' => Folder::class,
-            'column' => 'id'
-        ]
+        ['model' => UploadedFile::class, 'column' => 'folder_id'],
+        ['model' => Folder::class, 'column' => 'id']
     ],
     // Normal laravel join
-    'join' => [
-        'table1',
-        'table2.id',
-        '=',
-        'table1.user_id'
-    ]
+    'join' => ['table1', 'table2.id', '=', 'table1.user_id']
 ]);
 
-/// Applying the query to an Eloquent model and call the Builder get() method to retrieve the matching model
-$result = $filter->apply(new Example())->get($columns = ['*']);
+// Calling the query filter on laravel database builder instance
+$result = $filter->call(TestModel::query())->get($columns = ['*']);
 ```
 
-#### Client request filters Generator
+#### The query filters API
 
-Request query filter handler is a global function for generating query filters from an HTTP request parameters. It helps/allow developper to query the database table from client application whithout interaction of the backend application.
+The query filters API provides a list of filters that can be used to perform database query using PHP key-value pair array (a.k.a dictionnary) to send query using the framework database API.
 
 ### Example
 
 ```php
 
 // imports
-use Drewlabs\LaravelQuery\Tests\Stubs\TestModelStub;
+// ...
 
 // Create the request
 $request = new \Illuminate\Http\Request([
@@ -242,7 +224,9 @@ $request = new \Illuminate\Http\Request([
     'label' => 'Are you there ?',
     'id' => 320
 ]);
-$filters = \Drewlabs\LaravelQuery\QueryFiltersBuilder::for(new TestModelStub)->build($request);
+
+// Create query filters from framework request object
+$result = \Drewlabs\Query\PreparesFiltersBag::new($request)->build(new TestModel);
 ```
 
 - Here is a list of query methods supported by the package:
@@ -276,28 +260,31 @@ $methods = [
 ]
 ```
 
-#### ORM Model
+**Warning** Entity objects/ Query models must implements the `Drewlabs\Query\Contracts\Queryable` interface for it to be compatible with query method calls.
+
+## The command API
+
+The command API provides functions for sending query to database using the framework API under the hood.
 
 ```php
+use function Drewlabs\LaravelQuery\Proxy\useActionQueryCommand;
+use function Drewlabs\LaravelQuery\Proxy\DMLManager;
+use function Drewlabs\LaravelQuery\Proxy\SelectQueryAction;
+use function Drewlabs\Support\Proxy\Action;
 
-namespace App\Models\Patients;
+$command = useActionQueryCommand(Test::class);
 
-use Drewlabs\LaravelQuery\Traits\Queryable as QueryableTrait;
-use Drewlabs\Query\Contracts\Queryable;
-use Illuminate\Database\Eloquent\Model;
+// Executing command with an action using `exec` method
+$result = $command->exec(SelectQueryAction($id));
 
-final class Adresse extends Model implements Queryable
-{
-    use QueryableTrait;
-  
-    /* ... */
+// Execute the command using a callable interface
+$result = $command(Action('SELECT' , $id));
 
-}
+// Creating and calling the the command API
+useActionQueryCommand(Test::class)(SelectQueryAction($id));
 ```
 
-## [v2.5.x] Changes
-
-### SelectQueryAction
+### Select Query Action
 
 `SelectQueryAction` Proxy function provides a typo free function for creating database query action of type `SELECT` .
 
@@ -321,27 +308,22 @@ use function Drewlabs\LaravelQuery\Proxy\SelectQueryAction;
 //...
 
 // Example
-$action = SelectQueryAction([
- 'where' => ['id', 12],
- 'whereHas' => ['parent', function($q) {
-     return $q->where('id', <>, 12);
- }]
-]);
+$action = SelectQueryAction([ 'where' => ['id', 12] ]);
 ```
 
 - SelectQueryAction(FiltersInterface $query [, array $columns, \Closure $callback])
 - SelectQueryAction(FiltersInterface $query, int $per_page [?int $page = null, array $columns, \Closure $callback])
 
 ```php
-use function Drewlabs\LaravelQuery\Proxy\ModelFiltersHandler;
+use function Drewlabs\LaravelQuery\Proxy\CreateQueryFilters;
 use function Drewlabs\LaravelQuery\Proxy\SelectQueryAction;
 
 // ...
 // Example
-$action = SelectQueryAction(ModelFiltersHandler(...));
+$action = SelectQueryAction(CreateQueryFilters(...));
 ```
 
-### UpdateQueryAction
+### Update Query Action
 
 `UpdateQueryAction` Proxy function provides a typo free function for creating database query action of type `UPDATE` .
 
@@ -364,14 +346,14 @@ use function Drewlabs\LaravelQuery\Proxy\UpdateQueryAction;
 // ...
 
 // Example
-$action = UpdateQueryAction(ModelFiltersHandler(...), ['name' => 'John Doe'])
+$action = UpdateQueryAction(CreateQueryFilters(...), ['name' => 'John Doe'])
 ```
 
 - UpdateQueryAction(FiltersInterface $query, array|object $attributes [, \Closure $callback])
 
 ```php
 use function Drewlabs\LaravelQuery\Proxy\UpdateQueryAction;
-use function Drewlabs\LaravelQuery\Proxy\ModelFiltersHandler;
+use function Drewlabs\LaravelQuery\Proxy\CreateQueryFilters;
 
 // ...
 
@@ -379,7 +361,7 @@ use function Drewlabs\LaravelQuery\Proxy\ModelFiltersHandler;
 $action = UpdateQueryAction(['where' => ['id' => 3]], ['name' => 'John Doe'])
 ```
 
-### DeleteQueryAction
+### Delete Query Action
 
 Creates a `DELETE` type query action using user provided by function user.
 
@@ -409,15 +391,15 @@ $action = DeleteQueryAction(['where' => ['id' => 3]])
 
 ```php
 use function Drewlabs\LaravelQuery\Proxy\DeleteQueryAction;
-use function Drewlabs\LaravelQuery\Proxy\ModelFiltersHandler;
+use function Drewlabs\LaravelQuery\Proxy\CreateQueryFilters;
 
 // ...
 
 // Example
-$action = DeleteQueryAction(ModelFiltersHandler(...))
+$action = DeleteQueryAction(CreateQueryFilters(...))
 ```
 
-### CreateQueryAction
+### Create Query Action
 
 Creates a `CREATE` type query action using user provided by function user
 
@@ -447,26 +429,6 @@ $object->notes = 67;
 $action = CreateQueryAction($object);
 ```
 
-### useActionQueryCommand
-
-Provides a default action handler command object for database queries.
-
-```php
-use function Drewlabs\LaravelQuery\Proxy\useActionQueryCommand;
-use function Drewlabs\LaravelQuery\Proxy\DMLManager;
-use function Drewlabs\LaravelQuery\Proxy\SelectQueryAction;
-
-$command = useActionQueryCommand(DMLManager(Test::class));
-// Executing command with an action using `exec` method
-$result = $command->exec(SelectQueryAction($id));
-
-// or Executing command using invokable/high order function interface
-$result = $command(SelectQueryAction($id));
-
-// Creatating and executing action in a single line
-useActionQueryCommand(DMLManager(Test::class))(SelectQueryAction($id));
-```
-
 **Note**
 To allow the creator function be more customizable, the function supports
 a second parameter that allow developpers to provides their own custom action handler.
@@ -476,7 +438,7 @@ use function Drewlabs\LaravelQuery\Proxy\useActionQueryCommand;
 use function Drewlabs\LaravelQuery\Proxy\DMLManager;
 use use Drewlabs\Contracts\Support\Actions\Action;
 
-$command = useActionQueryCommand(DMLManager(Test::class), function(Action $action, ?\Closure $callback = null) {
+$command = useActionQueryCommand(TestModel::class, function(Action $action, ?\Closure $callback = null) {
      // Provides custom action handlers
 });
 ```
