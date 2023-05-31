@@ -11,12 +11,12 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\LaravelQuery\Tests\Unit;
+namespace Drewlabs\Laravel\Query\Tests\Unit;
 
-use function Drewlabs\LaravelQuery\Proxy\DMLManager;
+use function Drewlabs\Laravel\Query\Proxy\DMLManager;
 
-use Drewlabs\LaravelQuery\Tests\Stubs\Person;
-use Drewlabs\LaravelQuery\Tests\TestCase;
+use Drewlabs\Laravel\Query\Tests\Stubs\Person;
+use Drewlabs\Laravel\Query\Tests\TestCase;
 use Drewlabs\Query\PreparesFiltersArray;
 
 class SelectQueryTest extends TestCase

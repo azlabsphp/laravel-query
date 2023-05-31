@@ -11,12 +11,12 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\LaravelQuery\Proxy;
+namespace Drewlabs\Laravel\Query\Proxy;
 
 use Closure;
-use Drewlabs\LaravelQuery\EloquentQueryFilters;
-use Drewlabs\LaravelQuery\QueryLanguage;
-use Drewlabs\LaravelQuery\SelectQueryResult;
+use Drewlabs\Laravel\Query\EloquentQueryFilters;
+use Drewlabs\Laravel\Query\QueryLanguage;
+use Drewlabs\Laravel\Query\SelectQueryResult;
 use Drewlabs\Query\Contracts\CommandInterface;
 use Drewlabs\Query\Contracts\EnumerableResultInterface;
 use Drewlabs\Query\Contracts\Queryable;
@@ -264,9 +264,9 @@ function useCollectQueryResult(\Closure $closure)
  * Provides a default action handler for database queries.
  *
  * ```php
- * use function Drewlabs\LaravelQuery\Proxy\useActionQueryCommand;
- * use function Drewlabs\LaravelQuery\Proxy\DMLManager;
- * use function Drewlabs\LaravelQuery\Proxy\SelectQueryAction;
+ * use function Drewlabs\Laravel\Query\Proxy\useActionQueryCommand;
+ * use function Drewlabs\Laravel\Query\Proxy\DMLManager;
+ * use function Drewlabs\Laravel\Query\Proxy\SelectQueryAction;
  *
  * $command = useActionQueryCommand(DMLManager(Test::class));
  * // Executing command with an action using `exec` method
@@ -285,8 +285,8 @@ function useCollectQueryResult(\Closure $closure)
  * a second parameter that allow developpers to provides their own custom action handler.
  *
  * ```php
- * use function Drewlabs\LaravelQuery\Proxy\useActionQueryCommand;
- * use function Drewlabs\LaravelQuery\Proxy\DMLManager;
+ * use function Drewlabs\Laravel\Query\Proxy\useActionQueryCommand;
+ * use function Drewlabs\Laravel\Query\Proxy\DMLManager;
  * use use Drewlabs\Contracts\Support\Actions\Action;
  *
  * $command = useActionQueryCommand(DMLManager(Test::class), function(Action $action, ?\Closure $callback = null) {

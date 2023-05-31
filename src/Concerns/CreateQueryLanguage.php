@@ -11,20 +11,20 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\LaravelQuery\Concerns;
+namespace Drewlabs\Laravel\Query\Concerns;
 
 use Drewlabs\Core\Helpers\Str;
 
-use function Drewlabs\LaravelQuery\Proxy\DMLManager;
+use function Drewlabs\Laravel\Query\Proxy\DMLManager;
 
-use Drewlabs\LaravelQuery\QueryableRelations;
+use Drewlabs\Laravel\Query\QueryableRelations;
 use Drewlabs\Query\Contracts\Queryable;
 use Drewlabs\Query\Contracts\TransactionManagerInterface;
 
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * @mixin \Drewlabs\LaravelQuery\Contracts\ProvidesFiltersFactory
+ * @mixin \Drewlabs\Laravel\Query\Contracts\ProvidesFiltersFactory
  *
  * @property TransactionManagerInterface transactions
  * @property Queryable|Model             queryable

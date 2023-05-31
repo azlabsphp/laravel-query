@@ -11,7 +11,7 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\LaravelQuery;
+namespace Drewlabs\Laravel\Query;
 
 use Drewlabs\Query\Contracts\TransactionClientInterface;
 use Drewlabs\Query\Contracts\TransactionManagerInterface;

@@ -11,11 +11,11 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\LaravelQuery\Concerns;
+namespace Drewlabs\Laravel\Query\Concerns;
 
 use Drewlabs\Core\Helpers\Arr;
 
-use function Drewlabs\LaravelQuery\Proxy\SelectQueryResult;
+use function Drewlabs\Laravel\Query\Proxy\SelectQueryResult;
 
 use Drewlabs\Query\Columns;
 use Drewlabs\Query\Contracts\FiltersInterface;
@@ -25,7 +25,7 @@ use Drewlabs\Query\EnumerableResult;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * @mixin \Drewlabs\LaravelQuery\Contracts\ProvidesFiltersFactory
+ * @mixin \Drewlabs\Laravel\Query\Contracts\ProvidesFiltersFactory
  *
  * @property Queryable|Model queryable
  */

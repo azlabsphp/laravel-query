@@ -11,10 +11,10 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\LaravelQuery\Tests\Unit;
+namespace Drewlabs\Laravel\Query\Tests\Unit;
 
-use Drewlabs\LaravelQuery\Tests\Stubs\ModelValue;
-use Drewlabs\LaravelQuery\Tests\TestCase;
+use Drewlabs\Laravel\Query\Tests\Stubs\ModelValue;
+use Drewlabs\Laravel\Query\Tests\TestCase;
 
 class URLRoutableTest extends TestCase
 {

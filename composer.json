@@ -9,7 +9,7 @@
     }],
     "minimum-stability": "stable",
     "require": {
-        "php": "^7.2|^7.3|^7.4|^8.0|^8.1|^8.2",
+        "php": ">=7.2",
         "illuminate/database": "^7.0|^8.0|^9.0|^10.0",
         "illuminate/pagination": "^7.0|^8.0|^9.0|^10.0",
         "doctrine/dbal": "^2.0|^3.1",
@@ -24,7 +24,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Drewlabs\\LaravelQuery\\": "src/"
+            "Drewlabs\\Laravel\\Query\\": "src/"
         },
         "files": [
             "src/helpers.php",
@@ -33,13 +33,13 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Drewlabs\\LaravelQuery\\Tests\\": "tests/"
+            "Drewlabs\\Laravel\\Query\\Tests\\": "tests/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "Drewlabs\\LaravelQuery\\ServiceProvider"
+                "Drewlabs\\Laravel\\Query\\ServiceProvider"
             ]
         },
         "branch-alias": {

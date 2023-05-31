@@ -11,20 +11,20 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\LaravelQuery\Tests\Unit;
+namespace Drewlabs\Laravel\Query\Tests\Unit;
 
-use function Drewlabs\LaravelQuery\Proxy\DMLManager;
+use function Drewlabs\Laravel\Query\Proxy\DMLManager;
 
-use Drewlabs\LaravelQuery\QueryableRelations;
-use Drewlabs\LaravelQuery\Tests\Stubs\Address;
-use Drewlabs\LaravelQuery\Tests\Stubs\Individual;
-use Drewlabs\LaravelQuery\Tests\Stubs\Manager;
-use Drewlabs\LaravelQuery\Tests\Stubs\Member;
-use Drewlabs\LaravelQuery\Tests\Stubs\Moral;
-use Drewlabs\LaravelQuery\Tests\Stubs\Person;
-use Drewlabs\LaravelQuery\Tests\Stubs\Post;
-use Drewlabs\LaravelQuery\Tests\Stubs\Video;
-use Drewlabs\LaravelQuery\Tests\TestCase;
+use Drewlabs\Laravel\Query\QueryableRelations;
+use Drewlabs\Laravel\Query\Tests\Stubs\Address;
+use Drewlabs\Laravel\Query\Tests\Stubs\Individual;
+use Drewlabs\Laravel\Query\Tests\Stubs\Manager;
+use Drewlabs\Laravel\Query\Tests\Stubs\Member;
+use Drewlabs\Laravel\Query\Tests\Stubs\Moral;
+use Drewlabs\Laravel\Query\Tests\Stubs\Person;
+use Drewlabs\Laravel\Query\Tests\Stubs\Post;
+use Drewlabs\Laravel\Query\Tests\Stubs\Video;
+use Drewlabs\Laravel\Query\Tests\TestCase;
 
 use Illuminate\Database\Eloquent\Collection;
 

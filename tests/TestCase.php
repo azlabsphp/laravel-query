@@ -11,11 +11,11 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\LaravelQuery\Tests;
+namespace Drewlabs\Laravel\Query\Tests;
 
-use Drewlabs\LaravelQuery\Tests\Stubs\Address;
-use Drewlabs\LaravelQuery\Tests\Stubs\Person;
-use Drewlabs\LaravelQuery\Tests\Stubs\Profil;
+use Drewlabs\Laravel\Query\Tests\Stubs\Address;
+use Drewlabs\Laravel\Query\Tests\Stubs\Person;
+use Drewlabs\Laravel\Query\Tests\Stubs\Profil;
 use Illuminate\Container\Container;
 use Illuminate\Database\Capsule\Manager;
 use Illuminate\Database\Connectors\ConnectionFactory;

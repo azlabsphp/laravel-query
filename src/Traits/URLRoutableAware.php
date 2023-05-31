@@ -11,7 +11,7 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\LaravelQuery\Traits;
+namespace Drewlabs\Laravel\Query\Traits;
 
 use const E_USER_WARNING;
 

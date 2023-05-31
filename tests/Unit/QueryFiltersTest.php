@@ -11,12 +11,12 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-use Drewlabs\LaravelQuery\Tests\Unit\TestQueryBuilderInterface;
-use Drewlabs\LaravelQuery\Tests\Unit\WithConsecutiveCalls;
+use Drewlabs\Laravel\Query\Tests\Unit\TestQueryBuilderInterface;
+use Drewlabs\Laravel\Query\Tests\Unit\WithConsecutiveCalls;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
-use function Drewlabs\LaravelQuery\Proxy\CreateQueryFilters;
+use function Drewlabs\Laravel\Query\Proxy\CreateQueryFilters;
 
 // 'or' => ['lastname', 'like', '%AZOMEDOH%'],
 // 'exists' => [

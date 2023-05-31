@@ -11,9 +11,9 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\LaravelQuery\Tests\Stubs;
+namespace Drewlabs\Laravel\Query\Tests\Stubs;
 
-use Drewlabs\LaravelQuery\Traits\Queryable as TraitsModel;
+use Drewlabs\Laravel\Query\Traits\Queryable as TraitsModel;
 use Drewlabs\Query\Contracts\Queryable;
 use Illuminate\Database\Eloquent\Model;
 

@@ -11,16 +11,16 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\LaravelQuery;
+namespace Drewlabs\Laravel\Query;
 
 use Closure;
 use Drewlabs\Core\Helpers\Arr;
-use Drewlabs\LaravelQuery\Concerns\CreateQueryLanguage;
-use Drewlabs\LaravelQuery\Concerns\DeleteQueryLanguage;
+use Drewlabs\Laravel\Query\Concerns\CreateQueryLanguage;
+use Drewlabs\Laravel\Query\Concerns\DeleteQueryLanguage;
 
-use Drewlabs\LaravelQuery\Concerns\SelectQueryLanguage;
-use Drewlabs\LaravelQuery\Concerns\UpdateQueryLanguage;
-use Drewlabs\LaravelQuery\Contracts\ProvidesFiltersFactory;
+use Drewlabs\Laravel\Query\Concerns\SelectQueryLanguage;
+use Drewlabs\Laravel\Query\Concerns\UpdateQueryLanguage;
+use Drewlabs\Laravel\Query\Contracts\ProvidesFiltersFactory;
 use Drewlabs\Overloadable\Overloadable;
 use Drewlabs\Query\AggregationMethods;
 use Drewlabs\Query\Contracts\EnumerableResultInterface;
@@ -49,7 +49,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method EnumerableResultInterface|mixed select(array $query, array $columns, \Closure $callback = null)
  * @method mixed                           select(array $query, int $per_page, int $page = null, \Closure $callback = null)
  * @method mixed                           select(array $query, int $per_page, array $columns, int $page = null, \Closure $callback = null)
- * @method int                             selectAggregate(array $query = [], string $aggregation = \Drewlabs\LaravelQuery\AggregationMethods::COUNT)
+ * @method int                             selectAggregate(array $query = [], string $aggregation = \Drewlabs\Laravel\Query\AggregationMethods::COUNT)
  * @method int                             update(array $query, $attributes = [])
  * @method int                             update(array $query, $attributes = [], bool $bulkstatement)
  * @method Queryable|mixed                 update(int $id, $attributes, \Closure $dto_transform_fn = null)

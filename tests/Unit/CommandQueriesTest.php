@@ -14,18 +14,18 @@ declare(strict_types=1);
 use Drewlabs\Contracts\Support\Actions\ActionResult;
 use Drewlabs\Core\Helpers\Functional;
 
-use function Drewlabs\LaravelQuery\Proxy\CreateQueryFilters;
-use function Drewlabs\LaravelQuery\Proxy\DMLManager;
-use function Drewlabs\LaravelQuery\Proxy\useActionQueryCommand;
+use function Drewlabs\Laravel\Query\Proxy\CreateQueryFilters;
+use function Drewlabs\Laravel\Query\Proxy\DMLManager;
+use function Drewlabs\Laravel\Query\Proxy\useActionQueryCommand;
 
-use Drewlabs\LaravelQuery\Tests\Stubs\Person;
-use Drewlabs\LaravelQuery\Tests\TestCase;
+use Drewlabs\Laravel\Query\Tests\Stubs\Person;
+use Drewlabs\Laravel\Query\Tests\TestCase;
 
-use function Drewlabs\LaravelQuery\Proxy\CreateQueryAction;
-use function Drewlabs\LaravelQuery\Proxy\DeleteQueryAction;
-use function Drewlabs\LaravelQuery\Proxy\SelectQueryAction;
+use function Drewlabs\Laravel\Query\Proxy\CreateQueryAction;
+use function Drewlabs\Laravel\Query\Proxy\DeleteQueryAction;
+use function Drewlabs\Laravel\Query\Proxy\SelectQueryAction;
 
-use function Drewlabs\LaravelQuery\Proxy\UpdateQueryAction;
+use function Drewlabs\Laravel\Query\Proxy\UpdateQueryAction;
 
 class CommandQueriesTest extends TestCase
 {

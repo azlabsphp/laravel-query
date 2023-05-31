@@ -11,16 +11,16 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Drewlabs\LaravelQuery\Concerns;
+namespace Drewlabs\Laravel\Query\Concerns;
 
 use Closure;
-use Drewlabs\LaravelQuery\QueryableRelations;
+use Drewlabs\Laravel\Query\QueryableRelations;
 use Drewlabs\Query\Contracts\FiltersInterface;
 use Drewlabs\Query\Contracts\Queryable;
 use Drewlabs\Query\Contracts\TransactionManagerInterface;
 
 /**
- * @mixin \Drewlabs\LaravelQuery\Contracts\ProvidesFiltersFactory
+ * @mixin \Drewlabs\Laravel\Query\Contracts\ProvidesFiltersFactory
  *
  * @property Queryable                   queryable
  * @property TransactionManagerInterface transactions
