@@ -39,7 +39,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Drewlabs\\Packages\\Database\\ServiceProvider"
+                "Drewlabs\\LaravelQuery\\ServiceProvider"
             ]
         },
         "branch-alias": {

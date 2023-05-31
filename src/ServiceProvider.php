@@ -13,8 +13,6 @@ declare(strict_types=1);
 
 namespace Drewlabs\LaravelQuery;
 
-use Drewlabs\LaravelQuery\Eloquent\QueryFilters;
-use Drewlabs\Query\Contracts\FiltersInterface;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
 class ServiceProvider extends BaseServiceProvider
@@ -36,7 +34,6 @@ class ServiceProvider extends BaseServiceProvider
      */
     public function register()
     {
-        $this->app->bind(FiltersInterface::class, QueryFilters::class);
     }
 
     protected function bindings()
