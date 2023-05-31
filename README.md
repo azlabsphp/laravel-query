@@ -274,10 +274,10 @@ use function Drewlabs\Support\Proxy\Action;
 
 $command = useActionQueryCommand(Test::class);
 
-// Executing command with an action using `exec` method
-$result = $command->exec(SelectQueryAction($id));
+// Calling command with an action using `call` method
+$result = $command->call(SelectQueryAction($id));
 
-// Execute the command using a callable interface
+// Calling the command using a callable interface
 $result = $command(Action('SELECT' , $id));
 
 // Creating and calling the the command API

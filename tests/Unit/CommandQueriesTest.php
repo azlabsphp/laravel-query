@@ -21,11 +21,11 @@ use function Drewlabs\LaravelQuery\Proxy\useActionQueryCommand;
 use Drewlabs\LaravelQuery\Tests\Stubs\Person;
 use Drewlabs\LaravelQuery\Tests\TestCase;
 
-use function Drewlabs\Query\Proxy\CreateQueryAction;
-use function Drewlabs\Query\Proxy\DeleteQueryAction;
-use function Drewlabs\Query\Proxy\SelectQueryAction;
+use function Drewlabs\LaravelQuery\Proxy\CreateQueryAction;
+use function Drewlabs\LaravelQuery\Proxy\DeleteQueryAction;
+use function Drewlabs\LaravelQuery\Proxy\SelectQueryAction;
 
-use function Drewlabs\Query\Proxy\UpdateQueryAction;
+use function Drewlabs\LaravelQuery\Proxy\UpdateQueryAction;
 
 class CommandQueriesTest extends TestCase
 {

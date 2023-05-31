@@ -23,8 +23,185 @@ use Drewlabs\Query\Contracts\Queryable;
 use Drewlabs\Query\Contracts\QueryLanguageInterface;
 use Drewlabs\Query\PreparesFiltersArray;
 use Illuminate\Database\Eloquent\Model;
+use Drewlabs\Contracts\Support\Actions\Action as AbstractAction;
+use Drewlabs\Contracts\Support\Actions\ActionPayload as AbstractActionPayload;
+use Drewlabs\Contracts\Support\Actions\ActionResult as AbstractActionResult;
+use Drewlabs\Query\Exceptions\BadQueryActionException;
 
-use function Drewlabs\Query\Proxy\useQueryCommand;
+use function Drewlabs\Support\Proxy\Action;
+use function Drewlabs\Support\Proxy\ActionResult;
+
+// #region Action query
+
+/**
+ * Creates a `SELECT` type query action using user provided by function user.
+ *
+ * + SelectQueryAction($id [, array $columns,\Closure $callback])
+ * ```php
+ * use function Drewlabs\Query\Proxy\SelectQueryAction;
+ *
+ * // ...
+ *
+ * // Example
+ * $action = SelectQueryAction($id) // Creates a select by id query
+ * ```
+ *
+ * + SelectQueryAction(array $query [, array $columns,\Closure $callback])
+ * + SelectQueryAction(array $query, int $per_page [?int $page = null, array $columns,\Closure $callback])
+ * ```php
+ * use function Drewlabs\Query\Proxy\SelectQueryAction;
+ *
+ * //...
+ *
+ * // Example
+ * $action = SelectQueryAction([
+ *  'where' => ['id', 12],
+ *  'whereHas' => ['parent', function($q) {
+ *      return $q->where('id', <>, 12);
+ *  }]
+ * ]);
+ * ```
+ *
+ * + SelectQueryAction(FiltersInterface $query [, array $columns,\Closure $callback])
+ * + SelectQueryAction(FiltersInterface $query, int $per_page [?int $page = null, array $columns,\Closure $callback])
+ * ```php
+ * use function Drewlabs\Query\Proxy\SelectQueryAction;
+ *
+ * // ...
+ * // Example
+ * $action = SelectQueryAction(new MyFiltersHandler(...));
+ * ```
+ *
+ * @param mixed $payload
+ *
+ * @return AbstractAction
+ */
+function SelectQueryAction(...$payload)
+{
+    return Action('SELECT', ...$payload);
+}
+
+/**
+ * Creates a `UPDATE` type query action using user provided by function user.
+ *
+ * + UpdateQueryAction($id, array|object $attributes [,\Closure $callback])
+ * ```php
+ * use function Drewlabs\Query\Proxy\UpdateQueryAction;
+ *
+ * // ...
+ *
+ * // Example
+ * $action = UpdateQueryAction($id, ['name' => 'John Doe'])
+ * ```
+ *
+ * + UpdateQueryAction(array $query, array|object $attributes [,\Closure $callback])
+ * ```php
+ * use function Drewlabs\Query\Proxy\UpdateQueryAction;
+ *
+ * // ...
+ *
+ * // Example
+ * $action = UpdateQueryAction(new MyFiltersHandler(...), ['name' => 'John Doe'])
+ * ```
+ *
+ * + UpdateQueryAction(FiltersInterface $query, array|object $attributes [,\Closure $callback])
+ * ```php
+ * use function Drewlabs\Query\Proxy\UpdateQueryAction;
+ *
+ * // ...
+ *
+ * // Example
+ * $action = UpdateQueryAction(['where' => ['id' => 3]], ['name' => 'John Doe'])
+ * ```
+ *
+ * @param mixed ...$payload
+ *
+ * @return AbstractAction
+ */
+function UpdateQueryAction(...$payload)
+{
+    return Action('UPDATE', ...$payload);
+}
+
+/**
+ * Creates a `DELETE` type query action using user provided by function user.
+ *
+ * + DeleteQueryAction($id [,\Closure $callback])
+ * ```php
+ * use function Drewlabs\Query\Proxy\DeleteQueryAction;
+ *
+ * // ...
+ *
+ * // Example
+ * $action = DeleteQueryAction($id)
+ * ```
+ *
+ * + DeleteQueryAction(array $query [,\Closure $callback])
+ * ```php
+ * use function Drewlabs\Query\Proxy\DeleteQueryAction;
+ *
+ * // ...
+ *
+ * // Example
+ * $action = DeleteQueryAction(['where' => ['id' => 3]])
+ * ```
+ *
+ * + DeleteQueryAction(FiltersInterface $query [,\Closure $callback])
+ * ```php
+ * use function Drewlabs\Query\Proxy\DeleteQueryAction;
+ *
+ * // ...
+ *
+ * // Example
+ * $action = DeleteQueryAction(new MyFiltersHandler(...))
+ * ```
+ *
+ * @param mixed ...$payload
+ *
+ * @return AbstractAction
+ */
+function DeleteQueryAction(...$payload)
+{
+    return Action('DELETE', ...$payload);
+}
+
+/**
+ * Creates a `CREATE` type query action using user provided by function user.
+ *
+ * + CreateQueryAction(array $attributes [, array $params, \Closure $callback])
+ * ```php
+ * use function Drewlabs\Query\Proxy\CreateQueryAction;
+ *
+ * // ...
+ *
+ * // Example
+ * $action = CreateQueryAction([...])
+ * ```
+ *
+ * + CreateQueryAction(object $attributes, [, array $params ,\Closure $callback])
+ * ```php
+ * use function Drewlabs\Query\Proxy\CreateQueryAction;
+ *
+ * // ...
+ *
+ * // Example
+ * $object = new stdClass;
+ * $object->name = 'John Doe';
+ * $object->notes = 67;
+ *
+ * $action = CreateQueryAction($object);
+ * ```
+ *
+ * @param mixed ...$payload
+ *
+ * @return AbstractAction
+ */
+function CreateQueryAction(...$payload)
+{
+    return Action('CREATE', ...$payload);
+}
+
+// #endregion Action query
 
 /**
  * Creates a `FiltersInterface` instance from an array of query filters
@@ -122,5 +299,75 @@ function useCollectQueryResult(\Closure $closure)
  */
 function useActionQueryCommand($instance, \Closure $overrides = null)
 {
-    return useQueryCommand(is_string($instance) ? new QueryLanguage($instance) : $instance, $overrides);
+    $instance = is_string($instance) ? new QueryLanguage($instance) : $instance;
+    return new class($instance, $overrides) implements CommandInterface {
+        /**
+         * @var DMLProvider
+         */
+        private $instance;
+
+        /**
+         * @var \Closure|null
+         */
+        private $overrides;
+
+        /**
+         * Creates class instance.
+         *
+         * @param Closure|null $overrides
+         */
+        public function __construct(QueryLanguageInterface $instance, \Closure $overrides = null)
+        {
+            $this->instance = $instance;
+            $this->overrides = $overrides;
+        }
+
+        public function __invoke(AbstractAction $action, \Closure $callback = null)
+        {
+            // We allow user to provide a custom handler that overrides the
+            // default action handler for the command
+            if ($this->overrides) {
+                return ActionResult(($this->overrides)($action, $callback));
+            }
+            $payload = $action->payload();
+            $payload = $payload instanceof AbstractActionPayload ? $payload->toArray() : (\is_array($payload) ? $payload : []);
+            // Handle switch statements
+            switch (strtoupper($action->type())) {
+                case 'CREATE':
+                case 'DB_CREATE_ACTION':
+
+                    $payload = null !== $callback ? array_merge($payload, [$callback]) : $payload;
+                    return ActionResult($this->instance->create(...$payload));
+                case 'UPDATE':
+                case 'DB_UPDATE_ACTION':
+
+                    $payload = null !== $callback ? array_merge($payload, [$callback]) : $payload;
+                    return ActionResult($this->instance->update(...$payload));
+                case 'DELETE':
+                case 'DB_DELETE_ACTION':
+
+                    return ActionResult($this->instance->delete(...$payload));
+                case 'SELECT':
+                case 'DB_SELECT_ACTION':
+                    
+                    $payload = null !== $callback ? array_merge($payload, [$callback]) : $payload;
+                    return ActionResult($this->instance->select(...$payload));
+                default:
+                    throw new BadQueryActionException('This '.__CLASS__.' can only handle CREATE,DELETE,UPDATE AND SELECT actions');
+            }
+        }
+
+        /**
+         * Calls the command with action parameters
+         * 
+         * @param AbstractAction $action 
+         * @param Closure|null $callback
+         * 
+         * @return AbstractActionResult 
+         */
+        public function call(AbstractAction $action, \Closure $callback = null)
+        {
+            return $this->__invoke($action, $callback);
+        }
+    };
 }
