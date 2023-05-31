@@ -84,4 +84,46 @@ trait Queryable
         return \is_array($this->getRelations()) ?: false;
     }
     // #endregion relations
+
+    // #region Adaptable
+    public function getPropertyValue(string $name)
+    {
+        return $this->getAttribute($name);
+    }
+
+    public function propertyExists(string $name)
+    {
+        return $this->attributeCastExists($name) ||
+            $this->attributeExists($name) ||
+            $this->isRelation($name) ||
+            $this->relationLoaded($name);
+    }
+
+    public function setPropertyValue(string $name, $value)
+    {
+        $this->setAttribute($name, $value);
+    }
+
+    /**
+     * Checks if attribute exists in the `casts` array
+     * 
+     * @param string $name 
+     * @return bool 
+     */
+    private function attributeCastExists(string $name): bool
+    {
+        return array_key_exists($name, $this->casts);
+    }
+
+    /**
+     * Checks if attribute exists in the `attributes` array
+     * 
+     * @param string $name 
+     * @return bool 
+     */
+    public function attributeExists(string $name): bool
+    {
+        return array_key_exists($name, $this->attributes);
+    }
+    // #endregion Adaptable
 }
