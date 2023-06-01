@@ -89,7 +89,6 @@ trait UpdateQueryLanguage
                 return $upsert ? QueryableRelations::new($model)->update($params['relations'] ?? [], $attributes) : QueryableRelations::new($model)->refresh($params['relations'] ?? [], $attributes);
             });
         }
-
         return $this->createUpdateClosure($this, $id, $attributes, $callback)();
     }
 

@@ -68,7 +68,7 @@ trait CreateQueryLanguage
         };
         $attributes = $this->attributesToArray($attributes);
         $upsertConditions = $params['upsert_conditions'] ?? [];
-        $keys = array_merge($params['relations']);
+        $keys = array_merge($params['relations'] ?? []);
         if (!empty($keys)) {
             // Creates a copy of the relation in order to maintain the state of the keys unchanged
             // accross changes that happen during execution
