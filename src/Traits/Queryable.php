@@ -91,7 +91,7 @@ trait Queryable
         return $this->getAttribute($name);
     }
 
-    public function propertyExists(string $name)
+    public function propertyExists(string $name): bool
     {
         return $this->attributeCastExists($name) ||
             $this->attributeExists($name) ||
