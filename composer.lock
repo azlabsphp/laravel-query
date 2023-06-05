@@ -680,16 +680,16 @@
         },
         {
             "name": "drewlabs/query",
-            "version": "v0.2.22",
+            "version": "v0.2.23",
             "source": {
                 "type": "git",
                 "url": "https://github.com/azlabsphp/query.git",
-                "reference": "d4656479138ab437d46aa006921d1124d9afa111"
+                "reference": "0b4ba7e215a0f6536975015940dba11a9d1e0bf4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/azlabsphp/query/zipball/d4656479138ab437d46aa006921d1124d9afa111",
-                "reference": "d4656479138ab437d46aa006921d1124d9afa111",
+                "url": "https://api.github.com/repos/azlabsphp/query/zipball/0b4ba7e215a0f6536975015940dba11a9d1e0bf4",
+                "reference": "0b4ba7e215a0f6536975015940dba11a9d1e0bf4",
                 "shasum": ""
             },
             "require": {
@@ -723,9 +723,9 @@
             ],
             "support": {
                 "issues": "https://github.com/azlabsphp/query/issues",
-                "source": "https://github.com/azlabsphp/query/tree/v0.2.22"
+                "source": "https://github.com/azlabsphp/query/tree/v0.2.23"
             },
-            "time": "2023-06-05T12:34:09+00:00"
+            "time": "2023-06-05T13:18:27+00:00"
         },
         {
             "name": "drewlabs/support",
@@ -5389,5 +5389,5 @@
         "php": ">=7.2"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.2.0"
 }
