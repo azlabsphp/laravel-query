@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Drewlabs\Laravel\Query\Tests\Unit;
 
+use function Drewlabs\Laravel\Query\Proxy\CreateQueryFilters;
 use function Drewlabs\Laravel\Query\Proxy\DMLManager;
 
 use Drewlabs\Laravel\Query\Tests\Stubs\Person;
@@ -341,9 +342,9 @@ class QueryLanguageTest extends TestCase
             ],
             ['relations' => ['profile']]
         );
-        $result = DMLManager(Person::class)->select(['and' => [['firstname', 'JOHN'], ['lastname', 'DUMELO']], 'notExists' => ['column' => 'profile', 'match' => 'where(url,https://i.picsum.photos/id/733/200/300.jpg)']])->first();
+        $result = DMLManager(Person::class)->select(CreateQueryFilters(['and' => [['firstname', 'JOHN'], ['lastname', 'DUMELO']], 'notExists' => ['column' => 'profile', 'match' => 'where(url,https://i.picsum.photos/id/733/200/300.jpg)']]))->first();
         $this->assertFalse(null !== $result);
-        $result = DMLManager(Person::class)->select(['and' => [['firstname', 'JOHN'], ['lastname', 'DUMELO']], 'exists' => ['column' => 'profile', 'match' => 'where(url,https://i.picsum.photos/id/733/200/300.jpg)']])->first();
+        $result = DMLManager(Person::class)->select(CreateQueryFilters(['and' => [['firstname', 'JOHN'], ['lastname', 'DUMELO']], 'exists' => ['column' => 'profile', 'match' => 'where(url,https://i.picsum.photos/id/733/200/300.jpg)']]))->first();
         $this->assertTrue(null !== $result);
     }
 
@@ -362,9 +363,9 @@ class QueryLanguageTest extends TestCase
             ],
             ['relations' => ['profile']]
         );
-        $result = DMLManager(Person::class)->select(['and' => [['firstname', 'JOHN'], ['lastname', 'DUMELO']], 'orNotExists' => ['column' => 'profile', 'match' => 'where(url,https://i.picsum.photos/id/733/200/300.jpg)']])->first();
+        $result = DMLManager(Person::class)->select(CreateQueryFilters(['and' => [['firstname', 'JOHN'], ['lastname', 'DUMELO']], 'orNotExists' => ['column' => 'profile', 'match' => 'where(url,https://i.picsum.photos/id/733/200/300.jpg)']]))->first();
         $this->assertNotNull($result);
-        $result = DMLManager(Person::class)->select(['and' => [['firstname', 'JOHN'], ['lastname', 'DUMELO']], 'orExists' => ['column' => 'profile', 'match' => 'where(url,https://i.picsum.photos/id/733/200/300.jpg)']])->first();
+        $result = DMLManager(Person::class)->select(CreateQueryFilters(['and' => [['firstname', 'JOHN'], ['lastname', 'DUMELO']], 'orExists' => ['column' => 'profile', 'match' => 'where(url,https://i.picsum.photos/id/733/200/300.jpg)']]))->first();
         $this->assertNotNull($result);
     }
 }

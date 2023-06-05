@@ -615,6 +615,9 @@ final class EloquentQueryFilters implements FiltersInterface
     {
         $opts = [$operator, 1, $boolean];
         $output = [];
+        /**
+         * @var callable
+         */
         $callback = null;
         foreach ($params as $value) {
             if (!is_string($value) && is_callable($value)) {
@@ -625,7 +628,10 @@ final class EloquentQueryFilters implements FiltersInterface
         }
         // We merge the output with the slice from the optional parameters value and append the callback
         // at the end if provided
-        $output = [...$output, ...array_slice($opts, count($output) - 1), $callback];
+        $self = $this;
+        $output = [...$output, ...array_slice($opts, count($output) - 1), null !== $callback ? function($builder) use ($callback, $self) {
+            return \Closure::fromCallable($callback)->__invoke($self, $builder);
+        } : $callback];
         // We protect the query method against parameters that do not translate what they means, by overriding
         // the operator and the boolean function to use for the query
         $output[1] = $operator;
