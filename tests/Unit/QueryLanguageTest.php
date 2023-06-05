@@ -324,4 +324,47 @@ class QueryLanguageTest extends TestCase
         $this->assertNotNull(DMLManager(Profil::class)->select($profil->getKey()));
         $this->assertNotNull(Person::where('firstname', 'Laura')->where('lastname', 'R. Clifford')->first());
     }
+
+
+    public function test_eloquent_query_filters_exists()
+    {
+        DMLManager(Person::class)->create(
+            [
+                'firstname' => 'JOHN',
+                'lastname' => 'DUMELO',
+                'phonenumber' => '+22892002345',
+                'age' => 44,
+                'sex' => 'M',
+                'profile' => [
+                    'url' => 'https://i.picsum.photos/id/733/200/300.jpg',
+                ],
+            ],
+            ['relations' => ['profile']]
+        );
+        $result = DMLManager(Person::class)->select(['and' => [['firstname', 'JOHN'], ['lastname', 'DUMELO']], 'notExists' => ['column' => 'profile', 'match' => 'where(url,https://i.picsum.photos/id/733/200/300.jpg)']])->first();
+        $this->assertFalse(null !== $result);
+        $result = DMLManager(Person::class)->select(['and' => [['firstname', 'JOHN'], ['lastname', 'DUMELO']], 'exists' => ['column' => 'profile', 'match' => 'where(url,https://i.picsum.photos/id/733/200/300.jpg)']])->first();
+        $this->assertTrue(null !== $result);
+    }
+
+    public function test_eloquent_query_filters_or_exists()
+    {
+        DMLManager(Person::class)->create(
+            [
+                'firstname' => 'JOHN',
+                'lastname' => 'DUMELO',
+                'phonenumber' => '+22892002345',
+                'age' => 44,
+                'sex' => 'M',
+                'profile' => [
+                    'url' => 'https://i.picsum.photos/id/733/200/300.jpg',
+                ],
+            ],
+            ['relations' => ['profile']]
+        );
+        $result = DMLManager(Person::class)->select(['and' => [['firstname', 'JOHN'], ['lastname', 'DUMELO']], 'orNotExists' => ['column' => 'profile', 'match' => 'where(url,https://i.picsum.photos/id/733/200/300.jpg)']])->first();
+        $this->assertNotNull($result);
+        $result = DMLManager(Person::class)->select(['and' => [['firstname', 'JOHN'], ['lastname', 'DUMELO']], 'orExists' => ['column' => 'profile', 'match' => 'where(url,https://i.picsum.photos/id/733/200/300.jpg)']])->first();
+        $this->assertNotNull($result);
+    }
 }

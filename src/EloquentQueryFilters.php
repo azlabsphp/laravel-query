@@ -119,7 +119,7 @@ final class EloquentQueryFilters implements FiltersInterface
     }
 
     /**
-     * apply `whereHas` or `has` query on the builder instance.
+     * apply `has` query on the builder instance.
      *
      * @param QueryBuilder|Builder $builder
      * @param mixed                $params
@@ -133,17 +133,43 @@ final class EloquentQueryFilters implements FiltersInterface
         foreach ($params as $value) {
             // To avoid query to throw, we check if the count of parameter isn't less than 2
             // Case it's less than 2 we skip to the next iteration
-            if (!\is_array($value) || \count($value) < 2) {
+            if (!\is_array($value) || empty($value)) {
                 continue;
             }
-            $builder = $builder->whereHas(...array_values($value));
+            $queryParams = $this->buildNestedQueryParams($value);
+            $builder = $builder->has(...$queryParams);
         }
 
         return $builder;
     }
 
     /**
-     * apply `whereDoesntHave` or `doesntHave` on builder instance.
+     * apply `orHas` query on the builder instance.
+     *
+     * @param QueryBuilder|Builder $builder
+     * @param mixed                $params
+     *
+     * @return Builder|QueryBuilder
+     */
+    private function orExists($builder, $params)
+    {
+        $params = array_filter($params, 'is_array') === $params ? $params : [$params];
+
+        foreach ($params as $value) {
+            // To avoid query to throw, we check if the count of parameter isn't less than 2
+            // Case it's less than 2 we skip to the next iteration
+            if (!\is_array($value) || empty($value)) {
+                continue;
+            }
+            $queryParams = $this->buildNestedQueryParams($value, 'or');
+            $builder = $builder->has(...$queryParams);
+        }
+
+        return $builder;
+    }
+
+    /**
+     * apply `doesntHave` or `doesntHave` on builder instance.
      *
      * @param QueryBuilder|Builder $builder
      * @param mixed                $params
@@ -153,13 +179,40 @@ final class EloquentQueryFilters implements FiltersInterface
     private function notExists($builder, $params)
     {
         $params = array_filter($params, 'is_array') === $params ? $params : [$params];
+
         foreach ($params as $value) {
             // To avoid query to throw, we check if the count of parameter isn't less than 2
             // Case it's less than 2 we skip to the next iteration
-            if (!\is_array($value) || \count($value) < 2) {
+            if (!\is_array($value) || empty($value)) {
                 continue;
             }
-            $builder = $builder->whereDoesntHave(...$value);
+            $queryParams = $this->buildNestedQueryParams($value, 'and', '<');
+            $builder = $builder->has(...$queryParams);
+        }
+
+        return $builder;
+    }
+
+    /**
+     * apply `orDoesntHave` or `doesntHave` on builder instance.
+     *
+     * @param QueryBuilder|Builder $builder
+     * @param mixed                $params
+     *
+     * @return QueryBuilder|Builder
+     */
+    private function orNotExists($builder, $params)
+    {
+        $params = array_filter($params, 'is_array') === $params ? $params : [$params];
+
+        foreach ($params as $value) {
+            // To avoid query to throw, we check if the count of parameter isn't less than 2
+            // Case it's less than 2 we skip to the next iteration
+            if (!\is_array($value) || empty($value)) {
+                continue;
+            }
+            $queryParams = $this->buildNestedQueryParams($value, 'or', '<');
+            $builder = $builder->has(...$queryParams);
         }
 
         return $builder;
@@ -206,44 +259,6 @@ final class EloquentQueryFilters implements FiltersInterface
 
         return $builder;
     }
-
-    // TODO : Merge with exists method
-
-    private function has($builder, $params)
-    {
-        if (\is_string($params)) {
-            return $builder->has($params);
-        }
-        $operators = ['>=', '<=', '<', '>', '<>', '!='];
-        if (\is_array($params) && (false !== Arr::search($params[1] ?? null, $operators))) {
-            return $builder->has(...$params);
-        }
-        if (\is_array($params)) {
-            foreach ($params as $value) {
-                $builder = $builder->has($value);
-            }
-        }
-
-        return $builder;
-    }
-
-    /**
-     * @param QueryBuilder|Builder $builder
-     * @param mixed                $params
-     *
-     * @return mixed
-     */
-    private function doesntHave($builder, $params)
-    {
-        $params = \is_array($params) ? $params : [$params];
-        foreach ($params as $value) {
-            $value = \is_array($value) ? $value : [$value];
-            $builder = $builder->doesntHave(...array_values($value));
-        }
-
-        return $builder;
-    }
-    // TODO : Merge with exists method
 
     /**
      * apply `orWhere` on builder instance.
@@ -518,62 +533,104 @@ final class EloquentQueryFilters implements FiltersInterface
      * apply `min` aggregation query on the builder.
      *
      * @param Builder $builder
-     * @param string  $relation
+     * @param array|string  $params
      *
      * @return void
      */
-    private function min($builder, string $column, string $relation = null)
+    private function min($builder, $params)
     {
-        return null !== $relation ? $builder->withAggregate($relation, $column, 'min') : $builder->addSelect([
-            sprintf('%s_min', $column) => $builder->clone()->min(),
-        ]);
+        $params = !is_array($params) ? [$params] : $params;
+        $params = array_filter($params, 'is_array') === $params ? $params : [$params];
+        return array_reduce($params, function($builder, $current) {
+            list($column, $relation) = $current;
+            return null !== $relation ? $builder->withAggregate($relation, $column, 'min') : $builder->addSelect([
+                sprintf('%s_min', $column) => $builder->clone()->min(),
+            ]);
+        }, $builder);
     }
 
     /**
      * apply `max` aggregation query on the builder.
      *
      * @param Builder $builder
-     * @param string  $relation
+     * @param array|string  $params
      *
      * @return void
      */
-    private function max($builder, string $column, string $relation = null)
+    private function max($builder, $params)
     {
-        return null !== $relation ? $builder->withAggregate($relation, $column, 'min') : $builder->addSelect([
-            sprintf('%s_max', $column) => $builder->clone()->max(),
-        ]);
-
+        $params = !is_array($params) ? [$params] : $params;
+        $params = array_filter($params, 'is_array') === $params ? $params : [$params];
+        return array_reduce($params, function($builder, $current) {
+            list($column, $relation) = $current;
+            return null !== $relation ? $builder->withAggregate($relation, $column, 'min') : $builder->addSelect([
+                sprintf('%s_max', $column) => $builder->clone()->max(),
+            ]);
+        }, $builder);
     }
 
     /**
      * apply `sum` aggregation query on the builder.
      *
      * @param Builder $builder
-     * @param string  $relation
+     * @param array|string  $params
      *
      * @return void
      */
-    private function sum($builder, string $column, string $relation = null)
+    private function sum($builder, $params)
     {
-        return null !== $relation ? $builder->withAggregate($relation, $column, 'sum') : $builder->addSelect([
-            sprintf('%s_sum', $column) => $builder->clone()->sum(),
-        ]);
+        $params = !is_array($params) ? [$params] : $params;
+        $params = array_filter($params, 'is_array') === $params ? $params : [$params];
+        return array_reduce($params, function($builder, $current) {
+            list($column, $relation) = $current;
+            return null !== $relation ? $builder->withAggregate($relation, $column, 'sum') : $builder->addSelect([
+                sprintf('%s_sum', $column) => $builder->clone()->sum(),
+            ]);
+        }, $builder);
     }
 
     /**
      * apply `avg` aggregation query on the builder.
      *
      * @param Builder $builder
-     * @param string  $relation
+     * @param array|string  $params
      *
      * @return void
      */
-    private function avg($builder, string $column, string $relation = null)
+    private function avg($builder, $params)
     {
-        return null !== $relation ? $builder->withAggregate($relation, $column, 'avg') : $builder->addSelect([
-            sprintf('%s_avg', $column) => $builder->clone()->avg(),
-        ]);
-
+        $params = !is_array($params) ? [$params] : $params;
+        $params = array_filter($params, 'is_array') === $params ? $params : [$params];
+        return array_reduce($params, function($builder, $current) {
+            list($column, $relation) = $current;
+            return null !== $relation ? $builder->withAggregate($relation, $column, 'avg') : $builder->addSelect([
+                sprintf('%s_avg', $column) => $builder->clone()->avg(),
+            ]);
+        }, $builder);
     }
     // #endregion Aggregation
+
+    //#region helper methods
+    private function buildNestedQueryParams(array $params, $boolean = 'and', $operator = '>=')
+    {
+        $opts = [$operator, 1, $boolean];
+        $output = [];
+        $callback = null;
+        foreach ($params as $value) {
+            if (!is_string($value) && is_callable($value)) {
+                $callback = $value;
+                continue;
+            }
+            $output[] = $value;
+        }
+        // We merge the output with the slice from the optional parameters value and append the callback
+        // at the end if provided
+        $output = [...$output, ...array_slice($opts, count($output) - 1), $callback];
+        // We protect the query method against parameters that do not translate what they means, by overriding
+        // the operator and the boolean function to use for the query
+        $output[1] = $operator;
+        $output[3] = $boolean;
+        return $output;
+    }
+    //#region helper methods
 }
