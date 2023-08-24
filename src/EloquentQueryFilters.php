@@ -33,11 +33,24 @@ final class EloquentQueryFilters implements FiltersInterface
     private $filters = [];
 
     /**
+     * List of supported aggregation methods
+     * 
+     * @var string[]
+     */
+    private $aggregations = [];
+
+    /**
+     * @var string[]
+     */
+    const DEFAULT_AGGREGATIONS = ['min', 'avg', 'sum', 'max', 'count'];
+
+    /**
      * Creates class instance.
      */
-    public function __construct(array $values = null)
+    public function __construct(array $values = null, array $aggregations = null)
     {
         $this->setQueryFilters($values ?? []);
+        $this->aggregations = !empty($aggregations) ? $aggregations : self::DEFAULT_AGGREGATIONS;
     }
 
     public function __call(string $method, $arguments)
@@ -92,7 +105,11 @@ final class EloquentQueryFilters implements FiltersInterface
 
     public function invoke(string $method, $builder, $args)
     {
-        return $this->{$method}($builder, $args);
+        try {
+            return $this->{$method}($builder, $args);
+        } catch (\Throwable $e) {
+            return $builder;
+        }
     }
 
     /**
@@ -526,7 +543,27 @@ final class EloquentQueryFilters implements FiltersInterface
      */
     private function count($builder, $relations)
     {
+        $builder->addSelect();
         return $builder->withAggregate(\is_array($relations) ? $relations : \func_get_args(), '*', 'count');
+    }
+
+
+    /**
+     * Handle aggregation query on the filter object
+     * 
+     * @param mixed $builder 
+     * @param mixed $params 
+     * @return mixed 
+     */
+    private function aggregate($builder, $params)
+    {
+        foreach ($params as $name => $value) {
+            if (!in_array($name, $this->aggregations)) {
+                continue;
+            }
+            $builder = $this->invoke($name, $builder, $value);
+        }
+        return $builder;
     }
 
     /**
@@ -539,12 +576,13 @@ final class EloquentQueryFilters implements FiltersInterface
      */
     private function min($builder, $params)
     {
-        $params = !is_array($params) ? [$params] : $params;
-        $params = array_filter($params, 'is_array') === $params ? $params : [$params];
-        return array_reduce($params, function($builder, $current) {
+        $params = array_filter($params, 'is_array') === $params ? $params : array_map(function($value) {
+            return [$value, null];
+        }, !is_array($params) ? [$params] : $params);
+        return array_reduce($params, function ($builder, $current) {
             list($column, $relation) = $current;
             return null !== $relation ? $builder->withAggregate($relation, $column, 'min') : $builder->addSelect([
-                sprintf('%s_min', $column) => $builder->clone()->min(),
+                sprintf('%s_min', $column) => $builder->clone()->min($column),
             ]);
         }, $builder);
     }
@@ -559,12 +597,13 @@ final class EloquentQueryFilters implements FiltersInterface
      */
     private function max($builder, $params)
     {
-        $params = !is_array($params) ? [$params] : $params;
-        $params = array_filter($params, 'is_array') === $params ? $params : [$params];
-        return array_reduce($params, function($builder, $current) {
+        $params = array_filter($params, 'is_array') === $params ? $params : array_map(function($value) {
+            return [$value, null];
+        }, !is_array($params) ? [$params] : $params);
+        return array_reduce($params, function ($builder, $current) {
             list($column, $relation) = $current;
             return null !== $relation ? $builder->withAggregate($relation, $column, 'min') : $builder->addSelect([
-                sprintf('%s_max', $column) => $builder->clone()->max(),
+                sprintf('%s_max', $column) => $builder->clone()->max($column),
             ]);
         }, $builder);
     }
@@ -579,12 +618,13 @@ final class EloquentQueryFilters implements FiltersInterface
      */
     private function sum($builder, $params)
     {
-        $params = !is_array($params) ? [$params] : $params;
-        $params = array_filter($params, 'is_array') === $params ? $params : [$params];
-        return array_reduce($params, function($builder, $current) {
+        $params = array_filter($params, 'is_array') === $params ? $params : array_map(function($value) {
+            return [$value, null];
+        }, !is_array($params) ? [$params] : $params);
+        return array_reduce($params, function ($builder, $current) {
             list($column, $relation) = $current;
             return null !== $relation ? $builder->withAggregate($relation, $column, 'sum') : $builder->addSelect([
-                sprintf('%s_sum', $column) => $builder->clone()->sum(),
+                sprintf('%s_sum', $column) => $builder->clone()->sum($column),
             ]);
         }, $builder);
     }
@@ -599,12 +639,13 @@ final class EloquentQueryFilters implements FiltersInterface
      */
     private function avg($builder, $params)
     {
-        $params = !is_array($params) ? [$params] : $params;
-        $params = array_filter($params, 'is_array') === $params ? $params : [$params];
-        return array_reduce($params, function($builder, $current) {
+        $params = array_filter($params, 'is_array') === $params ? $params : array_map(function($value) {
+            return [$value, null];
+        }, !is_array($params) ? [$params] : $params);
+        return array_reduce($params, function ($builder, $current) {
             list($column, $relation) = $current;
             return null !== $relation ? $builder->withAggregate($relation, $column, 'avg') : $builder->addSelect([
-                sprintf('%s_avg', $column) => $builder->clone()->avg(),
+                sprintf('%s_avg', $column) => $builder->clone()->avg($column),
             ]);
         }, $builder);
     }
@@ -629,7 +670,7 @@ final class EloquentQueryFilters implements FiltersInterface
         // We merge the output with the slice from the optional parameters value and append the callback
         // at the end if provided
         $self = $this;
-        $output = [...$output, ...array_slice($opts, count($output) - 1), null !== $callback ? function($builder) use ($callback, $self) {
+        $output = [...$output, ...array_slice($opts, count($output) - 1), null !== $callback ? function ($builder) use ($callback, $self) {
             return \Closure::fromCallable($callback)->__invoke($self, $builder);
         } : $callback];
         // We protect the query method against parameters that do not translate what they means, by overriding

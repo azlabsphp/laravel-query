@@ -22,4 +22,18 @@ interface TestQueryBuilderInterface
     public function whereIn($column, array $values);
 
     public function has($relation, string $operator = '>=', int $count = 1, $boolean = 'and', Closure $callback = null);
+
+    public function withAggregate($relations, $column, $function = null);
+
+    public function clone();
+
+    public function min($column);
+
+    public function max($column);
+
+    public function sum($column);
+    
+    public function avg($column);
+
+    public function addSelect($column);
 }
