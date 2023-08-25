@@ -91,10 +91,14 @@ class QueryFiltersTest extends TestCase
         ]);
 
         $mockObject
-        ->expects($this->exactly(2))
-        ->method('min')
-        ->with(...static::withConsecutive(['grades'], ['courses']))
-        ->willReturn($mockObject);
+            ->method('limit')
+            ->willReturn($mockObject);
+
+        $mockObject
+            ->expects($this->exactly(2))
+            ->method('selectRaw')
+            ->with(...static::withConsecutive(['min(grades)'], ['min(courses)']))
+            ->willReturn($mockObject);
 
         $mockObject
             ->expects($this->exactly(2))
@@ -104,7 +108,7 @@ class QueryFiltersTest extends TestCase
         $mockObject
             ->expects($this->exactly(2))
             ->method('addSelect')
-            ->with(...static::withConsecutive([['grades_min' => $mockObject]], [['courses_min' => $mockObject]]))
+            ->with(...static::withConsecutive([['min_grades' => $mockObject]], [['min_courses' => $mockObject]]))
             ->willReturn($mockObject);
 
         $this->assertSame($mockObject, $queryFilters->apply($mockObject));
@@ -123,10 +127,14 @@ class QueryFiltersTest extends TestCase
         ]);
 
         $mockObject
-        ->expects($this->exactly(2))
-        ->method('max')
-        ->with(...static::withConsecutive(['grades'], ['courses']))
-        ->willReturn($mockObject);
+            ->method('limit')
+            ->willReturn($mockObject);
+
+        $mockObject
+            ->expects($this->exactly(2))
+            ->method('selectRaw')
+            ->with(...static::withConsecutive(['max(grades)'], ['max(courses)']))
+            ->willReturn($mockObject);
 
         $mockObject
             ->expects($this->exactly(2))
@@ -136,13 +144,13 @@ class QueryFiltersTest extends TestCase
         $mockObject
             ->expects($this->exactly(2))
             ->method('addSelect')
-            ->with(...static::withConsecutive([['grades_max' => $mockObject]], [['courses_max' => $mockObject]]))
+            ->with(...static::withConsecutive([['max_grades' => $mockObject]], [['max_courses' => $mockObject]]))
             ->willReturn($mockObject);
 
         $this->assertSame($mockObject, $queryFilters->apply($mockObject));
     }
 
-    
+
 
     public function test_query_filters_aggregate_avg_call_add_select_if_aggregation_method_is_called_string_as_column_or_list_of_string_as_column()
     {
@@ -157,10 +165,14 @@ class QueryFiltersTest extends TestCase
         ]);
 
         $mockObject
-        ->expects($this->exactly(2))
-        ->method('avg')
-        ->with(...static::withConsecutive(['grades'], ['courses']))
-        ->willReturn($mockObject);
+            ->method('limit')
+            ->willReturn($mockObject);
+
+        $mockObject
+            ->expects($this->exactly(2))
+            ->method('selectRaw')
+            ->with(...static::withConsecutive(['avg(grades)'], ['avg(courses)']))
+            ->willReturn($mockObject);
 
         $mockObject
             ->expects($this->exactly(2))
@@ -170,7 +182,7 @@ class QueryFiltersTest extends TestCase
         $mockObject
             ->expects($this->exactly(2))
             ->method('addSelect')
-            ->with(...static::withConsecutive([['grades_avg' => $mockObject]], [['courses_avg' => $mockObject]]))
+            ->with(...static::withConsecutive([['avg_grades' => $mockObject]], [['avg_courses' => $mockObject]]))
             ->willReturn($mockObject);
 
         $this->assertSame($mockObject, $queryFilters->apply($mockObject));
@@ -189,10 +201,14 @@ class QueryFiltersTest extends TestCase
         ]);
 
         $mockObject
-        ->expects($this->exactly(2))
-        ->method('sum')
-        ->with(...static::withConsecutive(['grades'], ['courses']))
-        ->willReturn($mockObject);
+            ->method('limit')
+            ->willReturn($mockObject);
+
+        $mockObject
+            ->expects($this->exactly(2))
+            ->method('selectRaw')
+            ->with(...static::withConsecutive(['sum(grades)'], ['sum(courses)']))
+            ->willReturn($mockObject);
 
         $mockObject
             ->expects($this->exactly(2))
@@ -202,7 +218,7 @@ class QueryFiltersTest extends TestCase
         $mockObject
             ->expects($this->exactly(2))
             ->method('addSelect')
-            ->with(...static::withConsecutive([['grades_sum' => $mockObject]], [['courses_sum' => $mockObject]]))
+            ->with(...static::withConsecutive([['sum_grades' => $mockObject]], [['sum_courses' => $mockObject]]))
             ->willReturn($mockObject);
 
         $this->assertSame($mockObject, $queryFilters->apply($mockObject));

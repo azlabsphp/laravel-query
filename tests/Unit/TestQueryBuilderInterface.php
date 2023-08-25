@@ -27,13 +27,9 @@ interface TestQueryBuilderInterface
 
     public function clone();
 
-    public function min($column);
+    public function selectRaw($expression, $bindings = null);
 
-    public function max($column);
-
-    public function sum($column);
-    
-    public function avg($column);
+    public function limit($limit);
 
     public function addSelect($column);
 }
