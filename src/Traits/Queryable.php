@@ -15,6 +15,9 @@ namespace Drewlabs\Laravel\Query\Traits;
 
 use Drewlabs\Core\Helpers\Arr;
 
+/**
+ * @property array attributes
+ */
 trait Queryable
 {
     // #region primary keys
@@ -25,8 +28,8 @@ trait Queryable
 
     public function setKey($value)
     {
-        $this->{$this->getPrimaryKey()} = $value;
-
+        $primaryKey = $this->getPrimaryKey();
+        $this->{$primaryKey} = $value;
         return $this;
     }
     // #endregion primary keys
@@ -85,12 +88,7 @@ trait Queryable
     }
     // #endregion relations
 
-    // #region Adaptable
-    public function getPropertyValue(string $name)
-    {
-        return $this->getAttribute($name);
-    }
-
+    // #region
     public function propertyExists(string $name): bool
     {
         return $this->attributeCastExists($name) ||
@@ -99,9 +97,25 @@ trait Queryable
             $this->relationLoaded($name);
     }
 
+    public function getPropertyValue(string $name)
+    {
+        return $this->getAttribute($name);
+    }
+
     public function setPropertyValue(string $name, $value)
     {
         $this->setAttribute($name, $value);
+    }
+
+    /**
+     * Checks if attribute exists in the `attributes` array
+     * 
+     * @param string $name 
+     * @return bool 
+     */
+    public function attributeExists(string $name): bool
+    {
+        return array_key_exists($name, $this->attributes);
     }
 
     /**
@@ -116,14 +130,26 @@ trait Queryable
     }
 
     /**
-     * Checks if attribute exists in the `attributes` array
+     * Get the value of a column for the current row
      * 
      * @param string $name 
-     * @return bool 
+     * @return mixed 
      */
-    public function attributeExists(string $name): bool
+    private function getRawPropertyValue(string $name)
     {
-        return array_key_exists($name, $this->attributes);
+        return $this->attributes[$name];
     }
-    // #endregion Adaptable
+
+    /**
+     * Set value for the raw property
+     * 
+     * @param string $name 
+     * @param mixed $value 
+     * @return void 
+     */
+    private function setRawPropertyValue(string $name, $value)
+    {
+        $this->attributes[$name] = $value;
+    }
+    // #region
 }
