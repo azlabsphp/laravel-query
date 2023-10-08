@@ -137,7 +137,8 @@ trait Queryable
      */
     private function getRawPropertyValue(string $name)
     {
-        return $this->attributes[$name];
+        // TODO: If required, add eloquen mergeAttributeFromCachedCast in future release
+        return $this->attributes[$name] ?? null;
     }
 
     /**
