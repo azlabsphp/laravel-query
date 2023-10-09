@@ -17,6 +17,7 @@ use Drewlabs\Core\Helpers\Arr;
 
 /**
  * @property array attributes
+ * @method array getAttributes()
  */
 trait Queryable
 {
@@ -137,8 +138,7 @@ trait Queryable
      */
     private function getRawPropertyValue(string $name)
     {
-        // TODO: If required, add eloquen mergeAttributeFromCachedCast in future release
-        return $this->attributes[$name] ?? null;
+        return $this->getAttributes()[$name] ?? null;
     }
 
     /**
