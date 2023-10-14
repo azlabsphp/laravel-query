@@ -85,3 +85,6 @@
 - Removed `ModelTypeException` exception class
 - Renameed `DMLException` to `QueryException` class
 - Removed `EloquentModel` base extension class for models
+
+
+- Added a Query facade that uses Builder class to construct query and provide a getResult() method for reading query results
