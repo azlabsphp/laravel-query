@@ -17,6 +17,11 @@ use Drewlabs\Query\Contracts\EnumerableResultInterface;
 use Drewlabs\Query\EnumerableResult;
 use Illuminate\Contracts\Container\BindingResolutionException;
 
+/**
+ * @internal
+ * 
+ * @package Drewlabs\Laravel\Query
+ */
 class SelectQueryResult
 {
     /**

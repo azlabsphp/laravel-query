@@ -95,7 +95,7 @@ final class QueryLanguage implements QueryLanguageInterface, ProvidesFiltersFact
     private $transactions;
 
     /**
-     * @var \Closure(mixed|array): EloquentQueryFilters
+     * @var \Closure(mixed|array): QueryFilters
      */
     private $filtersFactory;
 
@@ -328,12 +328,12 @@ final class QueryLanguage implements QueryLanguageInterface, ProvidesFiltersFact
     /**
      * Use the eloquent query filter as default query filter.
      *
-     * @return Closure(mixed|array $queries): EloquentQueryFilters
+     * @return Closure(mixed|array $queries): QueryFilters
      */
     private function useDefaultQueryFactory()
     {
         return static function (array $queries) {
-            return new EloquentQueryFilters($queries);
+            return new QueryFilters($queries);
         };
     }
 

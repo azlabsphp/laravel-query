@@ -14,7 +14,7 @@ declare(strict_types=1);
 namespace Drewlabs\Laravel\Query\Proxy;
 
 use Closure;
-use Drewlabs\Laravel\Query\EloquentQueryFilters;
+use Drewlabs\Laravel\Query\QueryFilters;
 use Drewlabs\Laravel\Query\QueryLanguage;
 use Drewlabs\Laravel\Query\SelectQueryResult;
 use Drewlabs\Query\Contracts\CommandInterface;
@@ -207,11 +207,11 @@ function CreateQueryAction(...$payload)
  * Creates a `FiltersInterface` instance from an array of query filters
  * 
  * @param array $values 
- * @return EloquentQueryFilters 
+ * @return QueryFilters 
  */
 function CreateQueryFilters(array $values)
 {
-    return EloquentQueryFilters::new(PreparesFiltersArray::new($values)->call());
+    return QueryFilters::new(PreparesFiltersArray::new($values)->call());
 }
 
 /**

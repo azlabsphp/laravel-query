@@ -133,6 +133,7 @@ trait SelectQueryLanguage
                     return $builder->paginate($per_page, $columns, null, $page ?? 1);
                 });
             },
+
             function (\Closure $callback = null) {
                 return $this->createSelector([], ['*'], $callback)(static function ($builder, $columns) {
                     return $builder->get($columns);
@@ -194,14 +195,12 @@ trait SelectQueryLanguage
             $declared = $this->queryable->getDeclaredColumns();
             $primaryKey = $this->queryable->getPrimaryKey();
             $exceptions = $this->queryable->getHidden();
-            [$c, $r] = Columns::new($columns)->tuple($declared, $model_relations);
+            [$c, $relations] = Columns::new($columns)->tuple($declared, $model_relations);
             // We prepare the query builder object
             $builder = $this->builderFactory()($this->queryable, $query);
 
             // Add relationship queries to the builder if the relationship array is not empty
-            if (!empty($r)) {
-                $builder = $builder->with($r);
-            }
+            $builder = !empty($relations) ? $builder->with($relations) : $builder;
 
             // Create set columns that must not be included in the output result
             $excepts = array_unique((!empty($c) && !\in_array('*', $c, true)) ? array_merge($exceptions, array_diff(Arr::filter($declared, static function ($column) use ($primaryKey) {
@@ -209,7 +208,7 @@ trait SelectQueryLanguage
             }), [...$c, '*'])) : $exceptions);
 
             return $callback(SelectQueryResult(
-                new EnumerableResult($selector($builder, empty($c) || !empty($r) ? ['*'] : array_unique(array_merge($c ?? [], [$primaryKey]))))
+                new EnumerableResult($selector($builder, empty($c) || !empty($relations) ? ['*'] : array_unique(array_merge($c ?? [], [$primaryKey]))))
             )->map(static function ($value) use ($excepts) {
                 return $value->setHidden($excepts);
             })->get());

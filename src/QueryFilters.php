@@ -21,7 +21,12 @@ use Drewlabs\Support\Traits\MethodProxy;
 use Illuminate\Contracts\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\Builder;
 
-final class EloquentQueryFilters implements FiltersInterface
+/**
+ * @internal
+ * 
+ * @package Drewlabs\Laravel\Query
+ */
+final class QueryFilters implements FiltersInterface
 {
     use MethodProxy;
 
@@ -86,7 +91,7 @@ final class EloquentQueryFilters implements FiltersInterface
             }
         }
 
-        // Then is the aggregate filter is present in the list of filters, we invoke the aggregate
+        // Then if the aggregate filter is present in the list of filters, we invoke the aggregate
         // filter on the builder
         if (isset($this->filters['aggregate']) && (null !== $this->filters['aggregate'])) {
             $builder = \call_user_func([$this, 'aggregate'], $builder, $this->filters['aggregate']);
