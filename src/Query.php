@@ -4,19 +4,18 @@ namespace Drewlabs\Laravel\Query;
 
 use BadMethodCallException;
 use Drewlabs\Laravel\Query\Contracts\QueryInterface;
-use Drewlabs\Query\Builder as QueryBuilder;
-use Drewlabs\Query\Contracts\FiltersBuilderInterface;
+use Drewlabs\Query\Builder;
 use Illuminate\Contracts\Database\Query\Builder as BaseQueryBuilder;
 use Illuminate\Support\Facades\DB;
 use IteratorAggregate;
 
 /**
- * @mixin \Drewlabs\Query\Contracts\FiltersBuilderInterface
+ * @mixin \Drewlabs\Query\Contracts\BuilderInterface
  */
 class Query implements IteratorAggregate, QueryInterface
 {
     /**
-     * @var QueryBuilder
+     * @var Builder
      */
     private $filters;
 
@@ -28,7 +27,7 @@ class Query implements IteratorAggregate, QueryInterface
     /**
      * Creates new query builder instance
      */
-    public function __construct(FiltersBuilderInterface $filters)
+    private function __construct(Builder $filters)
     {
         $this->filters = $filters;
     }
@@ -40,7 +39,7 @@ class Query implements IteratorAggregate, QueryInterface
      */
     public static function new()
     {
-        return new static(QueryBuilder::new());
+        return new static(Builder::new());
     }
 
     /**

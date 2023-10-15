@@ -6,7 +6,6 @@ use BadMethodCallException;
 
 interface QueryInterface
 {
-
     /**
      * Get query results as array
      * 
