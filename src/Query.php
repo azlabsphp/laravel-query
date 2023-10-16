@@ -81,11 +81,7 @@ class Query implements IteratorAggregate, QueryInterface
         if (null === $this->builder) {
             throw new BadMethodCallException('Query builder point to a null reference, you probably did not call fromBuilder() or fromTable() method.');
         }
-        return QueryFilters::new($this->filters->getQuery() ?? [])
-            ->apply($this->builder)
-            ->select($this->filters->getColumns() ?? ['*'])
-            ->cursor()
-            ->getIterator();
+        return $this->prepareQuery()->cursor()->getIterator();
     }
 
     public function getResult(): array
@@ -93,11 +89,67 @@ class Query implements IteratorAggregate, QueryInterface
         if (null === $this->builder) {
             throw new BadMethodCallException('Query builder point to a null reference, you probably did not call fromBuilder() or fromTable() method.');
         }
-        return QueryFilters::new($this->filters->getQuery() ?? [])
-            ->apply($this->builder)
-            ->select($this->filters->getColumns() ?? ['*'])
-            ->get()
-            ->all();
+        return $this->prepareQuery()->get()->all();
+    }
+
+    /**
+     * Get the count of the query result rows
+     * 
+     * @param array $columns 
+     * @return int 
+     * @throws BadMethodCallException 
+     */
+    public function count($columns = ['*']): int
+    {
+        if (null === $this->builder) {
+            throw new BadMethodCallException('Query builder point to a null reference, you probably did not call fromBuilder() or fromTable() method.');
+        }
+        return $this->prepareQuery()->count($columns);
+    }
+
+    /**
+     * Get the minimum value the given column in the query result
+     * 
+     * @param string $column 
+     * @return mixed 
+     * @throws BadMethodCallException 
+     */
+    public function min(string $column)
+    {
+        if (null === $this->builder) {
+            throw new BadMethodCallException('Query builder point to a null reference, you probably did not call fromBuilder() or fromTable() method.');
+        }
+        return $this->prepareQuery()->min($column);
+    }
+
+    /**
+     * Get the maximum value the given column in the query result
+     * 
+     * @param string $column 
+     * @return mixed 
+     * @throws BadMethodCallException 
+     */
+    public function max(string $column)
+    {
+        if (null === $this->builder) {
+            throw new BadMethodCallException('Query builder point to a null reference, you probably did not call fromBuilder() or fromTable() method.');
+        }
+        return $this->prepareQuery()->max($column);
+    }
+
+    /**
+     * Get the average value the given column in the query result
+     * 
+     * @param string $column 
+     * @return mixed 
+     * @throws BadMethodCallException 
+     */
+    public function avg(string $column)
+    {
+        if (null === $this->builder) {
+            throw new BadMethodCallException('Query builder point to a null reference, you probably did not call fromBuilder() or fromTable() method.');
+        }
+        return $this->prepareQuery()->avg($column);
     }
 
     /**
@@ -125,5 +177,17 @@ class Query implements IteratorAggregate, QueryInterface
         // Return the current object to allow method chaining on the current
         // instance
         return $this;
+    }
+
+    /**
+     * Prepare base query builder
+     *  
+     * @return BaseQueryBuilder 
+     */
+    private function prepareQuery()
+    {
+        return QueryFilters::new($this->filters->getQuery() ?? [])
+            ->apply($this->builder)
+            ->select($this->filters->getColumns() ?? ['*']);
     }
 }
