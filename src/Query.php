@@ -108,7 +108,7 @@ class Query implements IteratorAggregate, QueryInterface
     }
 
     /**
-     * Get the minimum value the given column in the query result
+     * Get the minimum value for the given column in the query result
      * 
      * @param string $column 
      * @return mixed 
@@ -123,7 +123,7 @@ class Query implements IteratorAggregate, QueryInterface
     }
 
     /**
-     * Get the maximum value the given column in the query result
+     * Get the maximum value for the given column in the query result
      * 
      * @param string $column 
      * @return mixed 
@@ -136,9 +136,24 @@ class Query implements IteratorAggregate, QueryInterface
         }
         return $this->prepareQuery()->max($column);
     }
+    
+    /**
+     * Get the sum of all values for the given column in the query result
+     * 
+     * @param string $column 
+     * @return mixed 
+     * @throws BadMethodCallException 
+     */
+    public function sum(string $column)
+    {
+        if (null === $this->builder) {
+            throw new BadMethodCallException('Query builder point to a null reference, you probably did not call fromBuilder() or fromTable() method.');
+        }
+        return $this->prepareQuery()->sum($column);
+    }
 
     /**
-     * Get the average value the given column in the query result
+     * Get the average value for the given column in the query result
      * 
      * @param string $column 
      * @return mixed 
