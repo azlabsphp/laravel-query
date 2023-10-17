@@ -145,9 +145,9 @@ final class QueryFilters implements FiltersInterface
             });
         }
 
-        return Arr::isList($result = (new ConditionQuery())->compile($params)) ? array_reduce($result, static function ($builder, array $query) {
-            return \is_array($query) ? $builder->where(...array_values($query)) : $builder->where($query);
-        }, $builder) : $builder->where(...$result);
+        return Arr::isList($result = (new ConditionQuery())->compile($params)) ? array_reduce($result, function ($builder, array $query) {
+            return $this->callWhereQuery($builder, $query);
+        }, $builder) : $this->callWhereQuery($builder, $result);
     }
 
     /**
@@ -310,11 +310,11 @@ final class QueryFilters implements FiltersInterface
             });
         }
 
-        return Arr::isList($result = (new ConditionQuery())->compile($params)) ? array_reduce($result, static function ($builder, array $query) {
+        return Arr::isList($result = (new ConditionQuery())->compile($params)) ? array_reduce($result, function ($builder, array $query) {
             // In case the internal query is not an array, we simply pass it to the illuminate query builder
             // Which may throws if the parameters are not supported
-            return \is_array($query) ? $builder->orWhere(...array_values($query)) : $builder->orWhere($query);
-        }, $builder) : $builder->orWhere(...$result);
+            return $this->callOrWhereQuery($builder, $query);
+        }, $builder) : $this->callOrWhereQuery($builder, $result);
     }
 
     /**
@@ -706,6 +706,38 @@ final class QueryFilters implements FiltersInterface
         $output[1] = $operator;
         $output[3] = $boolean;
         return $output;
+    }
+
+    private function callOrWhereQuery(Builder $builder, $query)
+    {
+        if (is_array($query)) {
+            $items = array_values($query);
+            return count($items) === 1 && is_callable($items[0]) ? $builder->orWhere(function ($q) use ($items) {
+                return call_user_func_array($items[0], [$this, $q]);
+            }) : $builder->orWhere(...$items);
+        }
+        if (is_callable($query)) {
+            return $builder->orWhere(function ($q) use ($query) {
+                return $query($this, $q);
+            });
+        }
+        return $builder->orWhere($query);
+    }
+
+    private function callWhereQuery($builder, $query)
+    {
+        if (is_array($query)) {
+            $items = array_values($query);
+            return count($items) === 1 && is_callable($items[0]) ? $builder->where(function ($q) use ($items) {
+                return call_user_func_array($items[0], [$this, $q]);
+            }) : $builder->where(...$items);
+        }
+        if (is_callable($query)) {
+            return $builder->where(function ($q) use ($query) {
+                return $query($this, $q);
+            });
+        }
+        return $builder->where($query);
     }
     //#region helper methods
 }

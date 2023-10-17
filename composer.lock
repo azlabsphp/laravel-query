@@ -681,16 +681,16 @@
         },
         {
             "name": "drewlabs/query",
-            "version": "v0.2.47",
+            "version": "v0.2.50",
             "source": {
                 "type": "git",
                 "url": "https://github.com/azlabsphp/query.git",
-                "reference": "f4b03e70a471446f077b7f595dc258bd83ea34c9"
+                "reference": "e9c1a9972d4937708309bf892cd139838063bc41"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/azlabsphp/query/zipball/f4b03e70a471446f077b7f595dc258bd83ea34c9",
-                "reference": "f4b03e70a471446f077b7f595dc258bd83ea34c9",
+                "url": "https://api.github.com/repos/azlabsphp/query/zipball/e9c1a9972d4937708309bf892cd139838063bc41",
+                "reference": "e9c1a9972d4937708309bf892cd139838063bc41",
                 "shasum": ""
             },
             "require": {
@@ -725,9 +725,9 @@
             ],
             "support": {
                 "issues": "https://github.com/azlabsphp/query/issues",
-                "source": "https://github.com/azlabsphp/query/tree/v0.2.47"
+                "source": "https://github.com/azlabsphp/query/tree/v0.2.50"
             },
-            "time": "2023-10-14T21:58:46+00:00"
+            "time": "2023-10-17T20:27:41+00:00"
         },
         {
             "name": "drewlabs/query-contracts",
