@@ -708,7 +708,14 @@ final class QueryFilters implements FiltersInterface
         return $output;
     }
 
-    private function callOrWhereQuery(Builder $builder, $query)
+    /**
+     * Performs an eloquent `or where` query
+     * 
+     * @param Builder $builder 
+     * @param mixed $query 
+     * @return Builder 
+     */
+    private function callOrWhereQuery($builder, $query)
     {
         if (is_array($query)) {
             $items = array_values($query);
@@ -724,6 +731,13 @@ final class QueryFilters implements FiltersInterface
         return $builder->orWhere($query);
     }
 
+    /**
+     * Performs an eloquent `where` query
+     * 
+     * @param Builder $builder 
+     * @param mixed $query 
+     * @return Builder 
+     */
     private function callWhereQuery($builder, $query)
     {
         if (is_array($query)) {
