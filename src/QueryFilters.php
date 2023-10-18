@@ -548,6 +548,23 @@ final class QueryFilters implements FiltersInterface
         return $builder->limit($limit);
     }
 
+    /**
+     * 
+     * @param Builder $builder 
+     * @param array|true $columns 
+     * @return Builder 
+     */
+    private function distinct($builder, $columns = true)
+    {
+        if (is_bool($columns)) {
+            return true === $columns ? $builder->distinct() : $builder;
+        }
+        $columns = is_array($columns) ? $columns : [$columns];
+
+        // Spread the list of columns to the builder distinct function
+        return $builder->distinct(...$columns);
+    }
+
     // #region Aggregation
 
     /**
@@ -730,6 +747,8 @@ final class QueryFilters implements FiltersInterface
         }
         return $builder->orWhere($query);
     }
+
+
 
     /**
      * Performs an eloquent `where` query

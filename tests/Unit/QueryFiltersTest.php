@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 use Drewlabs\Laravel\Query\Tests\Unit\TestQueryBuilderInterface;
 use Drewlabs\Laravel\Query\Tests\Unit\WithConsecutiveCalls;
+use Drewlabs\Query\Builder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -264,5 +266,44 @@ class QueryFiltersTest extends TestCase
                 return $this;
             }
         });
+    }
+
+
+    public function test_query_filters_distinct_is_invoked_when_builder_distinct_is_called()
+    {
+        $query = Builder::new()->select(['*'])->distinct(['name']);
+
+        /**
+         * @var QueryBuilder&MockObject $builder
+         */
+        $builder = $this->createMock(QueryBuilder::class);
+
+        $builder->expects($this->once())
+                ->method('distinct')
+                ->with('name')
+                ->willReturn($builder);
+
+        $filter = CreateQueryFilters($query->getQuery());
+
+        $filter->apply($builder);
+    }
+
+    public function test_query_builder_distinct_is_called_without_parameter_case_filter_builder_distinct_is_called_without_parameter()
+    {
+        $query = Builder::new()->select(['*'])->distinct(['name']);
+
+        /**
+         * @var QueryBuilder&MockObject $builder
+         */
+        $builder = $this->createMock(QueryBuilder::class);
+
+        $builder->expects($this->once())
+                ->method('distinct')
+                ->willReturn($builder);
+
+        $filter = CreateQueryFilters($query->getQuery());
+
+        $filter->apply($builder);
+
     }
 }
