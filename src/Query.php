@@ -7,6 +7,7 @@ use Drewlabs\Laravel\Query\Contracts\QueryInterface;
 use Drewlabs\Query\Builder;
 use Illuminate\Contracts\Database\Query\Builder as BaseQueryBuilder;
 use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
 use IteratorAggregate;
 
 /**
@@ -90,6 +91,22 @@ class Query implements IteratorAggregate, QueryInterface
             throw new BadMethodCallException('Query builder point to a null reference, you probably did not call fromBuilder() or fromTable() method.');
         }
         return $this->prepareQuery()->get()->all();
+    }
+
+    /**
+     * Returns the first entry matching the query
+     * 
+     * @return object|null 
+     * @throws BadMethodCallException 
+     * @throws InvalidArgumentException 
+     */
+    public function first()
+    {
+        if (null === $this->builder) {
+            throw new BadMethodCallException('Query builder point to a null reference, you probably did not call fromBuilder() or fromTable() method.');
+        }
+        // Fetch the first result of the prepareQuery method
+        return $this->prepareQuery()->first();
     }
 
     /**
@@ -203,6 +220,6 @@ class Query implements IteratorAggregate, QueryInterface
     {
         return QueryFilters::new($this->filters->getQuery() ?? [])
             ->apply($this->builder)
-            ->select($this->filters->getColumns() ?? ['*']);
+            ->select(!empty($columns = $this->filters->getColumns()) ? $columns : ['*']);
     }
 }
