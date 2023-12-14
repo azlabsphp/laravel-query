@@ -144,8 +144,7 @@ final class QueryFilters implements FiltersInterface
                 return $params($this, $query);
             });
         }
-
-        return Arr::isList($result = (new ConditionQuery())->compile($params)) ? array_reduce($result, function ($builder, array $query) {
+        return count(array_filter($result = (new ConditionQuery())->compile($params), 'is_array')) !== 0 ? array_reduce($result, function ($builder, $query) {
             return $this->callWhereQuery($builder, $query);
         }, $builder) : $this->callWhereQuery($builder, $result);
     }
@@ -310,7 +309,7 @@ final class QueryFilters implements FiltersInterface
             });
         }
 
-        return Arr::isList($result = (new ConditionQuery())->compile($params)) ? array_reduce($result, function ($builder, array $query) {
+        return count(array_filter($result = (new ConditionQuery())->compile($params), 'is_array')) !== 0 ? array_reduce($result, function ($builder, $query) {
             // In case the internal query is not an array, we simply pass it to the illuminate query builder
             // Which may throws if the parameters are not supported
             return $this->callOrWhereQuery($builder, $query);
