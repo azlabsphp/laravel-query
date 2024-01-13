@@ -144,6 +144,12 @@ final class QueryFilters implements FiltersInterface
                 return $params($this, $query);
             });
         }
+
+        // Return the builder instance case the params is empty
+        if (empty($params)) {
+            return $builder;
+        }
+
         return count(array_filter($result = (new ConditionQuery())->compile($params), 'is_array')) !== 0 ? array_reduce($result, function ($builder, $query) {
             return $this->callWhereQuery($builder, $query);
         }, $builder) : $this->callWhereQuery($builder, $result);
@@ -159,6 +165,11 @@ final class QueryFilters implements FiltersInterface
      */
     private function exists($builder, $params)
     {
+        // Return the builder instance case the params is empty
+        if (empty($params)) {
+            return $builder;
+        }
+
         $params = array_filter($params, 'is_array') === $params ? $params : [$params];
 
         foreach ($params as $value) {
@@ -184,6 +195,11 @@ final class QueryFilters implements FiltersInterface
      */
     private function orExists($builder, $params)
     {
+        // Return the builder instance case the params is empty
+        if (empty($params)) {
+            return $builder;
+        }
+
         $params = array_filter($params, 'is_array') === $params ? $params : [$params];
 
         foreach ($params as $value) {
@@ -209,6 +225,11 @@ final class QueryFilters implements FiltersInterface
      */
     private function notExists($builder, $params)
     {
+        // Return the builder instance case the params is empty
+        if (empty($params)) {
+            return $builder;
+        }
+
         $params = array_filter($params, 'is_array') === $params ? $params : [$params];
 
         foreach ($params as $value) {
@@ -234,6 +255,11 @@ final class QueryFilters implements FiltersInterface
      */
     private function orNotExists($builder, $params)
     {
+        // Return the builder instance case the params is empty
+        if (empty($params)) {
+            return $builder;
+        }
+
         $params = array_filter($params, 'is_array') === $params ? $params : [$params];
 
         foreach ($params as $value) {
@@ -259,6 +285,11 @@ final class QueryFilters implements FiltersInterface
      */
     private function date($builder, $params)
     {
+        // Return the builder instance case the params is empty
+        if (empty($params)) {
+            return $builder;
+        }
+
         $params = array_filter($params, 'is_array') === $params ? $params : [$params];
         foreach ($params as $value) {
             if (!\is_array($value)) {
@@ -280,6 +311,11 @@ final class QueryFilters implements FiltersInterface
      */
     private function orDate($builder, $params)
     {
+        // Return the builder instance case the params is empty
+        if (empty($params)) {
+            return $builder;
+        }
+
         $params = array_filter($params, 'is_array') === $params ? $params : [$params];
         foreach ($params as $value) {
             if (!\is_array($value)) {
@@ -309,6 +345,11 @@ final class QueryFilters implements FiltersInterface
             });
         }
 
+        // Return the builder instance case the params is empty
+        if (empty($params)) {
+            return $builder;
+        }
+
         return count(array_filter($result = (new ConditionQuery())->compile($params), 'is_array')) !== 0 ? array_reduce($result, function ($builder, $query) {
             // In case the internal query is not an array, we simply pass it to the illuminate query builder
             // Which may throws if the parameters are not supported
@@ -325,6 +366,11 @@ final class QueryFilters implements FiltersInterface
      */
     private function in($builder, array $params)
     {
+        // Return the builder instance case the params is empty
+        if (empty($params)) {
+            return $builder;
+        }
+
         return array_reduce(array_filter($params, 'is_array') === $params ? $params : [$params], static function ($carry, $curr) {
             // To make sure the builder does not throw we ignore any in query providing invalid
             // arguments
@@ -341,6 +387,11 @@ final class QueryFilters implements FiltersInterface
      */
     private function between($builder, array $params)
     {
+        // Return the builder instance case the params is empty
+        if (empty($params)) {
+            return $builder;
+        }
+    
         return array_reduce(array_filter($params, 'is_array') === $params ? $params : [$params], static function ($builder, $curr) {
             if (\count($curr) < 2) {
                 return $builder;
@@ -358,6 +409,11 @@ final class QueryFilters implements FiltersInterface
      */
     private function noIn($builder, array $params)
     {
+        // Return the builder instance case the params is empty
+        if (empty($params)) {
+            return $builder;
+        }
+
         return array_reduce(array_filter($params, 'is_array') === $params ? $params : [$params], static function ($carry, $curr) {
             // To make sure the builder does not throw we ignore any in query providing invalid
             // arguments
@@ -374,6 +430,11 @@ final class QueryFilters implements FiltersInterface
      */
     private function sort($builder, array $params)
     {
+        // Return the builder instance case the params is empty
+        if (empty($params)) {
+            return $builder;
+        }
+
         $validate = static function ($values) {
             if (empty($values)) {
                 return false;
@@ -477,6 +538,11 @@ final class QueryFilters implements FiltersInterface
      */
     private function isNull($builder, $params)
     {
+        // Return the builder instance case the params is empty
+        if (empty($params)) {
+            return $builder;
+        }
+
         $params = \is_array($params) ? $params : [$params];
 
         return array_reduce($params, static function ($carry, $current) {
@@ -494,6 +560,11 @@ final class QueryFilters implements FiltersInterface
      */
     private function notNull($builder, $params)
     {
+        // Return the builder instance case the params is empty
+        if (empty($params)) {
+            return $builder;
+        }
+
         $params = \is_array($params) ? $params : [$params];
 
         return array_reduce($params, static function ($carry, $current) {
@@ -511,6 +582,11 @@ final class QueryFilters implements FiltersInterface
      */
     private function orIsNull($builder, $params)
     {
+        // Return the builder instance case the params is empty
+        if (empty($params)) {
+            return $builder;
+        }
+        
         $params = \is_array($params) ? $params : [$params];
 
         return array_reduce($params, static function ($carry, $current) {
@@ -528,6 +604,11 @@ final class QueryFilters implements FiltersInterface
      */
     private function orNotNull($builder, $params)
     {
+        // Return the builder instance case the params is empty
+        if (empty($params)) {
+            return $builder;
+        }
+        
         $params = \is_array($params) ? $params : [$params];
 
         return array_reduce($params, static function ($carry, $current) {
@@ -594,6 +675,11 @@ final class QueryFilters implements FiltersInterface
      */
     private function count($builder, $params)
     {
+        // Return the builder instance case the params is empty
+        if (empty($params)) {
+            return $builder;
+        }
+        
         $params = array_map(function ($value) {
             return is_array($value) ? array_pad($value, 2, null) : [$value, null];
         }, !is_array($params) ? [$params] : $params);
@@ -616,6 +702,11 @@ final class QueryFilters implements FiltersInterface
      */
     private function min($builder, $params)
     {
+        // Return the builder instance case the params is empty
+        if (empty($params)) {
+            return $builder;
+        }
+        
         $params = array_map(function ($value) {
             return is_array($value) ? array_pad($value, 2, null) : [$value, null];
         }, !is_array($params) ? [$params] : $params);
@@ -638,6 +729,11 @@ final class QueryFilters implements FiltersInterface
      */
     private function max($builder, $params)
     {
+        // Return the builder instance case the params is empty
+        if (empty($params)) {
+            return $builder;
+        }
+        
         $params = array_map(function ($value) {
             return is_array($value) ? array_pad($value, 2, null) : [$value, null];
         }, !is_array($params) ? [$params] : $params);
@@ -660,6 +756,11 @@ final class QueryFilters implements FiltersInterface
      */
     private function sum($builder, $params)
     {
+        // Return the builder instance case the params is empty
+        if (empty($params)) {
+            return $builder;
+        }
+
         $params = array_map(function ($value) {
             return is_array($value) ? array_pad($value, 2, null) : [$value, null];
         }, !is_array($params) ? [$params] : $params);
@@ -682,6 +783,11 @@ final class QueryFilters implements FiltersInterface
      */
     private function avg($builder, $params)
     {
+        // Return the builder instance case the params is empty
+        if (empty($params)) {
+            return $builder;
+        }
+        
         $params = array_map(function ($value) {
             return is_array($value) ? array_pad($value, 2, null) : [$value, null];
         }, !is_array($params) ? [$params] : $params);
