@@ -991,13 +991,31 @@ final class QueryFilters implements FiltersInterface
                     }, $b);
                 };
             }
-            $expression = $builder->clone();
+            // TODO: Uncomment the code below the old implementation if new implementation is not what
+            // is intended to be done by the method
+            // $expression = $builder->clone();
+            // $as = $as ?? sprintf('added_%s_%s', strtolower($method), $column);
+            // return $builder->addSelect([
+            //      $as => $queryFunc(
+            //         $expression->getConnection()
+            //             ->table($expression, 't__0')
+            //             ->whereColumn(sprintf("t__0.%s", $column), '=', sprintf("%s.%s", $expression->getModel()->getTable(), $column))
+            //             ->selectRaw(sprintf("%s(%s)", $method, $column))
+            //     )->limit(1)
+            // ]);
+
+            
+            // TODO: Comment the code below if old implementation is preferred
+            $model = $builder->getModel();
             $as = $as ?? sprintf('added_%s_%s', strtolower($method), $column);
             return $builder->addSelect([
                  $as => $queryFunc(
-                    $expression->getConnection()
-                        ->table($expression, 't__0')
-                        ->whereColumn(sprintf("t__0.%s", $column), '=', sprintf("%s.%s", $expression->getModel()->getTable(), $column))
+                    $model->getConnection()
+                        // We reset existing query by creating a new model query instance
+                        // in order to not take in account existing filters applied on the builder
+                        // instance
+                        ->table($builder->getModel()->newModelQuery(), 't__0')
+                        ->whereColumn(sprintf("t__0.%s", $column), '=', sprintf("%s.%s", $model->getTable(), $column))
                         ->selectRaw(sprintf("%s(%s)", $method, $column))
                 )->limit(1)
             ]);
