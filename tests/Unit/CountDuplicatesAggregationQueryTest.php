@@ -16,7 +16,7 @@ use Drewlabs\Laravel\Query\Tests\TestCase;
  * file that was distributed with this source code.
  */
 
-class CountByAggregationQueryTest extends TestCase
+class CountDuplicatesAggregationQueryTest extends TestCase
 {
 
     public function test_query_filters_count_by()
