@@ -22,7 +22,7 @@ class CountDuplicatesAggregationQueryTest extends TestCase
     public function test_query_filters_count_by()
     {
         $filters = new QueryFilters([
-            'aggregate' => ['countDuplicates' => 'age']
+            'aggregate' => ['addCount' => [['age', null, 'age_count']]]
         ]);
 
         // Act
@@ -32,6 +32,6 @@ class CountDuplicatesAggregationQueryTest extends TestCase
         })->first();
 
         // Assert
-        $this->assertEquals(2, $match->count_duplicates_age);
+        $this->assertEquals(2, $match->age_count);
     }
 }
