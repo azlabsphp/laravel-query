@@ -912,7 +912,6 @@ final class QueryFilters implements FiltersInterface
      */
     private function aggregateDuplicates($builder, $p, string $method = 'COUNT')
     {
-        printf("performing aggregateBy...\n");
         if (empty($p)) {
             return $builder;
         }
