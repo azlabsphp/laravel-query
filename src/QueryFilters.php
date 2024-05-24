@@ -53,9 +53,9 @@ final class QueryFilters implements FiltersInterface
         'avg',
         'max',
         'count',
-        'countDuplicates',
+        'addCount',
         'sum',
-        'sumDuplicates'
+        'addSum'
     ];
 
     /** @var array<string,string> */
@@ -747,15 +747,15 @@ final class QueryFilters implements FiltersInterface
     }
 
     /**
-     * Add a count_by_[column] name field which is the count of all values for the given column
+     * Add a added_count_[column] name field which is the count of all values for the given column
      * 
      * @param Builder $builder 
      * @param string|array $p 
      * @return Builder 
      */
-    private function countDuplicates($builder, $p)
+    private function addCount($builder, $p)
     {
-        return $this->aggregateDuplicates($builder, $p, 'COUNT');
+        return $this->addAggregate($builder, $p, 'COUNT');
     }
 
     /**
@@ -846,9 +846,9 @@ final class QueryFilters implements FiltersInterface
      * @param string|array $p 
      * @return Builder 
      */
-    private function sumDuplicates($builder, $p)
+    private function addSum($builder, $p)
     {
-        return $this->aggregateDuplicates($builder, $p, 'SUM');
+        return $this->addAggregate($builder, $p, 'SUM');
     }
 
 
@@ -961,22 +961,22 @@ final class QueryFilters implements FiltersInterface
      * @param string $method
      * @return Builder 
      */
-    private function aggregateDuplicates($builder, $p, string $method = 'COUNT')
+    private function addAggregate($builder, $p, string $method = 'COUNT')
     {
         if (empty($p)) {
             return $builder;
         }
 
         $p = array_map(function ($value) {
-            return is_array($value) ? array_pad($value, 3, null) : [$value, null];
+            return is_array($value) ? array_pad($value, 3, null) : [$value, null, null];
         }, !is_array($p) ? [$p] : $p);
 
         return array_reduce(!is_array($p) ? [$p] : $p, function (Builder $builder, $current) use ($method) {
-            list($column, $query) = $current;
+            list($column, $query, $as) = $current;
             $queryFunc = function ($b) {
                 return $b;
             };
-            if (!is_null($query) && is_string($query)) {
+            if (!is_null($query) && is_string($query) && !empty($query)) {
                 /** @var QueryStatement[] */
                 $statements = array_reduce(explode('->', $query), function ($stmts, $val) {
                     $stmts[] = QueryStatement::fromString($val);
@@ -992,8 +992,9 @@ final class QueryFilters implements FiltersInterface
                 };
             }
             $expression = $builder->clone();
+            $as = $as ?? sprintf('added_%s_%s', strtolower($method), $column);
             return $builder->addSelect([
-                sprintf('%s_duplicates_%s', strtolower($method), $column) => $queryFunc(
+                 $as => $queryFunc(
                     $expression->getConnection()
                         ->table($expression, 't__0')
                         ->whereColumn(sprintf("t__0.%s", $column), '=', sprintf("%s.%s", $expression->getModel()->getTable(), $column))
