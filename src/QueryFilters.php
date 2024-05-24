@@ -17,6 +17,7 @@ use Drewlabs\Core\Helpers\Arr;
 use Drewlabs\Query\ConditionQuery;
 use Drewlabs\Query\Contracts\FiltersInterface;
 use Drewlabs\Query\JoinQuery;
+use Drewlabs\Query\QueryStatement;
 use Drewlabs\Support\Traits\MethodProxy;
 use Illuminate\Contracts\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\Builder;
@@ -47,7 +48,61 @@ final class QueryFilters implements FiltersInterface
     /**
      * @var string[]
      */
-    const DEFAULT_AGGREGATIONS = ['min', 'avg', 'max', 'count', 'countDuplicates', 'sum', 'sumDuplicates'];
+    const DEFAULT_AGGREGATIONS = [
+        'min',
+        'avg',
+        'max',
+        'count',
+        'countDuplicates',
+        'sum',
+        'sumDuplicates'
+    ];
+
+    /** @var array<string,string> */
+    const ELOQUENT_QUERY_PROXIES = [
+        'and' => 'where',
+        'where' => 'where',
+
+        // or clause
+        'or' => 'orwhere',
+        'orWhere' => 'orwhere',
+        'orwhere' => 'orwhere',
+
+        // in clause
+        'in' => 'whereIn',
+        'whereIn' => 'whereIn',
+        'wherein' => 'whereIn',
+
+        //  not in clause
+        'notIn' => 'whereNotIn',
+        'notin' => 'whereNotIn',
+        'whereNotIn' => 'whereNotIn',
+        'wherenotin' => 'whereNotIn',
+
+        // null clause
+        'isNull' => 'whereNull',
+        'isnull' => 'whereNull',
+        'whereNull' => 'whereNull',
+        'wherenull' => 'whereNull',
+
+        // or null clause
+        'orIsNull' => 'orwherenull',
+        'orisnull' => 'orwherenull',
+        'orWhereNull' => 'orwherenull',
+        'orwherenull' => 'orwherenull',
+
+        // not null clause
+        'notNull' => 'whereNotNull',
+        'notnull' => 'whereNotNull',
+        'whereNotNull' => 'whereNotNull',
+        'wherenotnull' => 'whereNotNull',
+
+        // or not null clause
+        'orNotNull' => 'orWhereNotNull',
+        'ornotnull' => 'orWhereNotNull',
+        'orWhereNotNull' => 'orWhereNotNull',
+        'orwherenotnull' => 'orWhereNotNull',
+    ];
 
     /**
      * Creates class instance.
@@ -877,8 +932,6 @@ final class QueryFilters implements FiltersInterface
         return $builder->orWhere($query);
     }
 
-
-
     /**
      * Performs an eloquent `where` query
      * 
@@ -902,9 +955,7 @@ final class QueryFilters implements FiltersInterface
         return $builder->where($query);
     }
 
-
     /**
-     * 
      * @param Builder $builder 
      * @param string|array $p 
      * @param string $method
@@ -921,28 +972,33 @@ final class QueryFilters implements FiltersInterface
         }, !is_array($p) ? [$p] : $p);
 
         return array_reduce(!is_array($p) ? [$p] : $p, function (Builder $builder, $current) use ($method) {
-            list($column) = $current;
-            // list($column, $table) = $current;
-            // list($s_column, $t, $t_column) = ['id', null, 'id'];
-            // if (!is_null($table)) {
-            //     $offset = strpos($table, '=');
-            //     $s_column = $offset !== false ? trim(substr($table, 0, $offset)) : 'id';
-            //     $t = $offset !== false ? trim(substr($table, $offset + 1)) : $table;
-            //     list($t, $t_column) = (strpos($t, '.') !== false ? explode('.', trim($t)) : [trim($t, 'id')]);
-            // }
+            list($column, $query) = $current;
+            $queryFunc = function ($b) {
+                return $b;
+            };
+            if (!is_null($query) && is_string($query)) {
+                /** @var QueryStatement[] */
+                $statements = array_reduce(explode('->', $query), function ($stmts, $val) {
+                    $stmts[] = QueryStatement::fromString($val);
+                    return $stmts;
+                }, []);
+                $queryFunc = function ($b) use ($statements) {
+                    return array_reduce($statements, function ($carry, QueryStatement $statement) {
+                        if (is_null($method = static::ELOQUENT_QUERY_PROXIES[$statement->method()] ?? null)) {
+                            return $carry;
+                        }
+                        return call_user_func_array([$carry, $method], $statement->args());
+                    }, $b);
+                };
+            }
             $expression = $builder->clone();
             return $builder->addSelect([
-                sprintf('%s_duplicates_%s', strtolower($method), $column) =>
-                // !is_null($t) ? $expression->getConnection()
-                //     ->table($t, 't__0')
-                //     ->whereColumn(sprintf("t__0.%s", $t_column), '=', sprintf("%s.%s", $expression->getModel()->getTable(), $s_column))
-                //     ->selectRaw(sprintf("%s(%s)", $method, $column))
-                //     ->limit(1) : 
-                $expression->getConnection()
-                    ->table($expression, 't__0')
-                    ->whereColumn(sprintf("t__0.%s", $column), '=', sprintf("%s.%s", $expression->getModel()->getTable(), $column))
-                    ->selectRaw(sprintf("%s(%s)", $method, $column))
-                    ->limit(1)
+                sprintf('%s_duplicates_%s', strtolower($method), $column) => $queryFunc(
+                    $expression->getConnection()
+                        ->table($expression, 't__0')
+                        ->whereColumn(sprintf("t__0.%s", $column), '=', sprintf("%s.%s", $expression->getModel()->getTable(), $column))
+                        ->selectRaw(sprintf("%s(%s)", $method, $column))
+                )->limit(1)
             ]);
         }, $builder);
     }
