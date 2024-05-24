@@ -188,7 +188,7 @@ class QueryLanguageTest extends TestCase
                 ],
             ]
         );
-        $this->assertTrue(2 === $dmlManager->select()->count(), 'Expect the database to contain only 2 items after insertion');
+        $this->assertTrue(3 === $dmlManager->select()->count(), 'Expect the database to contain only 2 items after insertion');
         $this->assertTrue(0 === Person::where('lastname', 'PAYARO')->count(), 'Expect person having lastname == PAYARO to be modified');
     }
 
@@ -212,7 +212,7 @@ class QueryLanguageTest extends TestCase
             ],
         ]);
         $this->assertTrue($result);
-        $this->assertTrue(4 === $dmlManager->select()->count(), 'Expect the database to contain only 4 items after insertion');
+        $this->assertTrue(5 === $dmlManager->select()->count(), 'Expect the database to contain only 4 items after insertion');
     }
 
     public function test_select_method()
@@ -268,19 +268,19 @@ class QueryLanguageTest extends TestCase
         // Update by array query
         $result = $manager->delete(PreparesFiltersArray::new(['where' => ['firstname', 'SIDOINE']])->call(), true);
         $this->assertTrue(1 === $result, 'Expect the delete operation to return TRUE');
-        $this->assertTrue(0 === $manager->select()->count(), 'Expect the database person table to be empty');
+        $this->assertEquals(1, $manager->select()->count(), 'Expect the database person table to contains only 1 item');
     }
 
     public function test_select_aggregate()
     {
         $manager = DMLManager(Person::class);
-        $this->assertSame(2, $manager->selectAggregate([], AggregationMethods::COUNT));
+        $this->assertSame(3, $manager->selectAggregate([], AggregationMethods::COUNT));
     }
 
     public function test_select_aggregate_sum()
     {
         $manager = DMLManager(Person::class);
-        $this->assertSame(52, $manager->selectAggregate([], AggregationMethods::SUM, 'age'));
+        $this->assertSame(74, $manager->selectAggregate([], AggregationMethods::SUM, 'age'));
     }
 
     public function test_select_relations_as_columns()

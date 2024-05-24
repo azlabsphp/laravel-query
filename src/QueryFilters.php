@@ -47,7 +47,7 @@ final class QueryFilters implements FiltersInterface
     /**
      * @var string[]
      */
-    const DEFAULT_AGGREGATIONS = ['min', 'avg', 'sum', 'max', 'count'];
+    const DEFAULT_AGGREGATIONS = ['min', 'avg', 'max', 'count', 'countDuplicates', 'sum', 'sumDuplicates'];
 
     /**
      * Creates class instance.
@@ -122,7 +122,6 @@ final class QueryFilters implements FiltersInterface
         try {
             return $this->{$method}($builder, $args);
         } catch (\Throwable $e) {
-            printf("%s\n", $e->getMessage());
             return $builder;
         }
     }
@@ -391,7 +390,7 @@ final class QueryFilters implements FiltersInterface
         if (empty($params)) {
             return $builder;
         }
-    
+
         return array_reduce(array_filter($params, 'is_array') === $params ? $params : [$params], static function ($builder, $curr) {
             if (\count($curr) < 2) {
                 return $builder;
@@ -586,7 +585,7 @@ final class QueryFilters implements FiltersInterface
         if (empty($params)) {
             return $builder;
         }
-        
+
         $params = \is_array($params) ? $params : [$params];
 
         return array_reduce($params, static function ($carry, $current) {
@@ -608,7 +607,7 @@ final class QueryFilters implements FiltersInterface
         if (empty($params)) {
             return $builder;
         }
-        
+
         $params = \is_array($params) ? $params : [$params];
 
         return array_reduce($params, static function ($carry, $current) {
@@ -671,7 +670,7 @@ final class QueryFilters implements FiltersInterface
      * @param Builder $builder
      * @param string|array $params
      *
-     * @return void
+     * @return Builder
      */
     private function count($builder, $params)
     {
@@ -679,7 +678,7 @@ final class QueryFilters implements FiltersInterface
         if (empty($params)) {
             return $builder;
         }
-        
+
         $params = array_map(function ($value) {
             return is_array($value) ? array_pad($value, 2, null) : [$value, null];
         }, !is_array($params) ? [$params] : $params);
@@ -690,6 +689,18 @@ final class QueryFilters implements FiltersInterface
                 sprintf('count_%s', $column) => $builder->clone()->selectRaw(sprintf("count(%s)", $column ?? '*'))->limit(1)
             ]);
         }, $builder);
+    }
+
+    /**
+     * Add a count_by_[column] name field which is the count of all values for the given column
+     * 
+     * @param Builder $builder 
+     * @param string|array $p 
+     * @return Builder 
+     */
+    private function countDuplicates($builder, $p)
+    {
+        return $this->aggregateDuplicates($builder, $p, 'COUNT');
     }
 
     /**
@@ -706,7 +717,7 @@ final class QueryFilters implements FiltersInterface
         if (empty($params)) {
             return $builder;
         }
-        
+
         $params = array_map(function ($value) {
             return is_array($value) ? array_pad($value, 2, null) : [$value, null];
         }, !is_array($params) ? [$params] : $params);
@@ -733,7 +744,7 @@ final class QueryFilters implements FiltersInterface
         if (empty($params)) {
             return $builder;
         }
-        
+
         $params = array_map(function ($value) {
             return is_array($value) ? array_pad($value, 2, null) : [$value, null];
         }, !is_array($params) ? [$params] : $params);
@@ -774,6 +785,19 @@ final class QueryFilters implements FiltersInterface
     }
 
     /**
+     * Add a sum_by_[column] name field which is the count of all values for the given column
+     * 
+     * @param Builder $builder 
+     * @param string|array $p 
+     * @return Builder 
+     */
+    private function sumDuplicates($builder, $p)
+    {
+        return $this->aggregateDuplicates($builder, $p, 'SUM');
+    }
+
+
+    /**
      * apply `avg` aggregation query on the builder.
      *
      * @param Builder $builder
@@ -787,7 +811,7 @@ final class QueryFilters implements FiltersInterface
         if (empty($params)) {
             return $builder;
         }
-        
+
         $params = array_map(function ($value) {
             return is_array($value) ? array_pad($value, 2, null) : [$value, null];
         }, !is_array($params) ? [$params] : $params);
@@ -876,6 +900,52 @@ final class QueryFilters implements FiltersInterface
             });
         }
         return $builder->where($query);
+    }
+
+
+    /**
+     * 
+     * @param Builder $builder 
+     * @param string|array $p 
+     * @param string $method
+     * @return Builder 
+     */
+    private function aggregateDuplicates($builder, $p, string $method = 'COUNT')
+    {
+        printf("performing aggregateBy...\n");
+        if (empty($p)) {
+            return $builder;
+        }
+
+        $p = array_map(function ($value) {
+            return is_array($value) ? array_pad($value, 3, null) : [$value, null];
+        }, !is_array($p) ? [$p] : $p);
+
+        return array_reduce(!is_array($p) ? [$p] : $p, function (Builder $builder, $current) use ($method) {
+            list($column) = $current;
+            // list($column, $table) = $current;
+            // list($s_column, $t, $t_column) = ['id', null, 'id'];
+            // if (!is_null($table)) {
+            //     $offset = strpos($table, '=');
+            //     $s_column = $offset !== false ? trim(substr($table, 0, $offset)) : 'id';
+            //     $t = $offset !== false ? trim(substr($table, $offset + 1)) : $table;
+            //     list($t, $t_column) = (strpos($t, '.') !== false ? explode('.', trim($t)) : [trim($t, 'id')]);
+            // }
+            $expression = $builder->clone();
+            return $builder->addSelect([
+                sprintf('%s_duplicates_%s', strtolower($method), $column) =>
+                // !is_null($t) ? $expression->getConnection()
+                //     ->table($t, 't__0')
+                //     ->whereColumn(sprintf("t__0.%s", $t_column), '=', sprintf("%s.%s", $expression->getModel()->getTable(), $s_column))
+                //     ->selectRaw(sprintf("%s(%s)", $method, $column))
+                //     ->limit(1) : 
+                $expression->getConnection()
+                    ->table($expression, 't__0')
+                    ->whereColumn(sprintf("t__0.%s", $column), '=', sprintf("%s.%s", $expression->getModel()->getTable(), $column))
+                    ->selectRaw(sprintf("%s(%s)", $method, $column))
+                    ->limit(1)
+            ]);
+        }, $builder);
     }
     //#region helper methods
 }

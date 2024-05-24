@@ -173,10 +173,24 @@ class TestCase extends FrameworkTestCase
                 'firstname' => 'SIDOINE',
                 'lastname' => 'AZOMEDOH',
                 'phonenumber' => '+22891002345',
-                'age' => 28,
+                'age' => 24,
                 'sex' => 'M',
                 'is_active' => 1,
                 'email' => 'azandrewdevelopper@gmail.com',
+            ],
+            true,
+            false,
+            []
+        );
+        $p3 = Person::create(
+            [
+                'firstname' => 'UNKNOWN',
+                'lastname' => 'PERSON',
+                'phonenumber' => '+228994567',
+                'age' => 26,
+                'sex' => 'M',
+                'is_active' => 1,
+                'email' => 'unknown-person@gmail.com',
             ],
             true,
             false,
@@ -189,6 +203,13 @@ class TestCase extends FrameworkTestCase
             'email' => 'azandrew@liksoft.tg',
             'person_id' => $p2->getKey(),
         ]);
+        Address::create([
+            'postal_code' => 'BP 17 LOME - TOGO',
+            'country' => 'GHANA',
+            'city' => 'LOME',
+            'email' => 'azandrew2@liksoft.tg',
+            'person_id' => $p2->getKey(),
+        ]);
 
         Address::create([
             'postal_code' => 'BP 228 LOME - TOGO',
@@ -196,6 +217,14 @@ class TestCase extends FrameworkTestCase
             'city' => 'LOME',
             'email' => 'benjamin-p@liksoft.tg',
             'person_id' => $p1->getKey(),
+        ]);
+
+        Address::create([
+            'postal_code' => 'BP 228 LOME - TOGO',
+            'country' => 'TOGO',
+            'city' => 'LOME',
+            'email' => 'unknown-person@liksoft.tg',
+            'person_id' => $p3->getKey(),
         ]);
     }
 
