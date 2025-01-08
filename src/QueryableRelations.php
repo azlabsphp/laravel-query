@@ -318,7 +318,7 @@ class QueryableRelations
      *
      * @return \Traversable<T>
      */
-    private function findAll(array $list, \Closure $callback, \Closure $project = null)
+    private function findAll(array $list, \Closure $callback, ?\Closure $project = null)
     {
         foreach ($list as $key => $value) {
             if ($callback($value, $key)) {

@@ -35,7 +35,7 @@ trait SelectQueryLanguage
     {
         return $this->overload($args, [
             // Overload
-            function (string $id, array $columns, \Closure $callback = null) {
+            function (string $id, array $columns, ?\Closure $callback = null) {
                 $callback = $callback ?? static function ($value) {
                     return $value;
                 };
@@ -46,7 +46,7 @@ trait SelectQueryLanguage
             },
 
             // Overload
-            function (string $id, \Closure $callback = null) {
+            function (string $id, ?\Closure $callback = null) {
                 $callback = $callback ?? static function ($value) {
                     return $value;
                 };
@@ -57,7 +57,7 @@ trait SelectQueryLanguage
             },
 
             // Overload
-            function (int $id, array $columns, \Closure $callback = null) {
+            function (int $id, array $columns, ?\Closure $callback = null) {
                 $callback = $callback ?? static function ($value) {
                     return $value;
                 };
@@ -68,7 +68,7 @@ trait SelectQueryLanguage
             },
 
             // Overload
-            function (int $id, \Closure $callback = null) {
+            function (int $id, ?\Closure $callback = null) {
                 $callback = $callback ?? static function ($value) {
                     return $value;
                 };
@@ -79,62 +79,62 @@ trait SelectQueryLanguage
             },
 
             // Overload
-            function (array $query, \Closure $callback = null) {
+            function (array $query, ?\Closure $callback = null) {
                 return $this->createSelector($query, ['*'], $callback)(static function ($builder, $columns) {
                     return $builder->get($columns);
                 });
             },
 
             // Overload
-            function (array $query, array $columns, \Closure $callback = null) {
+            function (array $query, array $columns, ?\Closure $callback = null) {
                 return $this->createSelector($query, $columns, $callback)(static function ($builder, $columns) {
                     return $builder->get($columns);
                 });
             },
 
             // Overload
-            function (array $query, int $per_page, int $page = null, \Closure $callback = null) {
+            function (array $query, int $per_page, ?int $page = null, ?\Closure $callback = null) {
                 return $this->createSelector($query, ['*'], $callback)(static function ($builder, $columns) use ($per_page, $page) {
                     return $builder->paginate($per_page, $columns, null, $page ?? 1);
                 });
             },
 
             // Overload
-            function (array $query, int $per_page, array $columns, int $page = null, \Closure $callback = null) {
+            function (array $query, int $per_page, array $columns, ?int $page = null, ?\Closure $callback = null) {
                 return $this->createSelector($query, $columns, $callback)(static function ($builder, $columns) use ($per_page, $page) {
                     return $builder->paginate($per_page, $columns, null, $page ?? 1);
                 });
             },
 
             // Overload
-            function (FiltersInterface $query, \Closure $callback = null) {
+            function (FiltersInterface $query, ?\Closure $callback = null) {
                 return $this->createSelector($query, ['*'], $callback)(static function ($builder, $columns) {
                     return $builder->get($columns);
                 });
             },
 
             // Overload
-            function (FiltersInterface $query, array $columns, \Closure $callback = null) {
+            function (FiltersInterface $query, array $columns, ?\Closure $callback = null) {
                 return $this->createSelector($query, $columns, $callback)(static function ($builder, $columns) {
                     return $builder->get($columns);
                 });
             },
 
             // Overload
-            function (FiltersInterface $query, int $per_page, int $page = null, \Closure $callback = null) {
+            function (FiltersInterface $query, int $per_page, ?int $page = null, ?\Closure $callback = null) {
                 return $this->createSelector($query, ['*'], $callback)(static function ($builder, $columns) use ($per_page, $page) {
                     return $builder->paginate($per_page, $columns, null, $page ?? 1);
                 });
             },
 
             // Overload
-            function (FiltersInterface $query, int $per_page, array $columns, int $page = null, \Closure $callback = null) {
+            function (FiltersInterface $query, int $per_page, array $columns, ?int $page = null, ?\Closure $callback = null) {
                 return $this->createSelector($query, $columns, $callback)(static function ($builder, $columns) use ($per_page, $page) {
                     return $builder->paginate($per_page, $columns, null, $page ?? 1);
                 });
             },
 
-            function (\Closure $callback = null) {
+            function (?\Closure $callback = null) {
                 return $this->createSelector([], ['*'], $callback)(static function ($builder, $columns) {
                     return $builder->get($columns);
                 });
@@ -147,7 +147,7 @@ trait SelectQueryLanguage
         return $this->overload(
             $args,
             [
-                function (array $query, \Closure $callback = null) {
+                function (array $query, ?\Closure $callback = null) {
                     $callback = $callback ?? static function ($value) {
                         return $value;
                     };
@@ -156,7 +156,7 @@ trait SelectQueryLanguage
                         return (null !== ($result = $builder->first($columns))) ? [$result] : [];
                     })->first());
                 },
-                function (array $query, array $columns, \Closure $callback = null) {
+                function (array $query, array $columns, ?\Closure $callback = null) {
                     $callback = $callback ?? static function ($value) {
                         return $value;
                     };
@@ -165,7 +165,7 @@ trait SelectQueryLanguage
                         return (null !== ($result = $builder->first($columns))) ? [$result] : [];
                     })->first());
                 },
-                function (\Closure $callback = null) {
+                function (?\Closure $callback = null) {
                     $callback = $callback ?? static function ($value) {
                         return $value;
                     };
@@ -183,7 +183,7 @@ trait SelectQueryLanguage
      *
      * @return \Closure
      */
-    private function createSelector($query, array $columns, \Closure $callback = null)
+    private function createSelector($query, array $columns, ?\Closure $callback = null)
     {
         return function (\Closure $selector) use ($query, $columns, $callback) {
             $callback = $callback ?? static function ($value) {

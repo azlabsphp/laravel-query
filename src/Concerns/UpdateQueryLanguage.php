@@ -37,16 +37,16 @@ trait UpdateQueryLanguage
                 function (FiltersInterface $query, $attributes, bool $batchMode = false) {
                     return $this->executeUpdateQuery($query, $attributes, $batchMode);
                 },
-                function (int $id, $attributes, \Closure $callback = null) {
+                function (int $id, $attributes, ?\Closure $callback = null) {
                     return $this->updateCommand((string) $id, $attributes, [], $callback);
                 },
-                function (int $id, $attributes, array $params, \Closure $callback = null) {
+                function (int $id, $attributes, array $params, ?\Closure $callback = null) {
                     return $this->updateCommand((string) $id, $attributes, $params, $callback);
                 },
-                function (string $id, $attributes, \Closure $callback = null) {
+                function (string $id, $attributes, ?\Closure $callback = null) {
                     return $this->updateCommand((string) $id, $attributes, [], $callback);
                 },
-                function (string $id, $attributes, array $params, \Closure $callback = null) {
+                function (string $id, $attributes, array $params, ?\Closure $callback = null) {
                     return $this->updateCommand($id, $attributes, $params, $callback);
                 },
             ]);
@@ -75,7 +75,7 @@ trait UpdateQueryLanguage
         }, 0);
     }
 
-    private function updateCommand($id, $attributes, array $params, \Closure $callback = null)
+    private function updateCommand($id, $attributes, array $params, ?\Closure $callback = null)
     {
         $callback = $callback ?? static function ($value) {
             return $value;
@@ -102,7 +102,7 @@ trait UpdateQueryLanguage
      */
     private function createUpdateClosure(self $self, $key, array $values, \Closure $callback)
     {
-        return function (\Closure $callable = null) use (
+        return function (?\Closure $callable = null) use (
             $self,
             $key,
             $values,

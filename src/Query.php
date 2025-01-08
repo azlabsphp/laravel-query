@@ -67,7 +67,7 @@ class Query implements IteratorAggregate, QueryInterface
      * 
      * @return static
      */
-    public function fromTable(string $table, string $as = null)
+    public function fromTable(string $table, ?string $as = null)
     {
         $self  = clone $this;
 

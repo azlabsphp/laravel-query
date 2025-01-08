@@ -107,7 +107,7 @@ final class QueryFilters implements FiltersInterface
     /**
      * Creates class instance.
      */
-    public function __construct(array $values = null, array $aggregations = null)
+    public function __construct(?array $values = null, ?array $aggregations = null)
     {
         $this->setQueryFilters($values ?? []);
         $this->aggregations = !empty($aggregations) ? $aggregations : self::DEFAULT_AGGREGATIONS;

@@ -297,7 +297,7 @@ function useCollectQueryResult(\Closure $closure)
  * 
  * @return CommandInterface
  */
-function useActionQueryCommand($instance, \Closure $overrides = null)
+function useActionQueryCommand($instance, ?\Closure $overrides = null)
 {
     $instance = is_string($instance) ? new QueryLanguage($instance) : $instance;
     return new class($instance, $overrides) implements CommandInterface {

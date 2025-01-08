@@ -35,17 +35,17 @@ trait CreateQueryLanguage
     {
         return $this->transactions->transaction(function () use ($args) {
             return $this->overload($args, [
-                function ($attributes, \Closure $callback = null) {
+                function ($attributes, ?\Closure $callback = null) {
                     $callback = $callback ?: static function ($param) {
                         return $param;
                     };
 
                     return $callback($this->queryable->create($this->parseAttributes($this->attributesToArray($attributes))));
                 },
-                function ($attributes, array $params, \Closure $callback = null) {
+                function ($attributes, array $params, ?\Closure $callback = null) {
                     return $this->executeCreateQuery($attributes, $params ?? [], false, $callback);
                 },
-                function ($attributes, array $params, bool $batch, \Closure $callback = null) {
+                function ($attributes, array $params, bool $batch, ?\Closure $callback = null) {
                     return $this->executeCreateQuery($attributes, $params, $batch, $callback);
                 },
             ]);
@@ -61,7 +61,7 @@ trait CreateQueryLanguage
      *
      * @return mixed
      */
-    private function executeCreateQuery($attributes, array $params, bool $batch = false, \Closure $callback = null)
+    private function executeCreateQuery($attributes, array $params, bool $batch = false, ?\Closure $callback = null)
     {
         $callback = $callback ?: static function ($param) {
             return $param;
