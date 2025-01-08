@@ -316,13 +316,13 @@ function useActionQueryCommand($instance, ?\Closure $overrides = null)
          *
          * @param Closure|null $overrides
          */
-        public function __construct(QueryLanguageInterface $instance, \Closure $overrides = null)
+        public function __construct(QueryLanguageInterface $instance, ?\Closure $overrides = null)
         {
             $this->instance = $instance;
             $this->overrides = $overrides;
         }
 
-        public function __invoke(AbstractAction $action, \Closure $callback = null)
+        public function __invoke(AbstractAction $action, ?\Closure $callback = null)
         {
             // We allow user to provide a custom handler that overrides the
             // default action handler for the command
@@ -365,7 +365,7 @@ function useActionQueryCommand($instance, ?\Closure $overrides = null)
          * 
          * @return AbstractActionResult 
          */
-        public function call(AbstractAction $action, \Closure $callback = null)
+        public function call(AbstractAction $action, ?\Closure $callback = null)
         {
             return $this->__invoke($action, $callback);
         }
