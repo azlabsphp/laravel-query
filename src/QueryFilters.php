@@ -15,6 +15,7 @@ namespace Drewlabs\Laravel\Query;
 
 use Drewlabs\Core\Helpers\Arr;
 use Drewlabs\Query\ConditionQuery;
+use Drewlabs\Query\Contracts\BuilderInterface;
 use Drewlabs\Query\Contracts\FiltersInterface;
 use Drewlabs\Query\JoinQuery;
 use Drewlabs\Query\QueryStatement;
@@ -27,7 +28,7 @@ use Illuminate\Database\Eloquent\Builder;
  * 
  * @package Drewlabs\Laravel\Query
  */
-final class QueryFilters implements FiltersInterface
+final class QueryFilters implements FiltersInterface, BuilderInterface
 {
     use MethodProxy;
 
@@ -111,6 +112,21 @@ final class QueryFilters implements FiltersInterface
     {
         $this->setQueryFilters($values ?? []);
         $this->aggregations = !empty($aggregations) ? $aggregations : self::DEFAULT_AGGREGATIONS;
+    }
+
+    /**
+     * apply `select` query on query builder.
+     *
+     * @param QueryBuilder|Builder $builder
+     * @param string[]                $columns
+     *
+     * @throws \InvalidArgumentException
+     *
+     * @return QueryBuilder|Builder
+     */
+    public function select($builder, ...$columns)
+    {
+        return $builder->select($columns);
     }
 
     public function __call(string $method, $arguments)
@@ -461,7 +477,7 @@ final class QueryFilters implements FiltersInterface
      *
      * @return QueryBuilder|Builder
      */
-    private function noIn($builder, array $params)
+    private function notIn($builder, array $params)
     {
         // Return the builder instance case the params is empty
         if (empty($params)) {
@@ -1004,12 +1020,12 @@ final class QueryFilters implements FiltersInterface
             //     )->limit(1)
             // ]);
 
-            
+
             // TODO: Comment the code below if old implementation is preferred
             $model = $builder->getModel();
             $as = $as ?? sprintf('added_%s_%s', strtolower($method), $column);
             return $builder->addSelect([
-                 $as => $queryFunc(
+                $as => $queryFunc(
                     $model->getConnection()
                         // We reset existing query by creating a new model query instance
                         // in order to not take in account existing filters applied on the builder
