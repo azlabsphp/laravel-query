@@ -15,7 +15,6 @@ namespace Drewlabs\Laravel\Query;
 
 use Drewlabs\Core\Helpers\Arr;
 use Drewlabs\Query\ConditionQuery;
-use Drewlabs\Query\Contracts\BuilderInterface;
 use Drewlabs\Query\Contracts\FiltersInterface;
 use Drewlabs\Query\JoinQuery;
 use Drewlabs\Query\QueryStatement;
@@ -28,7 +27,7 @@ use Illuminate\Database\Eloquent\Builder;
  * 
  * @package Drewlabs\Laravel\Query
  */
-final class QueryFilters implements FiltersInterface, BuilderInterface
+final class QueryFilters implements FiltersInterface
 {
     use MethodProxy;
 
