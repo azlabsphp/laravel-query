@@ -11,6 +11,8 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
+namespace Drewlabs\Laravel\Query\Tests\Unit;
+
 use Drewlabs\Laravel\Query\Tests\Unit\TestQueryBuilderInterface;
 use Drewlabs\Laravel\Query\Tests\Unit\WithConsecutiveCalls;
 use Drewlabs\Query\Builder;
@@ -254,7 +256,7 @@ class QueryFiltersTest extends TestCase
                 $this->testObject = $testObject;
             }
 
-            public function where(Closure $closure)
+            public function where(\Closure $closure)
             {
                 return $closure($this);
             }

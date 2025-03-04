@@ -1,46 +1,56 @@
 {
-    "name": "drewlabs/laravel-query",
-    "description": "Provides drewlabs/query bindings for laravel framework",
-    "type": "library",
-    "license": "MIT",
-    "authors": [{
-        "name": "azandrew-sidoine",
-        "email": "asmyns.platonnas29@gmail.com"
-    }],
-    "minimum-stability": "stable",
-    "require": {
-        "php": "^8.0",
-        "illuminate/database": "^9.0|^10.0|^11.0",
-        "illuminate/pagination": "^9.0|^10.0|^11.0",
-        "drewlabs/contracts": "^0.3",
-        "drewlabs/core-helpers": "^0.3",
-        "drewlabs/support": "^0.3",
-        "drewlabs/query": "^0.3"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "^9.0",
-        "phpbench/phpbench": "^1.0"
-    },
-    "autoload": {
-        "psr-4": {
-            "Drewlabs\\Laravel\\Query\\": "src/"
-        },
-        "files": [
-            "src/helpers.php",
-            "src/proxies.php"
-        ]
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Drewlabs\\Laravel\\Query\\Tests\\": "tests/"
-        }
-    },
-    "extra": {
-        "laravel": {
-            "providers": [
-                "Drewlabs\\Laravel\\Query\\ServiceProvider"
-            ]
-        },
-        "branch-alias": {}
+  "name": "drewlabs/laravel-query",
+  "description": "Provides drewlabs/query bindings for laravel framework",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "azandrew-sidoine",
+      "email": "asmyns.platonnas29@gmail.com"
     }
+  ],
+  "minimum-stability": "stable",
+  "require": {
+    "php": "^8.0",
+    "illuminate/database": "^9.0|^10.0|^11.0",
+    "illuminate/pagination": "^9.0|^10.0|^11.0",
+    "drewlabs/contracts": "^0.3",
+    "drewlabs/core-helpers": "^0.3",
+    "drewlabs/support": "^0.3",
+    "drewlabs/query": "^0.3"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^9.0",
+    "phpbench/phpbench": "^1.0",
+    "illuminate/validation": "^10.0|^11.44"
+  },
+  "autoload": {
+    "psr-4": {
+      "Drewlabs\\Laravel\\Query\\": "src/"
+    },
+    "files": [
+      "src/helpers.php",
+      "src/proxies.php"
+    ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Drewlabs\\Laravel\\Query\\Tests\\": "tests/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Drewlabs\\Laravel\\Query\\ServiceProvider"
+      ]
+    },
+    "branch-alias": {}
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true
+  },
+  "suggest": {
+    "illuminate/validation": "Required for validation rule"
+  }
 }

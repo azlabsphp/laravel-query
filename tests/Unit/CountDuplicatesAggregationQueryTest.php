@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
+namespace Drewlabs\Laravel\Query\Tests\Unit;
+
 use Drewlabs\Laravel\Query\QueryFilters;
-use Drewlabs\Laravel\Query\Tests\Stubs\Address;
 use Drewlabs\Laravel\Query\Tests\Stubs\Person;
 use Drewlabs\Laravel\Query\Tests\TestCase;
 

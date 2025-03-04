@@ -50,12 +50,12 @@ class Query implements IteratorAggregate, QueryInterface
      * 
      * @return static 
      */
-    public function fromBuilder(BaseQueryBuilder $table)
+    public function fromBuilder(BaseQueryBuilder $table): self
     {
         $self  = clone $this;
 
         $self->builder = $table;
-        //
+
         return $self;
     }
 
@@ -67,12 +67,25 @@ class Query implements IteratorAggregate, QueryInterface
      * 
      * @return static
      */
-    public function fromTable(string $table, ?string $as = null)
+    public function fromTable(string $table, ?string $as = null): self
+    {
+        return $this->from($table, $as);
+    }
+
+    /**
+     * defines database table object from which query is builded
+     * 
+     * @param string $table 
+     * @param null|string $as
+     * 
+     * @return static 
+     */
+    public function from(string $table, ?string $as = null): self
     {
         $self  = clone $this;
 
         $self->builder = DB::table($table, $as);
-        //
+
         return $self;
     }
 

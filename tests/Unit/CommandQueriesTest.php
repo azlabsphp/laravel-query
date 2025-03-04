@@ -11,6 +11,8 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
+namespace Drewlabs\Laravel\Query\Tests\Unit;
+
 use Drewlabs\Contracts\Support\Actions\ActionResult;
 use Drewlabs\Core\Helpers\Functional;
 

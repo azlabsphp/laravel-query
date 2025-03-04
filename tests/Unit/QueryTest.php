@@ -1,9 +1,9 @@
 <?php
 
+namespace Drewlabs\Laravel\Query\Tests\Unit;
+
 use Drewlabs\Laravel\Query\Query;
 use Drewlabs\Laravel\Query\Tests\TestCase;
-use Drewlabs\Query\Builder as DrewlabsQueryBuilder;
-use Drewlabs\Query\Contracts\FiltersBuilderInterface;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -25,14 +25,14 @@ class QueryTest extends TestCase
 
     public function test_query_get_iterator_throws_exception_case_from_builder_or_from_table_not_called_before()
     {
-        $this->expectException(BadMethodCallException::class);
+        $this->expectException(\BadMethodCallException::class);
         $this->expectExceptionMessage('Query builder point to a null reference, you probably did not call fromBuilder() or fromTable() method.');
         Query::new()->and('name', 'Armani')->and('tags', 'Shoes')->getIterator();
     }
 
     public function test_query_get_result_throws_exception_case_from_builder_or_from_table_not_called_before()
     {
-        $this->expectException(BadMethodCallException::class);
+        $this->expectException(\BadMethodCallException::class);
         $this->expectExceptionMessage('Query builder point to a null reference, you probably did not call fromBuilder() or fromTable() method.');
         Query::new()->and('name', 'Armani')->and('tags', 'Shoes')->getResult();
     }
