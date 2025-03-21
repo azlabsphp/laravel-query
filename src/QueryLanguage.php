@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Drewlabs\Laravel\Query;
 
-use Closure;
 use Drewlabs\Core\Helpers\Arr;
 use Drewlabs\Laravel\Query\Concerns\CreateQueryLanguage;
 use Drewlabs\Laravel\Query\Concerns\DeleteQueryLanguage;
@@ -195,7 +194,7 @@ final class QueryLanguage implements QueryLanguageInterface, ProvidesFiltersFact
     /**
      * Return the filters factory instance.
      *
-     * @return Closure(mixed|array $queries): FiltersInterface
+     * @return \Closure(mixed|array $queries): FiltersInterface
      */
     public function getFiltersFactory()
     {
@@ -205,7 +204,7 @@ final class QueryLanguage implements QueryLanguageInterface, ProvidesFiltersFact
     /**
      * Query language builder factory getter.
      *
-     * @return Closure(mixed $builder, array|FiltersInterface $query): Builder
+     * @return \Closure(mixed $builder, array|FiltersInterface $query): Builder
      */
     public function builderFactory()
     {
@@ -262,7 +261,7 @@ final class QueryLanguage implements QueryLanguageInterface, ProvidesFiltersFact
     /**
      * Provides a default builder factory that is used to invoke database queries.
      *
-     * @return Closure(mixed $builder, array|FiltersInterface $query): mixed
+     * @return \Closure(mixed $builder, array|FiltersInterface $query): mixed
      */
     private function defaultBuilderFactory()
     {
@@ -328,7 +327,7 @@ final class QueryLanguage implements QueryLanguageInterface, ProvidesFiltersFact
     /**
      * Use the eloquent query filter as default query filter.
      *
-     * @return Closure(mixed|array $queries): QueryFilters
+     * @return \Closure(mixed|array $queries): QueryFilters
      */
     private function useDefaultQueryFactory()
     {

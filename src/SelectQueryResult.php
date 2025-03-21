@@ -19,8 +19,6 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 
 /**
  * @internal
- * 
- * @package Drewlabs\Laravel\Query
  */
 class SelectQueryResult
 {

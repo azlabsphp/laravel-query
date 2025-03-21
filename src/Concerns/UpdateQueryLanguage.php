@@ -89,6 +89,7 @@ trait UpdateQueryLanguage
                 return $upsert ? QueryableRelations::new($model)->update($params['relations'] ?? [], $attributes) : QueryableRelations::new($model)->refresh($params['relations'] ?? [], $attributes);
             });
         }
+
         return $this->createUpdateClosure($this, $id, $attributes, $callback)();
     }
 
@@ -119,6 +120,7 @@ trait UpdateQueryLanguage
                 $result = \call_user_func($callable, ...$params_);
                 $instance = \is_object($result) ? $result : $instance;
             }
+
             // Call the outer callback
             return $callback($instance);
         };

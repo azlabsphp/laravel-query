@@ -13,15 +13,13 @@ declare(strict_types=1);
 
 namespace Drewlabs\Laravel\Query\Tests\Unit;
 
-use Closure;
-
 interface TestQueryBuilderInterface
 {
     public function where($column, $operator = null, $value = null);
 
     public function whereIn($column, array $values);
 
-    public function has($relation, string $operator = '>=', int $count = 1, $boolean = 'and', Closure $callback = null);
+    public function has($relation, string $operator = '>=', int $count = 1, $boolean = 'and', ?\Closure $callback = null);
 
     public function withAggregate($relations, $column, $function = null);
 

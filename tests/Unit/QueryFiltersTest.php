@@ -13,14 +13,13 @@ declare(strict_types=1);
 
 namespace Drewlabs\Laravel\Query\Tests\Unit;
 
-use Drewlabs\Laravel\Query\Tests\Unit\TestQueryBuilderInterface;
-use Drewlabs\Laravel\Query\Tests\Unit\WithConsecutiveCalls;
+use function Drewlabs\Laravel\Query\Proxy\CreateQueryFilters;
+
 use Drewlabs\Query\Builder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\TestCase;
 
-use function Drewlabs\Laravel\Query\Proxy\CreateQueryFilters;
+use PHPUnit\Framework\TestCase;
 
 class QueryFiltersTest extends TestCase
 {
@@ -60,7 +59,6 @@ class QueryFiltersTest extends TestCase
         $this->assertSame($mockObject, $queryFilters->apply($mockObject));
     }
 
-
     public function test_query_filters_aggregate_call_with_with_aggregate_if_aggregation_method_is_a_two_parameter_array()
     {
         /**
@@ -69,8 +67,8 @@ class QueryFiltersTest extends TestCase
         $mockObject = $this->createMock(TestQueryBuilderInterface::class);
         $queryFilters = CreateQueryFilters([
             'aggregate' => [
-                'min' => [['grades', 'courses']]
-            ]
+                'min' => [['grades', 'courses']],
+            ],
         ]);
 
         $mockObject
@@ -90,8 +88,8 @@ class QueryFiltersTest extends TestCase
         $mockObject = $this->createMock(TestQueryBuilderInterface::class);
         $queryFilters = CreateQueryFilters([
             'aggregate' => [
-                'min' => ['grades', 'courses']
-            ]
+                'min' => ['grades', 'courses'],
+            ],
         ]);
 
         $mockObject
@@ -126,8 +124,8 @@ class QueryFiltersTest extends TestCase
         $mockObject = $this->createMock(TestQueryBuilderInterface::class);
         $queryFilters = CreateQueryFilters([
             'aggregate' => [
-                'max' => ['grades', 'courses']
-            ]
+                'max' => ['grades', 'courses'],
+            ],
         ]);
 
         $mockObject
@@ -154,8 +152,6 @@ class QueryFiltersTest extends TestCase
         $this->assertSame($mockObject, $queryFilters->apply($mockObject));
     }
 
-
-
     public function test_query_filters_aggregate_avg_call_add_select_if_aggregation_method_is_called_string_as_column_or_list_of_string_as_column()
     {
         /**
@@ -164,8 +160,8 @@ class QueryFiltersTest extends TestCase
         $mockObject = $this->createMock(TestQueryBuilderInterface::class);
         $queryFilters = CreateQueryFilters([
             'aggregate' => [
-                'avg' => ['grades', 'courses']
-            ]
+                'avg' => ['grades', 'courses'],
+            ],
         ]);
 
         $mockObject
@@ -200,8 +196,8 @@ class QueryFiltersTest extends TestCase
         $mockObject = $this->createMock(TestQueryBuilderInterface::class);
         $queryFilters = CreateQueryFilters([
             'aggregate' => [
-                'sum' => ['grades', 'courses']
-            ]
+                'sum' => ['grades', 'courses'],
+            ],
         ]);
 
         $mockObject
@@ -247,8 +243,7 @@ class QueryFiltersTest extends TestCase
         $this->assertSame($mockObject, $queryFilters->apply($mockObject));
 
         // Use a mock to test invocation of sub queries
-        $queryFilters->apply(new class($this)
-        {
+        $queryFilters->apply(new class($this) {
             private $testObject;
 
             public function __construct(TestCase $testObject)
@@ -269,7 +264,6 @@ class QueryFiltersTest extends TestCase
             }
         });
     }
-
 
     public function test_query_filters_distinct_is_invoked_when_builder_distinct_is_called()
     {

@@ -14,6 +14,9 @@ declare(strict_types=1);
 namespace Drewlabs\Laravel\Query\Proxy;
 
 use Closure;
+use Drewlabs\Contracts\Support\Actions\Action as AbstractAction;
+use Drewlabs\Contracts\Support\Actions\ActionPayload as AbstractActionPayload;
+use Drewlabs\Contracts\Support\Actions\ActionResult as AbstractActionResult;
 use Drewlabs\Laravel\Query\QueryFilters;
 use Drewlabs\Laravel\Query\QueryLanguage;
 use Drewlabs\Laravel\Query\SelectQueryResult;
@@ -21,15 +24,14 @@ use Drewlabs\Query\Contracts\CommandInterface;
 use Drewlabs\Query\Contracts\EnumerableResultInterface;
 use Drewlabs\Query\Contracts\Queryable;
 use Drewlabs\Query\Contracts\QueryLanguageInterface;
-use Drewlabs\Query\PreparesFiltersArray;
-use Illuminate\Database\Eloquent\Model;
-use Drewlabs\Contracts\Support\Actions\Action as AbstractAction;
-use Drewlabs\Contracts\Support\Actions\ActionPayload as AbstractActionPayload;
-use Drewlabs\Contracts\Support\Actions\ActionResult as AbstractActionResult;
 use Drewlabs\Query\Exceptions\BadQueryActionException;
+use Drewlabs\Query\PreparesFiltersArray;
 
 use function Drewlabs\Support\Proxy\Action;
+
 use function Drewlabs\Support\Proxy\ActionResult;
+
+use Illuminate\Database\Eloquent\Model;
 
 // #region Action query
 
@@ -204,10 +206,9 @@ function CreateQueryAction(...$payload)
 // #endregion Action query
 
 /**
- * Creates a `FiltersInterface` instance from an array of query filters
- * 
- * @param array $values 
- * @return QueryFilters 
+ * Creates a `FiltersInterface` instance from an array of query filters.
+ *
+ * @return QueryFilters
  */
 function CreateQueryFilters(array $values)
 {
@@ -293,13 +294,15 @@ function useCollectQueryResult(\Closure $closure)
  *      // Provides custom action handlers
  * });
  * ```
+ *
  * @param class-string<Model>|QueryLanguageInterface $instance
- * 
+ *
  * @return CommandInterface
  */
 function useActionQueryCommand($instance, ?\Closure $overrides = null)
 {
-    $instance = is_string($instance) ? new QueryLanguage($instance) : $instance;
+    $instance = \is_string($instance) ? new QueryLanguage($instance) : $instance;
+
     return new class($instance, $overrides) implements CommandInterface {
         /**
          * @var DMLProvider
@@ -313,8 +316,6 @@ function useActionQueryCommand($instance, ?\Closure $overrides = null)
 
         /**
          * Creates class instance.
-         *
-         * @param Closure|null $overrides
          */
         public function __construct(QueryLanguageInterface $instance, ?\Closure $overrides = null)
         {
@@ -337,11 +338,13 @@ function useActionQueryCommand($instance, ?\Closure $overrides = null)
                 case 'DB_CREATE_ACTION':
 
                     $payload = null !== $callback ? array_merge($payload, [$callback]) : $payload;
+
                     return ActionResult($this->instance->create(...$payload));
                 case 'UPDATE':
                 case 'DB_UPDATE_ACTION':
 
                     $payload = null !== $callback ? array_merge($payload, [$callback]) : $payload;
+
                     return ActionResult($this->instance->update(...$payload));
                 case 'DELETE':
                 case 'DB_DELETE_ACTION':
@@ -349,8 +352,9 @@ function useActionQueryCommand($instance, ?\Closure $overrides = null)
                     return ActionResult($this->instance->delete(...$payload));
                 case 'SELECT':
                 case 'DB_SELECT_ACTION':
-                    
+
                     $payload = null !== $callback ? array_merge($payload, [$callback]) : $payload;
+
                     return ActionResult($this->instance->select(...$payload));
                 default:
                     throw new BadQueryActionException('This '.__CLASS__.' can only handle CREATE,DELETE,UPDATE AND SELECT actions');
@@ -358,12 +362,9 @@ function useActionQueryCommand($instance, ?\Closure $overrides = null)
         }
 
         /**
-         * Calls the command with action parameters
-         * 
-         * @param AbstractAction $action 
-         * @param Closure|null $callback
-         * 
-         * @return AbstractActionResult 
+         * Calls the command with action parameters.
+         *
+         * @return AbstractActionResult
          */
         public function call(AbstractAction $action, ?\Closure $callback = null)
         {

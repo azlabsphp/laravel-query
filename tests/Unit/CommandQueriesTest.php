@@ -16,18 +16,19 @@ namespace Drewlabs\Laravel\Query\Tests\Unit;
 use Drewlabs\Contracts\Support\Actions\ActionResult;
 use Drewlabs\Core\Helpers\Functional;
 
-use function Drewlabs\Laravel\Query\Proxy\CreateQueryFilters;
-use function Drewlabs\Laravel\Query\Proxy\DMLManager;
-use function Drewlabs\Laravel\Query\Proxy\useActionQueryCommand;
-
-use Drewlabs\Laravel\Query\Tests\Stubs\Person;
-use Drewlabs\Laravel\Query\Tests\TestCase;
-
 use function Drewlabs\Laravel\Query\Proxy\CreateQueryAction;
+use function Drewlabs\Laravel\Query\Proxy\CreateQueryFilters;
 use function Drewlabs\Laravel\Query\Proxy\DeleteQueryAction;
+
+use function Drewlabs\Laravel\Query\Proxy\DMLManager;
 use function Drewlabs\Laravel\Query\Proxy\SelectQueryAction;
 
 use function Drewlabs\Laravel\Query\Proxy\UpdateQueryAction;
+use function Drewlabs\Laravel\Query\Proxy\useActionQueryCommand;
+
+use Drewlabs\Laravel\Query\Tests\Stubs\Person;
+
+use Drewlabs\Laravel\Query\Tests\TestCase;
 
 class CommandQueriesTest extends TestCase
 {

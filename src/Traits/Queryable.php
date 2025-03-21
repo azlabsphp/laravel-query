@@ -17,6 +17,7 @@ use Drewlabs\Core\Helpers\Arr;
 
 /**
  * @property array attributes
+ *
  * @method array getAttributes()
  */
 trait Queryable
@@ -31,6 +32,7 @@ trait Queryable
     {
         $primaryKey = $this->getPrimaryKey();
         $this->{$primaryKey} = $value;
+
         return $this;
     }
     // #endregion primary keys
@@ -82,20 +84,15 @@ trait Queryable
     {
         return $this->relation_methods ?? [];
     }
-
-    protected function hasRelations()
-    {
-        return \is_array($this->getRelations()) ?: false;
-    }
     // #endregion relations
 
     // #region
     public function propertyExists(string $name): bool
     {
-        return $this->attributeCastExists($name) ||
-            $this->attributeExists($name) ||
-            $this->isRelation($name) ||
-            $this->relationLoaded($name);
+        return $this->attributeCastExists($name)
+            || $this->attributeExists($name)
+            || $this->isRelation($name)
+            || $this->relationLoaded($name);
     }
 
     public function getPropertyValue(string $name)
@@ -109,32 +106,30 @@ trait Queryable
     }
 
     /**
-     * Checks if attribute exists in the `attributes` array
-     * 
-     * @param string $name 
-     * @return bool 
+     * Checks if attribute exists in the `attributes` array.
      */
     public function attributeExists(string $name): bool
     {
-        return array_key_exists($name, $this->attributes);
+        return \array_key_exists($name, $this->attributes);
+    }
+
+    protected function hasRelations()
+    {
+        return \is_array($this->getRelations()) ?: false;
     }
 
     /**
-     * Checks if attribute exists in the `casts` array
-     * 
-     * @param string $name 
-     * @return bool 
+     * Checks if attribute exists in the `casts` array.
      */
     private function attributeCastExists(string $name): bool
     {
-        return array_key_exists($name, $this->casts);
+        return \array_key_exists($name, $this->casts);
     }
 
     /**
-     * Get the value of a column for the current row
-     * 
-     * @param string $name 
-     * @return mixed 
+     * Get the value of a column for the current row.
+     *
+     * @return mixed
      */
     private function getRawPropertyValue(string $name)
     {
@@ -142,11 +137,11 @@ trait Queryable
     }
 
     /**
-     * Set value for the raw property
-     * 
-     * @param string $name 
-     * @param mixed $value 
-     * @return void 
+     * Set value for the raw property.
+     *
+     * @param mixed $value
+     *
+     * @return void
      */
     private function setRawPropertyValue(string $name, $value)
     {

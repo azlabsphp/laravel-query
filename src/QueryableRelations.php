@@ -290,6 +290,7 @@ class QueryableRelations
         $composed = array_filter($relations, static function ($current) {
             return \is_string($current) && str_contains($current, '.');
         });
+
         // #endregion We filter the componsed relation from default relations to recursively set create model relations
         return [array_diff($relations, $composed), $composed];
     }

@@ -1,5 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
+/*
+ * This file is part of the drewlabs namespace.
+ *
+ * (c) Sidoine Azandrew <azandrewdevelopper@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Drewlabs\Laravel\Query\Tests\Unit;
 
 use Drewlabs\Laravel\Query\Query;
@@ -12,13 +23,12 @@ use PHPUnit\Framework\MockObject\MockObject;
 
 class QueryTest extends TestCase
 {
-
     public function test_query_from_builder()
     {
         /**
          * @var Builder&MockObject
          */
-        $builder =  $this->createMock(Builder::class);
+        $builder = $this->createMock(Builder::class);
         $query = Query::new()->fromBuilder($builder);
         $this->assertInstanceOf(Builder::class, $query->getBuilder());
     }
@@ -42,7 +52,7 @@ class QueryTest extends TestCase
         /**
          * @var Builder&MockObject
          */
-        $builder =  $this->createMock(QueryBuilder::class);
+        $builder = $this->createMock(QueryBuilder::class);
 
         $builder
             ->expects($this->once())
@@ -76,7 +86,7 @@ class QueryTest extends TestCase
         /**
          * @var Builder&MockObject
          */
-        $builder =  $this->createMock(QueryBuilder::class);
+        $builder = $this->createMock(QueryBuilder::class);
 
         $builder
             ->expects($this->once())
@@ -102,6 +112,6 @@ class QueryTest extends TestCase
             ->date('created_at', '2023-10-10')
             ->getResult();
 
-        $this->assertTrue(is_array($result));
+        $this->assertEquals(gettype($result), 'array');
     }
 }

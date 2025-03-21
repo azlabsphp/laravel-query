@@ -39,6 +39,7 @@ class TransactionManager implements TransactionManagerInterface
             $this->db->begin();
             // Run the transaction
             $callbackResult = (new \ReflectionFunction($callback))->invoke();
+
             // Return the result of the transaction
             return $this->afterTransaction(static function () use ($callbackResult) {
                 return $callbackResult;

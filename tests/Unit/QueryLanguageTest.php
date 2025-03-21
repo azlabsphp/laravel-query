@@ -268,7 +268,7 @@ class QueryLanguageTest extends TestCase
         // Update by array query
         $result = $manager->delete(PreparesFiltersArray::new(['where' => ['firstname', 'SIDOINE']])->call(), true);
         $this->assertTrue(1 === $result, 'Expect the delete operation to return TRUE');
-        $this->assertEquals(1, $manager->select()->count(), 'Expect the database person table to contains only 1 item');
+        $this->assertSame(1, $manager->select()->count(), 'Expect the database person table to contains only 1 item');
     }
 
     public function test_select_aggregate()
@@ -325,7 +325,6 @@ class QueryLanguageTest extends TestCase
         $this->assertNotNull(DMLManager(Profil::class)->select($profil->getKey()));
         $this->assertNotNull(Person::where('firstname', 'Laura')->where('lastname', 'R. Clifford')->first());
     }
-
 
     public function test_eloquent_query_filters_exists()
     {
