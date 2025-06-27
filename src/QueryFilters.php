@@ -17,6 +17,7 @@ use Drewlabs\Core\Helpers\Arr;
 use Drewlabs\Query\ConditionQuery;
 use Drewlabs\Query\Contracts\FiltersInterface;
 use Drewlabs\Query\JoinQuery;
+use Drewlabs\Query\PreparesFiltersArray;
 use Drewlabs\Query\QueryStatement;
 use Drewlabs\Support\Traits\MethodProxy;
 use Illuminate\Contracts\Database\Query\Builder as QueryBuilder;
@@ -996,12 +997,13 @@ final class QueryFilters implements FiltersInterface
         if (empty($p)) {
             return $builder;
         }
-
         $p = array_map(static function ($value) {
             return \is_array($value) ? array_pad($value, 3, null) : [$value, null, null];
         }, !\is_array($p) ? [$p] : $p);
 
-        return array_reduce(!\is_array($p) ? [$p] : $p, static function (Builder $builder, $current) use ($method) {
+        foreach ($p as $key => $current) {
+            print_r($current);
+
             [$column, $query, $as] = $current;
             $queryFunc = static function ($b) {
                 return $b;
@@ -1010,48 +1012,37 @@ final class QueryFilters implements FiltersInterface
                 /** @var QueryStatement[] */
                 $statements = array_reduce(explode('->', $query), static function ($stmts, $val) {
                     $stmts[] = QueryStatement::fromString($val);
-
                     return $stmts;
                 }, []);
+
                 $queryFunc = static function ($b) use ($statements) {
                     return array_reduce($statements, static function ($carry, QueryStatement $statement) {
                         if (null === ($method = static::ELOQUENT_QUERY_PROXIES[$statement->method()] ?? null)) {
                             return $carry;
                         }
-
                         return \call_user_func_array([$carry, $method], $statement->args());
                     }, $b);
                 };
+            } else if (null !== $query && is_array($query) && !empty($query)) {
+                $statements = [];
+                PreparesFiltersArray::new($query)->prepareInto($statements);
+                $queryFunc = static function ($b) use ($statements) {
+                    foreach ($statements as $key => $value) {
+                        $b = \call_user_func_array([$b, $key], $value);
+                    }
+                    return $b;
+                };
             }
-            // TODO: Uncomment the code below the old implementation if new implementation is not what
-            // is intended to be done by the method
-            // $expression = $builder->clone();
-            // $as = $as ?? sprintf('added_%s_%s', strtolower($method), $column);
-            // return $builder->addSelect([
-            //      $as => $queryFunc(
-            //         $expression->getConnection()
-            //             ->table($expression, 't__0')
-            //             ->whereColumn(sprintf("t__0.%s", $column), '=', sprintf("%s.%s", $expression->getModel()->getTable(), $column))
-            //             ->selectRaw(sprintf("%s(%s)", $method, $column))
-            //     )->limit(1)
-            // ]);
 
-            // TODO: Comment the code below if old implementation is preferred
             $model = $builder->getModel();
-            $as = $as ?? sprintf('added_%s_%s', strtolower($method), $column);
+            $as = $as ?? sprintf('%s_%s', strtolower($method), $column);
 
-            return $builder->addSelect([
-                $as => $queryFunc(
-                    $model->getConnection()
-                        // We reset existing query by creating a new model query instance
-                        // in order to not take in account existing filters applied on the builder
-                        // instance
-                        ->table($builder->getModel()->newModelQuery(), 't__0')
-                        ->whereColumn(sprintf('t__0.%s', $column), '=', sprintf('%s.%s', $model->getTable(), $column))
-                        ->selectRaw(sprintf('%s(%s)', $method, $column))
-                )->limit(1),
-            ]);
-        }, $builder);
+            $table = $queryFunc($model->getConnection()->table($builder->getModel()->newModelQuery(), 't__0'));
+            // $builder =  $builder->addSelect([$as => $table
+            //     ->whereColumn(sprintf('t__0.%s', $column), '=', sprintf('%s.%s', $model->getTable(), $column))
+            //     ->selectRaw(sprintf('%s(%s)', $method, $column))->limit(1)]);
+        }
+        return $builder;
     }
     // #region helper methods
 }
