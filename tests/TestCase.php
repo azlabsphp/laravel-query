@@ -15,6 +15,7 @@ namespace Drewlabs\Laravel\Query\Tests;
 
 use Drewlabs\Laravel\Query\Tests\Stubs\Address;
 use Drewlabs\Laravel\Query\Tests\Stubs\Person;
+use Drewlabs\Laravel\Query\Tests\Stubs\Product;
 use Drewlabs\Laravel\Query\Tests\Stubs\Profil;
 use Illuminate\Container\Container;
 use Illuminate\Database\Capsule\Manager;

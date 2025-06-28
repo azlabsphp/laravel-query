@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Drewlabs\Laravel\Query\QueryFilters;
 use Drewlabs\Laravel\Query\Tests\Stubs\Address;
 use Drewlabs\Laravel\Query\Tests\Stubs\Person;
+use Drewlabs\Laravel\Query\Tests\Stubs\Product;
 use Drewlabs\Laravel\Query\Tests\TestCase;
 
 /*
