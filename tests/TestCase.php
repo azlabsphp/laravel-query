@@ -153,6 +153,15 @@ class TestCase extends FrameworkTestCase
         });
         // #endregion Posts - Video - Comments
 
+
+        Manager::schema()->create('products', static function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('code');
+            $table->decimal('rating', 5, 2)->default(1);
+            $table->boolean('published');
+            $table->timestamps();
+        });
+
         // Seed table with default values
         $p1 = Person::create(
             [
@@ -225,6 +234,50 @@ class TestCase extends FrameworkTestCase
             'city' => 'LOME',
             'email' => 'unknown-person@liksoft.tg',
             'person_id' => $p3->getKey(),
+        ]);
+
+
+        Product::query()->create([
+            'code' => 'P0001',
+            'rating' => 3,
+            'published' => true
+        ]);
+
+        Product::query()->create([
+            'code' => 'P0001',
+            'rating' => 4,
+            'published' => true
+        ]);
+
+        Product::query()->create([
+            'code' => 'P0001',
+            'rating' => 2,
+            'published' => false
+        ]);
+
+        Product::query()->create([
+            'code' => 'P0001',
+            'rating' => 1,
+            'published' => false
+        ]);
+
+    
+        Product::query()->create([
+            'code' => 'P0002',
+            'rating' => 4,
+            'published' => false
+        ]);
+
+        Product::query()->create([
+            'code' => 'P0002',
+            'rating' => 2,
+            'published' => false
+        ]);
+
+        Product::query()->create([
+            'code' => 'P0002',
+            'rating' => 1,
+            'published' => false
         ]);
     }
 
