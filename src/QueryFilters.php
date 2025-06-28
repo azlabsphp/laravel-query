@@ -753,29 +753,26 @@ final class QueryFilters implements FiltersInterface
         }
 
         $params = array_map(static function ($value) {
-            return \is_array($value) ? array_pad($value, 2, null) : [$value, null];
+            return \is_array($value) ? array_pad($value, 3, null) : [$value, null, null];
         }, !\is_array($params) ? [$params] : $params);
 
-        return array_reduce($params, static function (Builder $builder, $current) {
-            [$column, $relation] = $current;
+        return array_reduce($params, function (Builder $builder, $current) {
+            [$column, $relation, $as] = $current;
+
+            if (is_null($column)) {
+                return $builder;
+            }
+
+            $as = $as ?? sprintf('count_%s', $column);
+
+            if (is_array($relation) || (is_string($relation) && \mb_strpos($relation, '->') !== false)) {
+                return $this->addAggregate($builder, [$current], 'COUNT');
+            }
 
             return null !== $relation ? $builder->withAggregate($relation, $column ?? '*', 'count') : $builder->addSelect([
-                sprintf('count_%s', $column) => $builder->clone()->selectRaw(sprintf('count(%s)', $column ?? '*'))->limit(1),
+                $as => $builder->clone()->selectRaw(sprintf('count(%s)', $column ?? '*'))->limit(1),
             ]);
         }, $builder);
-    }
-
-    /**
-     * Add a added_count_[column] name field which is the count of all values for the given column.
-     *
-     * @param Builder      $builder
-     * @param string|array $p
-     *
-     * @return Builder
-     */
-    private function addCount($builder, $p)
-    {
-        return $this->addAggregate($builder, $p, 'COUNT');
     }
 
     /**
@@ -794,14 +791,24 @@ final class QueryFilters implements FiltersInterface
         }
 
         $params = array_map(static function ($value) {
-            return \is_array($value) ? array_pad($value, 2, null) : [$value, null];
+            return \is_array($value) ? array_pad($value, 3, null) : [$value, null, null];
         }, !\is_array($params) ? [$params] : $params);
 
-        return array_reduce($params, static function ($builder, $current) {
-            [$column, $relation] = $current;
+        return array_reduce($params, function ($builder, $current) {
+            [$column, $relation, $as] = $current;
+
+            if (is_null($column)) {
+                return $builder;
+            }
+
+            $as = $as ?? sprintf('min_%s', $column);
+
+            if (is_array($relation) || (is_string($relation) && \mb_strpos($relation, '->') !== false)) {
+                return $this->addAggregate($builder, [$current], 'MIN');
+            }
 
             return null !== $relation ? $builder->withAggregate($relation, $column ?? '*', 'min') : $builder->addSelect([
-                sprintf('min_%s', $column) => $builder->clone()->selectRaw(sprintf('min(%s)', $column ?? '*'))->limit(1),
+                $as => $builder->clone()->selectRaw(sprintf('min(%s)', $column ?? '*'))->limit(1),
             ]);
         }, $builder);
     }
@@ -822,14 +829,24 @@ final class QueryFilters implements FiltersInterface
         }
 
         $params = array_map(static function ($value) {
-            return \is_array($value) ? array_pad($value, 2, null) : [$value, null];
+            return \is_array($value) ? array_pad($value, 3, null) : [$value, null, null];
         }, !\is_array($params) ? [$params] : $params);
 
-        return array_reduce($params, static function ($builder, $current) {
-            [$column, $relation] = $current;
+        return array_reduce($params, function ($builder, $current) {
+            [$column, $relation, $as] = $current;
+
+            if (is_null($column)) {
+                return $builder;
+            }
+
+            $as = $as ?? sprintf('max_%s', $column);
+
+            if (is_array($relation) || (is_string($relation) && \mb_strpos($relation, '->') !== false)) {
+                return $this->addAggregate($builder, [$current], 'MAX');
+            }
 
             return null !== $relation ? $builder->withAggregate($relation, $column ?? '*', 'max') : $builder->addSelect([
-                sprintf('max_%s', $column) => $builder->clone()->selectRaw(sprintf('max(%s)', $column ?? '*'))->limit(1),
+                $as => $builder->clone()->selectRaw(sprintf('max(%s)', $column ?? '*'))->limit(1),
             ]);
         }, $builder);
     }
@@ -850,29 +867,26 @@ final class QueryFilters implements FiltersInterface
         }
 
         $params = array_map(static function ($value) {
-            return \is_array($value) ? array_pad($value, 2, null) : [$value, null];
+            return \is_array($value) ? array_pad($value, 3, null) : [$value, null, null];
         }, !\is_array($params) ? [$params] : $params);
 
-        return array_reduce($params, static function ($builder, $current) {
-            [$column, $relation] = $current;
+        return array_reduce($params, function ($builder, $current) {
+            [$column, $relation, $as] = $current;
+
+            if (is_null($column)) {
+                return $builder;
+            }
+
+            $as = $as ?? sprintf('sum_%s', $column);
+
+            if (is_array($relation) || (is_string($relation) && \mb_strpos($relation, '->') !== false)) {
+                return $this->addAggregate($builder, [$current], 'SUM');
+            }
 
             return null !== $relation ? $builder->withAggregate($relation, $column ?? '*', 'sum') : $builder->addSelect([
-                sprintf('sum_%s', $column) => $builder->clone()->selectRaw(sprintf('sum(%s)', $column ?? '*'))->limit(1),
+                $as => $builder->clone()->selectRaw(sprintf('sum(%s)', $column ?? '*'))->limit(1),
             ]);
         }, $builder);
-    }
-
-    /**
-     * Add a sum_by_[column] name field which is the count of all values for the given column.
-     *
-     * @param Builder      $builder
-     * @param string|array $p
-     *
-     * @return Builder
-     */
-    private function addSum($builder, $p)
-    {
-        return $this->addAggregate($builder, $p, 'SUM');
     }
 
     /**
@@ -891,14 +905,24 @@ final class QueryFilters implements FiltersInterface
         }
 
         $params = array_map(static function ($value) {
-            return \is_array($value) ? array_pad($value, 2, null) : [$value, null];
+            return \is_array($value) ? array_pad($value, 3, null) : [$value, null, null];
         }, !\is_array($params) ? [$params] : $params);
 
-        return array_reduce($params, static function ($builder, $current) {
-            [$column, $relation] = $current;
+        return array_reduce($params, function ($builder, $current) {
+            [$column, $relation, $as] = $current;
+
+            if (is_null($column)) {
+                return $builder;
+            }
+
+            $as = $as ?? sprintf('avg_%s', $column);
+
+            if (is_array($relation) || (is_string($relation) && \mb_strpos($relation, '->') !== false)) {
+                return $this->addAggregate($builder, [$current], 'AVG');
+            }
 
             return null !== $relation ? $builder->withAggregate($relation, $column ?? '*', 'avg') : $builder->addSelect([
-                sprintf('avg_%s', $column) => $builder->clone()->selectRaw(sprintf('avg(%s)', $column ?? '*'))->limit(1),
+                $as => $builder->clone()->selectRaw(sprintf('avg(%s)', $column ?? '*'))->limit(1),
             ]);
         }, $builder);
     }
@@ -1001,48 +1025,76 @@ final class QueryFilters implements FiltersInterface
             return \is_array($value) ? array_pad($value, 3, null) : [$value, null, null];
         }, !\is_array($p) ? [$p] : $p);
 
-        foreach ($p as $key => $current) {
-            print_r($current);
+        $fn = null;
 
+        foreach ($p as $current) {
             [$column, $query, $as] = $current;
-            $queryFunc = static function ($b) {
-                return $b;
-            };
-            if (null !== $query && \is_string($query) && !empty($query)) {
-                /** @var QueryStatement[] */
-                $statements = array_reduce(explode('->', $query), static function ($stmts, $val) {
-                    $stmts[] = QueryStatement::fromString($val);
-                    return $stmts;
-                }, []);
 
-                $queryFunc = static function ($b) use ($statements) {
-                    return array_reduce($statements, static function ($carry, QueryStatement $statement) {
-                        if (null === ($method = static::ELOQUENT_QUERY_PROXIES[$statement->method()] ?? null)) {
-                            return $carry;
-                        }
-                        return \call_user_func_array([$carry, $method], $statement->args());
-                    }, $b);
-                };
-            } else if (null !== $query && is_array($query) && !empty($query)) {
-                $statements = [];
-                PreparesFiltersArray::new($query)->prepareInto($statements);
-                $queryFunc = static function ($b) use ($statements) {
-                    foreach ($statements as $key => $value) {
-                        $b = \call_user_func_array([$b, $key], $value);
-                    }
-                    return $b;
-                };
+            list($query_column, $join_on) = [null, null];
+
+            if (is_array($column)) {
+                $column = array_pad($column, 2, null);
+                $query_column = $column[0];
+                $join_on = $column[1] ?? $column[0];
+            } else {
+                $query_column = $column;
+                $join_on = $column;
             }
 
-            $model = $builder->getModel();
-            $as = $as ?? sprintf('%s_%s', strtolower($method), $column);
+            # Case user provide an empty array, we simply do not apply any query
+            if (is_null($query_column) || is_null($join_on)) {
+                return $builder;
+            }
 
-            $table = $queryFunc($model->getConnection()->table($builder->getModel()->newModelQuery(), 't__0'));
-            // $builder =  $builder->addSelect([$as => $table
-            //     ->whereColumn(sprintf('t__0.%s', $column), '=', sprintf('%s.%s', $model->getTable(), $column))
-            //     ->selectRaw(sprintf('%s(%s)', $method, $column))->limit(1)]);
+            if (\is_string($query) && !empty($query)) {
+                $fn = static::createQueryFactoryFromExpression($query);
+            } else if (is_array($query) && !empty($query)) {
+                $fn = static::createQueryFactoryFromArray($query);
+            }
+
+
+            $model = $builder->getModel();
+            $as = $as ?? sprintf('%s_%s', strtolower($method), $query_column);
+            $table = $model->getConnection()->table($model->newModelQuery(), 't__0');
+            /** @var \Illuminate\Database\Query\Builder $table */
+            $table = $fn ? $fn($table) : $table;
+
+            $builder =  $builder->addSelect([
+                $as => $table
+                    ->whereColumn(sprintf('t__0.%s', $join_on), '=', sprintf('%s.%s', $model->getTable(), $join_on))
+                    ->selectRaw(sprintf('%s(%s)', $method, $query_column))
+                    ->limit(1)
+            ]);
         }
+
         return $builder;
+    }
+
+    private static function createQueryFactoryFromExpression(string $query)
+    {
+        $statements = array_reduce(explode('->', $query), static function ($stmts, $val) {
+            $stmts[] = QueryStatement::fromString($val);
+            return $stmts;
+        }, []);
+
+        return function ($b) use ($statements) {
+            return array_reduce($statements, static function ($carry, QueryStatement $statement) {
+                if (null === ($method = static::ELOQUENT_QUERY_PROXIES[$statement->method()] ?? null)) {
+                    return $carry;
+                }
+                return \call_user_func_array([$carry, $method], $statement->args());
+            }, $b);
+        };
+    }
+
+    private static function createQueryFactoryFromArray($query)
+    {
+        $values = [];
+        PreparesFiltersArray::new($query)->prepareInto($values);
+        return function ($b) use ($values) {
+            # because we won't care about any aggregation query, we remove any aggregate declaration
+            return static::new(Arr::except($values, ['aggregate', 'agg', 'aggregate$', 'agg$']))->call($b);
+        };
     }
     // #region helper methods
 }

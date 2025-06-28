@@ -252,7 +252,13 @@ class TestCase extends FrameworkTestCase
 
         Product::query()->create([
             'code' => 'P0001',
-            'rating' => 4,
+            'rating' => 2,
+            'published' => false
+        ]);
+
+        Product::query()->create([
+            'code' => 'P0001',
+            'rating' => 1,
             'published' => false
         ]);
 
