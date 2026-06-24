@@ -13,8 +13,6 @@ declare(strict_types=1);
 
 namespace Drewlabs\Laravel\Query\Traits;
 
-use Drewlabs\Core\Helpers\UUID;
-
 use Illuminate\Database\Eloquent\Concerns\HasUuids as EloquentHasUuids;
 
 /** @deprecated v0.4.x use the implementation that is provided by the framework */

@@ -88,3 +88,10 @@
 
 
 - Added a Query facade that uses Builder class to construct query and provide a getResult() method for reading query results
+
+
+## [4.0.0] 2026-06-24
+
+- Deprecated Drewlabs\Laravel\Query\Traits\CreatesFilters trait declaration
+- Deprecated Drewlabs\Laravel\Query\Traits\HasUuids trait declaration
+- Added support for laravel 12 and 13
