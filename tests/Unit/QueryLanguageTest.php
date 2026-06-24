@@ -223,17 +223,14 @@ class QueryLanguageTest extends TestCase
         });
         $this->assertIsArray($person, 'Expect the returned person to be and array');
         $person = $manager->select(1);
-        $this->assertInstanceOf(Person::class, $person, 'Expect $person to be an instance of '.Person::class);
-        $list = $manager->select(PreparesFiltersArray::new(['where' => ['firstname', 'BENJAMIN'], 'orWhere' => ['lastname', 'AZOMEDOH']], ['firstname', 'addresses'])->call());
-        $this->assertInstanceOf(EnumerableResultInterface::class, $list, 'Expect the returned result to be an instance of '.EnumerableResultInterface::class);
+        $this->assertInstanceOf(Person::class, $person, 'Expect $person to be an instance of ' . Person::class);
+        $list = $manager->select(PreparesFiltersArray::new(['where' => ['firstname', 'BENJAMIN'], 'orWhere' => ['lastname', 'AZOMEDOH']])->call());
+        $this->assertInstanceOf(EnumerableResultInterface::class, $list, 'Expect the returned result to be an instance of ' . EnumerableResultInterface::class);
         $this->assertSame($list->count(), 2, 'Expect the total returned row to equals 2');
         $list = $manager->select(PreparesFiltersArray::new(['where' => ['firstname', 'BENJAMIN'], 'orWhere' => ['lastname', 'AZOMEDOH']])->call(), 15, ['addresses', 'profile'], 1);
         $this->assertInstanceOf(Paginator::class, $list, 'Expect the result of the query to be an instance of the paginator class');
         $this->assertSame($list->count(), 2, 'Expect the total returned row to equals 2');
-        $this->assertTrue(
-            $list->getCollection()->first()->relationLoaded('addresses'),
-            'Expect the addresses relation to be loaded'
-        );
+        $this->assertTrue($list->getCollection()->first()->relationLoaded('addresses'), 'Expect the addresses relation to be loaded');
     }
 
     public function test_update_method()

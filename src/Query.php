@@ -53,8 +53,6 @@ class Query implements \IteratorAggregate, QueryInterface
     {
         $this->filters = \call_user_func_array([$this->filters, $name], $arguments);
 
-        // Return the current object to allow method chaining on the current
-        // instance
         return $this;
     }
 
@@ -73,7 +71,7 @@ class Query implements \IteratorAggregate, QueryInterface
      *
      * @return static
      */
-    public function fromBuilder(BaseQueryBuilder $table): self
+    public function fromBuilder(BaseQueryBuilder $table)
     {
         $self = clone $this;
 
@@ -87,7 +85,7 @@ class Query implements \IteratorAggregate, QueryInterface
      *
      * @return static
      */
-    public function fromTable(string $table, ?string $as = null): self
+    public function fromTable(string $table, ?string $as = null)
     {
         return $this->from($table, $as);
     }
@@ -97,7 +95,7 @@ class Query implements \IteratorAggregate, QueryInterface
      *
      * @return static
      */
-    public function from(string $table, ?string $as = null): self
+    public function from(string $table, ?string $as = null)
     {
         $self = clone $this;
 
@@ -139,7 +137,6 @@ class Query implements \IteratorAggregate, QueryInterface
             throw new \BadMethodCallException('Query builder point to a null reference, you probably did not call fromBuilder() or fromTable() method.');
         }
 
-        // Fetch the first result of the prepareQuery method
         return $this->prepareQuery()->first();
     }
 

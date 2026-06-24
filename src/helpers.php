@@ -28,7 +28,7 @@ if (!function_exists('drewlabs_database_paginator_apply_callback')) {
      *
      * @return Paginator
      */
-    function drewlabs_database_paginator_apply_callback(Paginator $item, $callback)
+    function drewlabs_database_paginator_apply_callback(Paginator $item, callable $callback)
     {
         return new LengthAwarePaginator(
             Arr::create(Iter::filter(Iter::map(new ArrayIterator($item->items()), $callback), static function ($v) {
@@ -40,9 +40,7 @@ if (!function_exists('drewlabs_database_paginator_apply_callback')) {
             [
                 'path' => $item->path() ?? '/',
                 'fragment' => $item->fragment(),
-                'query' => [
-                    'page' => $item->currentPage(),
-                ],
+                'query' => [ 'page' => $item->currentPage() ],
             ]
         );
     }
@@ -166,7 +164,7 @@ if (!function_exists('transform_query_result')) {
      *
      * @param Paginator|array|mixed $item
      *
-     * @return Paginator|ContractsEnumerableQueryResult
+     * @return Paginator|EnumerableResultInterface
      */
     function transform_query_result($item, callable $callback)
     {

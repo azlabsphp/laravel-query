@@ -20,11 +20,18 @@ use Drewlabs\Query\Contracts\TransactionManagerInterface;
 /**
  * @mixin \Drewlabs\Laravel\Query\Contracts\ProvidesFiltersFactory
  *
- * @property TransactionManagerInterface transactions
+ * @property TransactionManagerInterface $transactions
  * @property Queryable                   queryable
  */
 trait DeleteQueryLanguage
 {
+    /**
+     * @template T
+     * 
+     * @param mixed ...$args
+     * 
+     * @return int
+     */
     public function delete(...$args)
     {
         return $this->transactions->transaction(function () use ($args) {
@@ -45,6 +52,13 @@ trait DeleteQueryLanguage
         });
     }
 
+    /**
+     * send a delete query to the backend database
+     * 
+     * @param mixed $query 
+     * @param bool $batch 
+     * @return int 
+     */
     private function deleteCommand($query, bool $batch = false)
     {
         return $batch ? $this->builderFactory()($this->queryable, $query)->delete() : array_reduce($this->select($query)->all(), static function ($carry, $instance) {

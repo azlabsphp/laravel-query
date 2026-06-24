@@ -22,11 +22,16 @@ use Drewlabs\Query\Contracts\TransactionManagerInterface;
 /**
  * @mixin \Drewlabs\Laravel\Query\Contracts\ProvidesFiltersFactory
  *
- * @property Queryable                   queryable
- * @property TransactionManagerInterface transactions
+ * @property Queryable                   $queryable
+ * @property TransactionManagerInterface $transactions
  */
 trait UpdateQueryLanguage
 {
+    /**
+     * @template T
+     * 
+     * @param mixed ...$args
+     */
     public function update(...$args)
     {
         return $this->transactions->transaction(function () use ($args) {
@@ -75,13 +80,21 @@ trait UpdateQueryLanguage
         }, 0);
     }
 
+    /**
+     * send an update query to the backend database server
+     * 
+     * @param mixed $id 
+     * @param mixed $attributes 
+     * @param array $params 
+     * @param null|Closure $callback 
+     * @return mixed 
+     */
     private function updateCommand($id, $attributes, array $params, ?\Closure $callback = null)
     {
         $callback = $callback ?? static function ($value) {
             return $value;
         };
         $attributes = $this->attributesToArray($attributes);
-        // Parse the params in order to get the method and upsert value
         $upsert = $params['upsert'] ?? true;
 
         if (isset($params['relations']) && !empty($params['relations'])) {
@@ -110,18 +123,13 @@ trait UpdateQueryLanguage
             $callback
         ) {
             $this->executeUpdateQuery(['and' => [$self->queryable->getPrimaryKey(), $key]], $values);
-            // Select the updated model
             $instance = $this->select($key);
-            // If there is a callable, call the callable, passing in updated model first and the other
-            // params later
             if ($callable) {
                 $params_ = \array_slice(\func_get_args(), 1);
                 $params_ = array_merge([$instance], $params_);
                 $result = \call_user_func($callable, ...$params_);
                 $instance = \is_object($result) ? $result : $instance;
             }
-
-            // Call the outer callback
             return $callback($instance);
         };
     }

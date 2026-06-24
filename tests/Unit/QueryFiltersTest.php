@@ -34,7 +34,7 @@ class QueryFiltersTest extends TestCase
         $queryFilters = CreateQueryFilters(['where' => ['age', 28]]);
 
         $mockObject
-            ->expects($this->once(2))
+            ->expects($this->once())
             ->method('where')
             ->with('age', 28)
             ->willReturn($mockObject);
@@ -244,6 +244,7 @@ class QueryFiltersTest extends TestCase
 
         // Use a mock to test invocation of sub queries
         $queryFilters->apply(new class($this) {
+            /** @var mixed */
             private $testObject;
 
             public function __construct(TestCase $testObject)
@@ -256,7 +257,7 @@ class QueryFiltersTest extends TestCase
                 return $closure($this);
             }
 
-            public function whereIn($column, $values)
+            public function whereIn(string $column, array $values)
             {
                 $this->testObject->assertEquals(['ratings', [3, 5]], [$column, $values]);
 

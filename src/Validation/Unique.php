@@ -13,7 +13,10 @@ declare(strict_types=1);
 
 namespace Drewlabs\Laravel\Query\Validation;
 
+use Closure;
+use BadMethodCallException;
 use Drewlabs\Laravel\Query\Query;
+use Error;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique as Fluent;
 
@@ -48,6 +51,14 @@ final class Unique
         }
     }
 
+    /**
+     * PHP magic method override
+     * 
+     * @param mixed $name 
+     * @param mixed $arguments
+     * 
+     * @return mixed 
+     */
     public function __call($name, $arguments)
     {
         return $this->proxy($this->decorated, $name, $arguments);
@@ -67,7 +78,7 @@ final class Unique
      *
      * @return static
      */
-    public static function new($table, $column = null): self
+    public static function new($table, $column = null)
     {
         if ($table instanceof Fluent) {
             $instance = new static('');
@@ -111,13 +122,24 @@ final class Unique
      *
      * @return static
      */
-    private function decorate(Fluent $o): self
+    private function decorate(Fluent $o)
     {
         $this->decorated = $o;
 
         return $this;
     }
 
+    /**
+     * redirect call to method on the provided `$object` instance
+     * 
+     * @param mixed $object 
+     * @param mixed $method 
+     * @param array $args 
+     * @param null|Closure $default 
+     * @return mixed 
+     * @throws Error 
+     * @throws BadMethodCallException 
+     */
     private function proxy($object, $method, $args = [], ?\Closure $default = null)
     {
         try {

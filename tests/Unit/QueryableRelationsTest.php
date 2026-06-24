@@ -41,7 +41,8 @@ class QueryableRelationsTest extends TestCase
             'address' => '1237 McDonald Avenue',
             'sex' => 'M',
         ]);
-        $model = QueryableRelations::new($model)->create(['member'], [
+        
+        QueryableRelations::new($model)->create(['member'], [
             'firstname' => 'David',
             'lastname' => 'P. Thompson',
             'address' => '1237 McDonald Avenue',
@@ -64,7 +65,8 @@ class QueryableRelationsTest extends TestCase
             'label' => 'AZLAB\'s Ltd.',
             'address' => '3378 West Fork Drive',
         ]);
-        $model = QueryableRelations::new($model)->create(['member'], [
+        
+        QueryableRelations::new($model)->create(['member'], [
             'label' => 'AZLAB\'s Ltd.',
             'address' => '3378 West Fork Drive',
             'member' => [
@@ -166,11 +168,7 @@ class QueryableRelationsTest extends TestCase
                 'email' => 'DavidPThompson@dayrep.com',
             ],
         ]);
-        QueryableRelations::new($model)->update(['member'], [
-            'member' => [
-                'email' => 'KatherineWSykora@dayrep.com',
-            ],
-        ], true);
+        QueryableRelations::new($model)->update(['member'], ['member' => ['email' => 'KatherineWSykora@dayrep.com' ]]);
         $member = Member::where('email', 'KatherineWSykora@dayrep.com')->get()->first();
         $this->assertNotNull($member);
         $this->assertSame($model->getKey(), $member->distinctable_id);

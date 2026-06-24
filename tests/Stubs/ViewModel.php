@@ -13,13 +13,19 @@ declare(strict_types=1);
 
 namespace Drewlabs\Laravel\Query\Tests\Stubs;
 
+
+/**
+ * @property array $inputs
+ */
 trait ViewModel
 {
+    /** @param string $key */
     public function get($key)
     {
         return $this->inputs[$key] ?? null;
     }
 
+    /** @param string $key */
     public function has($key)
     {
         return isset($this->inputs[$key]);

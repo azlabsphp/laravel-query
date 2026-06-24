@@ -47,6 +47,7 @@ final class Exists implements ValidationRule
         }
     }
 
+    /** @param mixed $value */
     public function __invoke(string $attribute, $value, \Closure $fail): void
     {
         $this->validate($attribute, $value, $fail);

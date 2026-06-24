@@ -38,7 +38,7 @@ class ServiceProvider extends BaseServiceProvider
 
     protected function bindings()
     {
-        // Solve issue related to version of MySQL older than the 5.7.7 release or MariaDB older than the 10.2.2.
-        $this->app['db']->connection()->getSchemaBuilder()->defaultStringLength(255);
+        // $this->app->version();
+        $this->app->make('db')->connection()->getSchemaBuilder()->defaultStringLength(255);
     }
 }

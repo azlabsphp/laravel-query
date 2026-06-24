@@ -13,15 +13,15 @@ declare(strict_types=1);
 
 namespace Drewlabs\Laravel\Query\Validation;
 
-use Drewlabs\Query\Http\Query;
+use Drewlabs\Query\Contracts\BuilderInterface;
 
 /**
- * @property Query $builder
+ * @property BuilderInterface $builder
  */
 trait HasBuilder
 {
     /**
-     * @notImplemented
+     * @notImplemented adding this method allow this trait to be used interchangeably with and http query driver implementation
      *
      * @return static
      */
@@ -30,6 +30,7 @@ trait HasBuilder
         return $this;
     }
 
+    /** @param string|\Closure $column */
     public function where($column, $value = null)
     {
         $this->builder = $this->builder->and($column, null !== $value ? '=' : null, $value);
@@ -37,6 +38,7 @@ trait HasBuilder
         return $this;
     }
 
+    /** @param string|\Closure $column */
     public function whereNot($column, $value = null)
     {
         $this->builder = $this->builder->and($column, null !== $value ? '<>' : null, $value);

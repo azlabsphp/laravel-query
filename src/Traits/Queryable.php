@@ -16,40 +16,34 @@ namespace Drewlabs\Laravel\Query\Traits;
 use Drewlabs\Core\Helpers\Arr;
 
 /**
- * @property array attributes
+ * @property array $attributes
+ * @property bool $timestamps
  *
  * @method array getAttributes()
  */
 trait Queryable
 {
-    // #region primary keys
     public function getPrimaryKey()
     {
         return $this->primaryKey ?? 'id';
     }
 
+    /** @param mixed $value  */
     public function setKey($value)
     {
-        $primaryKey = $this->getPrimaryKey();
-        $this->{$primaryKey} = $value;
+        $this->{$this->getPrimaryKey()} = $value;
 
         return $this;
     }
-    // #endregion primary keys
 
-    // #region Queryable columns
     public function getDeclaredColumns()
     {
-        // Get table primary key
         $primaryKey = $this->getPrimaryKey();
 
         return Arr::unique(array_merge(
             $this->getFillable() ?? [],
             $this->getGuarded() ?? [],
-            // Case the timestamps are not on the fillables, we simply add them
-            // to support query by created_at & updated_at, as it does
-            // no harm to the implementation
-            ['created_at', 'updated_at'],
+            isset($this->timestamps) && boolval($this->timestamps) === true ? ['created_at', 'updated_at'] : [],
             $primaryKey ? [$primaryKey] : []
         ));
     }
@@ -58,9 +52,7 @@ trait Queryable
     {
         return $this->guarded ?? [];
     }
-    // #endregion Queryable columns
 
-    // #region Hides attributes
     public function getHidden()
     {
         return $this->hidden;
@@ -72,9 +64,7 @@ trait Queryable
 
         return $this;
     }
-    // #endregion Hides attributes
 
-    // #region relations
     public function getRelations()
     {
         return $this->relations ?? [];
@@ -84,9 +74,7 @@ trait Queryable
     {
         return $this->relation_methods ?? [];
     }
-    // #endregion relations
 
-    // #region
     public function propertyExists(string $name): bool
     {
         return $this->attributeCastExists($name)
@@ -147,5 +135,4 @@ trait Queryable
     {
         $this->attributes[$name] = $value;
     }
-    // #region
 }

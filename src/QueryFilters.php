@@ -112,6 +112,13 @@ final class QueryFilters implements FiltersInterface
         $this->aggregations = !empty($aggregations) ? $aggregations : self::DEFAULT_AGGREGATIONS;
     }
 
+    /**
+     * PHP magic __call method override
+     * 
+     * @param string $method 
+     * @param mixed $arguments 
+     * @return mixed 
+     */
     public function __call(string $method, $arguments)
     {
         [$builder, $args] = [$arguments[0] ?? null, \array_slice($arguments, 1)];
@@ -587,6 +594,14 @@ final class QueryFilters implements FiltersInterface
         return $this->sql_Join($builder, $params, 'leftJoin');
     }
 
+    /**
+     * performs an sql join query
+     * 
+     * @param mixed $builder 
+     * @param mixed $params 
+     * @param string $method 
+     * @return mixed 
+     */
     private function sql_Join($builder, $params, $method = 'join')
     {
         $result = (new JoinQuery())->compile($params);
@@ -933,9 +948,7 @@ final class QueryFilters implements FiltersInterface
     {
         $opts = [$operator, 1, $boolean];
         $output = [];
-        /**
-         * @var callable
-         */
+        /** @var callable|null */
         $callback = null;
         foreach ($params as $value) {
             if (!\is_string($value) && \is_callable($value)) {
@@ -1087,7 +1100,7 @@ final class QueryFilters implements FiltersInterface
         };
     }
 
-    private static function createQueryFactoryFromArray($query)
+    private static function createQueryFactoryFromArray(array $query)
     {
         $values = [];
         PreparesFiltersArray::new($query)->prepareInto($values);

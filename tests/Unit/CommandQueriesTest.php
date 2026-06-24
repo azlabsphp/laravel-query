@@ -29,6 +29,7 @@ use function Drewlabs\Laravel\Query\Proxy\useActionQueryCommand;
 use Drewlabs\Laravel\Query\Tests\Stubs\Person;
 
 use Drewlabs\Laravel\Query\Tests\TestCase;
+use Drewlabs\Query\Contracts\Queryable;
 
 class CommandQueriesTest extends TestCase
 {
@@ -152,6 +153,14 @@ class CommandQueriesTest extends TestCase
         $this->assertSame($result->value()->toArray(), [2]);
     }
 
+    /**
+     * @param mixed $firstname 
+     * @param mixed $lastname 
+     * @param mixed $phonenumber 
+     * @param mixed $age 
+     * @param string $sex 
+     * @return Queryable|mixed 
+     */
     private function createPerson($firstname, $lastname, $phonenumber, $age, $sex = 'F')
     {
         $p = new \stdClass();

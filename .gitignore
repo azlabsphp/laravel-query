@@ -6,3 +6,5 @@
 /assets/
 Todos.md
 .metals/
+.phpunit.cache/
+composer.lock

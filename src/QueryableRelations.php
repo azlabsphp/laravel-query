@@ -51,7 +51,7 @@ class QueryableRelations
      */
     public static function new($model)
     {
-        return new self($model);
+        return new static($model);
     }
 
     /**
@@ -80,7 +80,7 @@ class QueryableRelations
     }
 
     /**
-     * Update model child relations based on user provided values.
+     * update model child relations based on user provided values.
      *
      * @return void
      */
@@ -89,13 +89,12 @@ class QueryableRelations
         if (empty($relations)) {
             return;
         }
-        // list($relations, $composed) = $this->groupRelations($relations);
+
         foreach ($relations as $relation) {
             $exists = method_exists($this->queryable, $relation) && !empty($attributes[$relation] ?? []);
             if (!$exists) {
                 continue;
             }
-            //  $this->resolveRelations($composed, $relation)
             $this->updateRelation($this->queryable->$relation(), $attributes[$relation]);
         }
     }
@@ -237,10 +236,17 @@ class QueryableRelations
         }
     }
 
-    private function createMany($instance, array $attributes, array $relations)
+    /**
+     * insert many model relations.
+     *
+     * @param Relation $model
+     *
+     * @return void
+     */
+    private function createMany($model, array $attributes, array $relations)
     {
         foreach ($attributes as $current) {
-            $result = Arr::isnotassoclist($current) ? static::updateOrCreate($this->getInstanceCopy($instance), $current) : $this->getInstanceCopy($instance)->create(...static::formatCreateAttributes($instance, $current));
+            $result = Arr::isnotassoclist($current) ? static::updateOrCreate($this->getInstanceCopy($model), $current) : $this->getInstanceCopy($model)->create(...static::formatCreateAttributes($model, $current));
             // Recursively execute the create implementation relations attached to the model
             self::new($result)->create($relations, $current);
         }
@@ -298,7 +304,8 @@ class QueryableRelations
     /**
      * Get relations that has the $relation value as parent relation.
      *
-     * @param mixed $relation
+     * @param string[] $relations
+     * @param string $relation
      *
      * @return array
      */
@@ -314,6 +321,8 @@ class QueryableRelations
     /**
      * Find all values matching user provided callback.
      *
+     * @template T
+     * 
      * @param Closure(T $value, $key):bool $callback
      * @param Closure(T $value, $key):mixed $callback
      *

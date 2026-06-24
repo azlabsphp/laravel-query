@@ -31,6 +31,11 @@ use Illuminate\Database\Eloquent\Model;
  */
 trait SelectQueryLanguage
 {
+    /**
+     * @template T
+     * 
+     * @param mixed ...$args
+     */
     public function select(...$args)
     {
         return $this->overload($args, [
@@ -142,6 +147,7 @@ trait SelectQueryLanguage
         ]);
     }
 
+    /** @param mixed ...$args */
     public function selectFirst(...$args)
     {
         return $this->overload(
@@ -189,20 +195,14 @@ trait SelectQueryLanguage
             $callback = $callback ?? static function ($value) {
                 return $value;
             };
-            // We initialize filtering attributes for optimization instead of querying them on each
-            // model instance returned after the query
             $model_relations = $this->queryable->getDeclaredRelations();
             $declared = $this->queryable->getDeclaredColumns();
             $primaryKey = $this->queryable->getPrimaryKey();
             $exceptions = $this->queryable->getHidden();
             [$c, $relations] = Columns::new($columns)->tuple($declared, $model_relations);
-            // We prepare the query builder object
             $builder = $this->builderFactory()($this->queryable, $query);
 
-            // Add relationship queries to the builder if the relationship array is not empty
             $builder = !empty($relations) ? $builder->with($relations) : $builder;
-
-            // Create set columns that must not be included in the output result
             $excepts = array_unique((!empty($c) && !\in_array('*', $c, true)) ? array_merge($exceptions, array_diff(Arr::filter($declared, static function ($column) use ($primaryKey) {
                 return $column !== $primaryKey;
             }), [...$c, '*'])) : $exceptions);

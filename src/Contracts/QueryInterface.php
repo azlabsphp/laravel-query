@@ -16,7 +16,7 @@ namespace Drewlabs\Laravel\Query\Contracts;
 interface QueryInterface
 {
     /**
-     * Get query results as array.
+     * get query results as array.
      *
      * @throws \BadMethodCallException
      */

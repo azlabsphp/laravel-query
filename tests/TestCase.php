@@ -23,7 +23,7 @@ use Illuminate\Database\Connectors\ConnectionFactory;
 use Illuminate\Database\DatabaseManager;
 use Illuminate\Database\Schema\Blueprint;
 use PHPUnit\Framework\TestCase as FrameworkTestCase;
-
+use PHPUnit\Framework\Attributes\Test;
 class TestCase extends FrameworkTestCase
 {
     protected function setUp(): void
@@ -292,9 +292,7 @@ class TestCase extends FrameworkTestCase
         });
     }
 
-    /**
-     * @test
-     */
+    #[Test]
     public function init()
     {
         $this->assertTrue(true);
@@ -385,6 +383,7 @@ class TestCase extends FrameworkTestCase
             'collation' => 'utf8_unicode_ci',
             'prefix' => '',
         ]);
+
         $db->bootEloquent();
         $db->setAsGlobal();
     }

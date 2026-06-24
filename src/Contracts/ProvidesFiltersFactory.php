@@ -13,21 +13,23 @@ declare(strict_types=1);
 
 namespace Drewlabs\Laravel\Query\Contracts;
 
+use Drewlabs\Query\Contracts\FiltersBuilderInterface;
+
 interface ProvidesFiltersFactory
 {
     /**
      * Set the filters factory instance on the current instance.
      *
-     * @param Closure $factory
+     * @param \Closure $factory
      *
      * @return self
      */
     public function setFiltersFactory(\Closure $factory);
 
     /**
-     * Return the filters factory instance.
+     * return the filters factory instance.
      *
-     * @return Closure(mixed|array $queries): EloquentQueryFilters
+     * @return \Closure(mixed|array $queries): FiltersBuilderInterface
      */
     public function getFiltersFactory();
 }

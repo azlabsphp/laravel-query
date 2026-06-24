@@ -26,11 +26,16 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @mixin \Drewlabs\Laravel\Query\Contracts\ProvidesFiltersFactory
  *
- * @property TransactionManagerInterface transactions
- * @property Queryable|Model             queryable
+ * @property TransactionManagerInterface $transactions
+ * @property Queryable|Model             $queryable
  */
 trait CreateQueryLanguage
 {
+    /**
+     * @template T
+     * 
+     * @param mixed ...$args
+     */
     public function create(...$args)
     {
         return $this->transactions->transaction(function () use ($args) {
@@ -103,20 +108,18 @@ trait CreateQueryLanguage
     {
         for ($i = 0; $i < \count($relations); ++$i) {
             $value = $relations[$i];
-            // If attributes does not contains entry with the current relation name
-            // there is not need to process further therefore we simply continues
+            
             if (!isset($attributes[$value]) || empty($attributes[$value])) {
                 continue;
             }
             $result = $instance->$value();
-            // We escapes relations that are not belongs to relations
+            // we escapes relations that are not belongs to relations
             if (!($result instanceof \Illuminate\Database\Eloquent\Relations\BelongsTo)) {
                 continue;
             }
             $parent = $result->getRelated();
             $foreignKey = $result->getForeignKeyName();
-            // We continue the loop if the Belongs to method call does not return
-            // a valid belongs to class for the related model
+
             if ((null === $parent) || (null === $foreignKey)) {
                 continue;
             }
@@ -131,11 +134,9 @@ trait CreateQueryLanguage
             $createdInstance = DMLManager($parent)->create($attributes[$value], [
                 'relations' => $embededRelations,
             ]);
-            // Once the create query of the parent model is executed, we add the foreign
-            // key to the current instance attributes
+            
             $attributes[$foreignKey] = $createdInstance->getKey();
-            // Remove the relation from the list of relations to create after model
-            // gets created
+            
             unset($relations[$i], $attributes[$value]);
         }
 

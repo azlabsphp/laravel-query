@@ -13,15 +13,13 @@ declare(strict_types=1);
 
 namespace Drewlabs\Laravel\Query\Traits;
 
-use const E_USER_WARNING;
-
 use Illuminate\Contracts\Routing\UrlRoutable;
 
 trait URLRoutableAware
 {
     public function getRouteKey()
     {
-        if ($instance = $this->getInstance()) {
+        if ($instance = $this->getRoutable()) {
             return $instance->getRouteKey();
         }
 
@@ -30,7 +28,7 @@ trait URLRoutableAware
 
     public function getRouteKeyName()
     {
-        if ($instance = $this->getInstance()) {
+        if ($instance = $this->getRoutable()) {
             return $instance->getRouteKeyName();
         }
 
@@ -39,39 +37,53 @@ trait URLRoutableAware
 
     /**
      * {@inheritDoc}
+     * 
+     * @param mixed $value
      *
-     * @return self|null
+     * @return static|null
      */
     public function resolveRouteBinding($value, $field = null)
     {
-        if ($instance = $this->getInstance()) {
+        if ($instance = $this->getRoutable()) {
             $value = $instance->resolveRouteBinding($value, $field);
 
-            return $value ? new self($value) : $value;
+            return $value ? new static($value) : $value;
         }
 
         return null;
     }
 
+    /**
+     * retrieve child model for a bound value.
+     * 
+     * @param mixed $childType 
+     * @param mixed $value 
+     * @param mixed $field 
+     * 
+     * @return URLRoutableAware|null 
+     */
     public function resolveChildRouteBinding($childType, $value, $field)
     {
-        if ($instance = $this->getInstance()) {
-            $value = $instance->resolveChildRouteBinding($childType, $value, $field);
-
-            return $value ? new self($value) : $value;
+        if ($routable = $this->getRoutable()) {
+            $value = $routable->resolveChildRouteBinding($childType, $value, $field);
+            return $value ? new static($value) : $value;
         }
 
         return null;
     }
 
-    protected function getInstance()
+    protected function getRoutable()
     {
-        try {
-            return (null === $value = $this->getModel()) || !($value instanceof UrlRoutable) ? null : $value;
-        } catch (\Exception $e) {
-            trigger_error(sprintf('%s - %s', $e->getMessage(), 'Composed class required getModel() definition'), E_USER_WARNING);
 
+        if (!method_exists($this, 'getModel')) {
             return null;
         }
+
+        $model = $this->getModel();
+        if ($model instanceof UrlRoutable) {
+            return $model;
+        }
+
+        return null;
     }
 }

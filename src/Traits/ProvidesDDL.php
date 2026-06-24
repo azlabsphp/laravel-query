@@ -15,6 +15,8 @@ namespace Drewlabs\Laravel\Query\Traits;
 
 use Illuminate\Database\Eloquent\Model;
 
+use Illuminate\Database\QueryException;
+
 trait ProvidesDDL
 {
     /**
@@ -82,6 +84,12 @@ trait ProvidesDDL
      */
     public static function newInstanceWithoutConstructor()
     {
-        return (new \ReflectionClass(__CLASS__))->newInstanceWithoutConstructor();
+        $model =  (new \ReflectionClass(__CLASS__))->newInstanceWithoutConstructor();
+
+        if (!($model instanceof Model)) {
+            throw new \RuntimeException('ProvidesDDL trait must be use on an eloquent class declaration');
+        }
+
+        return $model;
     }
 }

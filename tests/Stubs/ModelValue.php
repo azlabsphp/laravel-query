@@ -19,6 +19,7 @@ class ModelValue
 {
     use URLRoutableAware;
 
+    /** @var mixed */
     private $model;
 
     public function __construct($model = null)

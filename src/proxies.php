@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Drewlabs\Laravel\Query\Proxy;
 
-use Closure;
 use Drewlabs\Contracts\Support\Actions\Action as AbstractAction;
 use Drewlabs\Contracts\Support\Actions\ActionPayload as AbstractActionPayload;
 use Drewlabs\Contracts\Support\Actions\ActionResult as AbstractActionResult;
@@ -304,9 +303,8 @@ function useActionQueryCommand($instance, ?\Closure $overrides = null)
     $instance = \is_string($instance) ? new QueryLanguage($instance) : $instance;
 
     return new class($instance, $overrides) implements CommandInterface {
-        /**
-         * @var DMLProvider
-         */
+
+        /** @var mixed  */
         private $instance;
 
         /**
@@ -325,14 +323,12 @@ function useActionQueryCommand($instance, ?\Closure $overrides = null)
 
         public function __invoke(AbstractAction $action, ?\Closure $callback = null)
         {
-            // We allow user to provide a custom handler that overrides the
-            // default action handler for the command
             if ($this->overrides) {
                 return ActionResult(($this->overrides)($action, $callback));
             }
             $payload = $action->payload();
             $payload = $payload instanceof AbstractActionPayload ? $payload->toArray() : (\is_array($payload) ? $payload : []);
-            // Handle switch statements
+
             switch (strtoupper($action->type())) {
                 case 'CREATE':
                 case 'DB_CREATE_ACTION':
@@ -362,7 +358,7 @@ function useActionQueryCommand($instance, ?\Closure $overrides = null)
         }
 
         /**
-         * Calls the command with action parameters.
+         * calls the command with action parameters.
          *
          * @return AbstractActionResult
          */
