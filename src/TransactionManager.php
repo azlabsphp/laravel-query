@@ -45,9 +45,15 @@ class TransactionManager implements TransactionManagerInterface
             return $this->afterTransaction(static function () use ($callbackResult) {
                 return $callbackResult;
             });
-        } catch (BaseQueryException $e) {
+        } catch (\Exception $e) {
             return $this->afterCancelTransaction(static function () use ($e) {
-                throw new QueryException($e->getMessage(), $e->getCode(), $e);
+
+                // we cast eloquent query exception class into query exception defined in the current package if it was thrown
+                if ($e instanceof BaseQueryException) {
+                    throw new QueryException($e->getMessage(), $e->getCode(), $e);
+                }
+                
+                throw $e;
             });
         }
     }
