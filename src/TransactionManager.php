@@ -16,6 +16,7 @@ namespace Drewlabs\Laravel\Query;
 use Drewlabs\Query\Contracts\TransactionClientInterface;
 use Drewlabs\Query\Contracts\TransactionManagerInterface;
 use Drewlabs\Query\Exceptions\QueryException;
+use Illuminate\Database\QueryException as BaseQueryException;
 
 class TransactionManager implements TransactionManagerInterface
 {
@@ -44,7 +45,7 @@ class TransactionManager implements TransactionManagerInterface
             return $this->afterTransaction(static function () use ($callbackResult) {
                 return $callbackResult;
             });
-        } catch (\Exception $e) {
+        } catch (BaseQueryException $e) {
             return $this->afterCancelTransaction(static function () use ($e) {
                 throw new QueryException($e->getMessage(), $e->getCode(), $e);
             });
