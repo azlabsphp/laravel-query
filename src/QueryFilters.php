@@ -17,11 +17,11 @@ use Drewlabs\Core\Helpers\Arr;
 use Drewlabs\Query\ConditionQuery;
 use Drewlabs\Query\Contracts\FiltersInterface;
 use Drewlabs\Query\JoinQuery;
-use Drewlabs\Query\PreparesFiltersArray;
-use Drewlabs\Query\QueryStatement;
+use Drewlabs\Query\Sanitizers\ArraySanitizer;
 use Drewlabs\Support\Traits\MethodProxy;
 use Illuminate\Contracts\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\Builder;
+use Drewlabs\Query\AST\Builder as ASTBuilder;
 
 /**
  * @internal
@@ -43,7 +43,7 @@ final class QueryFilters implements FiltersInterface
         'addSum',
     ];
 
-    /** @var array<string,string> */
+    /** @deprecated @var array<string,string> */
     public const ELOQUENT_QUERY_PROXIES = [
         'and' => 'where',
         'where' => 'where',
@@ -762,7 +762,6 @@ final class QueryFilters implements FiltersInterface
      */
     private function count($builder, $params)
     {
-        // Return the builder instance case the params is empty
         if (empty($params)) {
             return $builder;
         }
@@ -780,7 +779,7 @@ final class QueryFilters implements FiltersInterface
 
             $as = $as ?? sprintf('count_%s', $column);
 
-            if (is_array($relation) || (is_string($relation) && \mb_strpos($relation, '->') !== false)) {
+            if (is_array($relation) || (is_string($relation) && (bool)preg_match('/->|\(|\)/', $relation))) {
                 return $this->addAggregate($builder, [$current], 'COUNT');
             }
 
@@ -818,7 +817,7 @@ final class QueryFilters implements FiltersInterface
 
             $as = $as ?? sprintf('min_%s', $column);
 
-            if (is_array($relation) || (is_string($relation) && \mb_strpos($relation, '->') !== false)) {
+            if (is_array($relation) || (is_string($relation) && (bool)preg_match('/->|\(|\)/', $relation))) {
                 return $this->addAggregate($builder, [$current], 'MIN');
             }
 
@@ -856,7 +855,7 @@ final class QueryFilters implements FiltersInterface
 
             $as = $as ?? sprintf('max_%s', $column);
 
-            if (is_array($relation) || (is_string($relation) && \mb_strpos($relation, '->') !== false)) {
+            if (is_array($relation) || (is_string($relation) && (bool)preg_match('/->|\(|\)/', $relation))) {
                 return $this->addAggregate($builder, [$current], 'MAX');
             }
 
@@ -894,7 +893,7 @@ final class QueryFilters implements FiltersInterface
 
             $as = $as ?? sprintf('sum_%s', $column);
 
-            if (is_array($relation) || (is_string($relation) && \mb_strpos($relation, '->') !== false)) {
+            if (is_array($relation) || (is_string($relation) && (bool)preg_match('/->|\(|\)/', $relation))) {
                 return $this->addAggregate($builder, [$current], 'SUM');
             }
 
@@ -932,7 +931,7 @@ final class QueryFilters implements FiltersInterface
 
             $as = $as ?? sprintf('avg_%s', $column);
 
-            if (is_array($relation) || (is_string($relation) && \mb_strpos($relation, '->') !== false)) {
+            if (is_array($relation) || (is_string($relation) && (bool)preg_match('/->|\(|\)/', $relation))) {
                 return $this->addAggregate($builder, [$current], 'AVG');
             }
 
@@ -941,9 +940,7 @@ final class QueryFilters implements FiltersInterface
             ]);
         }, $builder);
     }
-    // #endregion Aggregation
 
-    // #region helper methods
     private function buildNestedQueryParams(array $params, $boolean = 'and', $operator = '>=')
     {
         $opts = [$operator, 1, $boolean];
@@ -1031,9 +1028,11 @@ final class QueryFilters implements FiltersInterface
      */
     private function addAggregate($builder, $p, string $method = 'COUNT')
     {
+
         if (empty($p)) {
             return $builder;
         }
+
         $p = array_map(static function ($value) {
             return \is_array($value) ? array_pad($value, 3, null) : [$value, null, null];
         }, !\is_array($p) ? [$p] : $p);
@@ -1085,29 +1084,20 @@ final class QueryFilters implements FiltersInterface
 
     private static function createQueryFactoryFromExpression(string $query)
     {
-        $statements = array_reduce(explode('->', $query), static function ($stmts, $val) {
-            $stmts[] = QueryStatement::fromString($val);
-            return $stmts;
-        }, []);
+        $builder = new ASTBuilder;
+        $expression =  $builder->build($query);
 
-        return function ($b) use ($statements) {
-            return array_reduce($statements, static function ($carry, QueryStatement $statement) {
-                if (null === ($method = static::ELOQUENT_QUERY_PROXIES[$statement->method()] ?? null)) {
-                    return $carry;
-                }
-                return \call_user_func_array([$carry, $method], $statement->args());
-            }, $b);
+        return function ($b) use ($expression) {
+            $sanitizer = new ArraySanitizer;
+            return new static(Arr::except($sanitizer->apply($expression->toDict()), ['aggregate', 'agg', 'aggregate$', 'agg$']))->call($b);
         };
     }
 
     private static function createQueryFactoryFromArray(array $query)
     {
-        $values = [];
-        PreparesFiltersArray::new($query)->prepareInto($values);
-        return function ($b) use ($values) {
-            # because we won't care about any aggregation query, we remove any aggregate declaration
-            return static::new(Arr::except($values, ['aggregate', 'agg', 'aggregate$', 'agg$']))->call($b);
+        return function ($b) use ($query) {
+            $sanitizer = new ArraySanitizer;
+            return static::new(Arr::except($sanitizer->apply($query), ['aggregate', 'agg', 'aggregate$', 'agg$']))->call($b);
         };
     }
-    // #region helper methods
 }

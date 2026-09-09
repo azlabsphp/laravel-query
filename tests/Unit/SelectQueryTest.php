@@ -17,22 +17,24 @@ use function Drewlabs\Laravel\Query\Proxy\DMLManager;
 
 use Drewlabs\Laravel\Query\Tests\Stubs\Person;
 use Drewlabs\Laravel\Query\Tests\TestCase;
-use Drewlabs\Query\PreparesFiltersArray;
+use Drewlabs\Query\Sanitizers\ArraySanitizer;
 
 class SelectQueryTest extends TestCase
 {
     public function testSelectAllWithRelation()
     {
         $manager = DMLManager(Person::class);
+        $sanitizer = new ArraySanitizer;
 
-        $result = $manager->select(PreparesFiltersArray::new(['where' => ['firstname', 'BENJAMIN']])->call(), ['*', 'addresses']);
+        $result = $manager->select($sanitizer->apply(['where' => ['firstname', 'BENJAMIN']]), ['*', 'addresses']);
         $this->assertTrue($result->first()->relationLoaded('addresses'), 'Expect the addresses relation to be loaded');
     }
 
     public function testSelectColumnsWithRelations()
     {
         $manager = DMLManager(Person::class);
-        $result = $manager->select(PreparesFiltersArray::new(['where' => ['firstname', 'BENJAMIN']])->call(), ['firstname', 'lastname', 'addresses', 'profile']);
+        $sanitizer = new ArraySanitizer;
+        $result = $manager->select($sanitizer->apply(['where' => ['firstname', 'BENJAMIN']]), ['firstname', 'lastname', 'addresses', 'profile']);
         $this->assertTrue($result->first()->relationLoaded('addresses'), 'Expect the addresses relation to be loaded');
         $array = $result->first()->toArray();
         $this->assertTrue('BENJAMIN' === $array['firstname'], 'Expect first name of the selected item to be BENJAMIN');
@@ -42,7 +44,8 @@ class SelectQueryTest extends TestCase
     public function testSelectMissingColumns()
     {
         $manager = DMLManager(Person::class);
-        $result = $manager->select(PreparesFiltersArray::new(['where' => ['firstname', 'BENJAMIN']])->call(), ['firstname', 'lastname']);
+        $sanitizer = new ArraySanitizer;
+        $result = $manager->select($sanitizer->apply(['where' => ['firstname', 'BENJAMIN']]), ['firstname', 'lastname']);
         $array = $result->first()->toArray();
         $this->assertNull($array['phonenumber'] ?? null, 'Expect the phonenumber attribute to not be loaded');
     }
@@ -50,7 +53,9 @@ class SelectQueryTest extends TestCase
     public function test_select_one_method_parameters()
     {
         $manager = DMLManager(Person::class);
-        $result = $manager->selectFirst(PreparesFiltersArray::new(['where' => ['firstname', 'BENJAMIN']])->call(), ['*', 'addresses']);
+        $sanitizer = new ArraySanitizer;
+        
+        $result = $manager->selectFirst($sanitizer->apply(['where' => ['firstname', 'BENJAMIN']]), ['*', 'addresses']);
         $this->assertTrue($result->relationLoaded('addresses'), 'Expect the addresses relation to be loaded');
         $this->assertInstanceOf(Person::class, $result);
         $result = $manager->selectFirst(

@@ -24,7 +24,8 @@ use Drewlabs\Query\Contracts\EnumerableResultInterface;
 use Drewlabs\Query\Contracts\Queryable;
 use Drewlabs\Query\Contracts\QueryLanguageInterface;
 use Drewlabs\Query\Exceptions\BadQueryActionException;
-use Drewlabs\Query\PreparesFiltersArray;
+use Drewlabs\Query\Sanitizers\ArraySanitizer;
+use Drewlabs\Query\Sanitizers\Sanitizer;
 
 use function Drewlabs\Support\Proxy\Action;
 
@@ -211,7 +212,8 @@ function CreateQueryAction(...$payload)
  */
 function CreateQueryFilters(array $values)
 {
-    return QueryFilters::new(PreparesFiltersArray::new($values)->call());
+    $sanitizer = new ArraySanitizer;
+    return QueryFilters::new($sanitizer->apply($values));
 }
 
 /**

@@ -22,7 +22,7 @@ use Drewlabs\Laravel\Query\Tests\Stubs\Profil;
 use Drewlabs\Laravel\Query\Tests\TestCase;
 use Drewlabs\Query\AggregationMethods;
 use Drewlabs\Query\Contracts\EnumerableResultInterface;
-use Drewlabs\Query\PreparesFiltersArray;
+use Drewlabs\Query\Sanitizers\ArraySanitizer;
 use Illuminate\Contracts\Pagination\Paginator;
 
 use Illuminate\Support\Collection;
@@ -217,6 +217,7 @@ class QueryLanguageTest extends TestCase
 
     public function test_select_method()
     {
+        $sanitizer = new ArraySanitizer;
         $manager = DMLManager(Person::class);
         $person = $manager->select('1', ['*'], static function ($model) {
             return $model->toArray();
@@ -224,10 +225,10 @@ class QueryLanguageTest extends TestCase
         $this->assertIsArray($person, 'Expect the returned person to be and array');
         $person = $manager->select(1);
         $this->assertInstanceOf(Person::class, $person, 'Expect $person to be an instance of ' . Person::class);
-        $list = $manager->select(PreparesFiltersArray::new(['where' => ['firstname', 'BENJAMIN'], 'orWhere' => ['lastname', 'AZOMEDOH']])->call());
+        $list = $manager->select($sanitizer->apply(['where' => ['firstname', 'BENJAMIN'], 'orWhere' => ['lastname', 'AZOMEDOH']]));
         $this->assertInstanceOf(EnumerableResultInterface::class, $list, 'Expect the returned result to be an instance of ' . EnumerableResultInterface::class);
         $this->assertSame($list->count(), 2, 'Expect the total returned row to equals 2');
-        $list = $manager->select(PreparesFiltersArray::new(['where' => ['firstname', 'BENJAMIN'], 'orWhere' => ['lastname', 'AZOMEDOH']])->call(), 15, ['addresses', 'profile'], 1);
+        $list = $manager->select($sanitizer->apply(['where' => ['firstname', 'BENJAMIN'], 'orWhere' => ['lastname', 'AZOMEDOH']]), 15, ['addresses', 'profile'], 1);
         $this->assertInstanceOf(Paginator::class, $list, 'Expect the result of the query to be an instance of the paginator class');
         $this->assertSame($list->count(), 2, 'Expect the total returned row to equals 2');
         $this->assertTrue($list->getCollection()->first()->relationLoaded('addresses'), 'Expect the addresses relation to be loaded');
@@ -236,6 +237,7 @@ class QueryLanguageTest extends TestCase
     public function test_update_method()
     {
         $manager = DMLManager(Person::class);
+        $sanitizer = new ArraySanitizer;
 
         // Update by ID
         $person = $manager->update(1, ['firstname' => 'BENBOSS']);
@@ -248,22 +250,23 @@ class QueryLanguageTest extends TestCase
         $this->assertTrue('AZANDREW' === $person->firstname, 'Expect the modified person firstname to equal AZANDREW');
 
         // Update using query without mass update
-        $count = $manager->update(PreparesFiltersArray::new(['where' => ['firstname', 'SIDOINE']])->call(), ['firstname' => 'AZANDREW']);
+        $count = $manager->update($sanitizer->apply(['where' => ['firstname', 'SIDOINE']]), ['firstname' => 'AZANDREW']);
         $this->assertTrue(1 === $count, 'Expect the total updated items to equals 1');
-        $list = $manager->select(PreparesFiltersArray::new(['where' => ['firstname', 'SIDOINE']])->call());
+        $list = $manager->select($sanitizer->apply(['where' => ['firstname', 'SIDOINE']]));
         $this->assertTrue(0 === $list->count(), 'Expect Not to find person with firstname === SIDOINE in the database');
     }
 
     public function test_delete_methods()
     {
         $manager = DMLManager(Person::class);
+        $sanitizer = new ArraySanitizer;
         // Update by ID
         $result = $manager->delete(1);
         $this->assertTrue($result, 'Expect the delete operation to return TRUE');
         $this->assertNull($manager->select(1), 'Expect database to not have person with id == 1');
 
         // Update by array query
-        $result = $manager->delete(PreparesFiltersArray::new(['where' => ['firstname', 'SIDOINE']])->call(), true);
+        $result = $manager->delete($sanitizer->apply(['where' => ['firstname', 'SIDOINE']]), true);
         $this->assertTrue(1 === $result, 'Expect the delete operation to return TRUE');
         $this->assertSame(1, $manager->select()->count(), 'Expect the database person table to contains only 1 item');
     }
@@ -359,9 +362,9 @@ class QueryLanguageTest extends TestCase
             ],
             ['relations' => ['profile']]
         );
-        $result = DMLManager(Person::class)->select(CreateQueryFilters(['and' => [['firstname', 'JOHN'], ['lastname', 'DUMELO']], 'orNotExists' => ['column' => 'profile', 'match' => 'where(url,https://i.picsum.photos/id/733/200/300.jpg)']]))->first();
+        $result = DMLManager(Person::class)->select(CreateQueryFilters(['and' => [['firstname', 'JOHN'], ['lastname', 'DUMELO']], 'orNotExists' => ['column' => 'profile', 'match' => 'where(url,"https://i.picsum.photos/id/733/200/300.jpg")']]))->first();
         $this->assertNotNull($result);
-        $result = DMLManager(Person::class)->select(CreateQueryFilters(['and' => [['firstname', 'JOHN'], ['lastname', 'DUMELO']], 'orExists' => ['column' => 'profile', 'match' => 'where(url,https://i.picsum.photos/id/733/200/300.jpg)']]))->first();
+        $result = DMLManager(Person::class)->select(CreateQueryFilters(['and' => [['firstname', 'JOHN'], ['lastname', 'DUMELO']], 'orExists' => ['column' => 'profile', 'match' => 'where(url,"https://i.picsum.photos/id/733/200/300.jpg")']]))->first();
         $this->assertNotNull($result);
     }
 }
