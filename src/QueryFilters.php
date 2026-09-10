@@ -981,9 +981,19 @@ final class QueryFilters implements FiltersInterface
         if (\is_array($query)) {
             $items = array_values($query);
 
-            return 1 === \count($items) && \is_callable($items[0]) ? $builder->orWhere(function ($q) use ($items) {
-                return \call_user_func_array($items[0], [$this, $q]);
-            }) : $builder->orWhere(...$items);
+            if (array_filter($items, 'is_scalar') === $items) {
+                return $builder->orWhere(...$items);
+            }
+
+            foreach ($items as $fn) {
+                if (!is_callable($fn)) {
+                    continue;
+                }
+
+                $builder = $builder->orWhere(function ($q) use ($fn) {
+                    return \call_user_func_array($fn, [$this, $q]);
+                });
+            }
         }
         if (\is_callable($query)) {
             return $builder->orWhere(function ($q) use ($query) {
@@ -1007,13 +1017,26 @@ final class QueryFilters implements FiltersInterface
         if (\is_array($query)) {
             $items = array_values($query);
 
-            return 1 === \count($items) && \is_callable($items[0]) ? $builder->where(function ($q) use ($items) {
-                return \call_user_func_array($items[0], [$this, $q]);
-            }) : $builder->where(...$items);
+            if (array_filter($items, 'is_scalar') === $items) {
+                return $builder->where(...$items);
+            }
+
+            foreach ($items as $fn) {
+                if (!is_callable($fn)) {
+                    continue;
+                }
+
+                $builder = $builder->where(function ($q) use ($fn) {
+                    return \call_user_func_array($fn, [$this, $q]);
+                });
+            }
+
+            return $builder;
         }
+
         if (\is_callable($query)) {
             return $builder->where(function ($q) use ($query) {
-                return $query($this, $q);
+                return \call_user_func_array($query, [$this, $q]);
             });
         }
 
