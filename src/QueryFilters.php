@@ -1021,13 +1021,32 @@ final class QueryFilters implements FiltersInterface
                 return $builder->where(...$items);
             }
 
-            foreach ($items as $fn) {
-                if (!is_callable($fn)) {
+            $count = count($items);
+            if ($count === 0) {
+                return $builder;
+            }
+
+            $isstring = is_string($items[0]);
+            if ($count === 2 &&  $isstring && is_null($items[1])) {
+                return $builder->whereNull($items[0]);
+            }
+
+            if ($count === 3 && $isstring && is_null($items[2])) {
+                return $builder->whereNull($items[0], 'and', strval($items[1]) !== '=');
+            }
+
+            foreach ($items as $current) {
+                if (is_string($current)) {
+                    $builder = $builder->whereNotNull($current);
                     continue;
                 }
 
-                $builder = $builder->where(function ($q) use ($fn) {
-                    return \call_user_func_array($fn, [$this, $q]);
+                if (!is_callable($current)) {
+                    continue;
+                }
+
+                $builder = $builder->where(function ($q) use ($current) {
+                    return \call_user_func_array($current, [$this, $q]);
                 });
             }
 

@@ -15,8 +15,11 @@ namespace Drewlabs\Laravel\Query\Tests\Unit;
 
 use function Drewlabs\Laravel\Query\Proxy\CreateQueryFilters;
 
+use Drewlabs\Laravel\Query\Tests\Stubs\Person;
 use Drewlabs\Query\Builder;
+use Illuminate\Database\Capsule\Manager;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 
 use PHPUnit\Framework\TestCase;
@@ -25,6 +28,7 @@ class QueryFiltersTest extends TestCase
 {
     use WithConsecutiveCalls;
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_filters_apply_call_builder_where_method_with_provided_parameters()
     {
         /**
@@ -42,6 +46,7 @@ class QueryFiltersTest extends TestCase
         $this->assertSame($mockObject, $queryFilters->apply($mockObject));
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_filters_call_invoke_builder_twice_whith_2_queries_as_arguments()
     {
         /**
@@ -59,6 +64,7 @@ class QueryFiltersTest extends TestCase
         $this->assertSame($mockObject, $queryFilters->apply($mockObject));
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_query_filters_aggregate_call_with_with_aggregate_if_aggregation_method_is_a_two_parameter_array()
     {
         /**
@@ -80,6 +86,7 @@ class QueryFiltersTest extends TestCase
         $this->assertSame($mockObject, $queryFilters->apply($mockObject));
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_query_filters_aggregate_min_call_add_select_if_aggregation_method_is_called_string_as_column_or_list_of_string_as_column()
     {
         /**
@@ -116,6 +123,7 @@ class QueryFiltersTest extends TestCase
         $this->assertSame($mockObject, $queryFilters->apply($mockObject));
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_query_filters_aggregate_max_call_add_select_if_aggregation_method_is_called_string_as_column_or_list_of_string_as_column()
     {
         /**
@@ -152,6 +160,7 @@ class QueryFiltersTest extends TestCase
         $this->assertSame($mockObject, $queryFilters->apply($mockObject));
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_query_filters_aggregate_avg_call_add_select_if_aggregation_method_is_called_string_as_column_or_list_of_string_as_column()
     {
         /**
@@ -188,6 +197,7 @@ class QueryFiltersTest extends TestCase
         $this->assertSame($mockObject, $queryFilters->apply($mockObject));
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_query_filters_aggregate_sum_call_add_select_if_aggregation_method_is_called_string_as_column_or_list_of_string_as_column()
     {
         /**
@@ -224,6 +234,7 @@ class QueryFiltersTest extends TestCase
         $this->assertSame($mockObject, $queryFilters->apply($mockObject));
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_filters_call_invoke_builder_with_closure()
     {
         /**
@@ -233,10 +244,8 @@ class QueryFiltersTest extends TestCase
         $queryFilters = CreateQueryFilters(['where' => ['method' => 'in', 'params' => ['ratings', [3, 5]]]]);
 
         $mockObject
-            ->expects($this->any())
+            ->expects($this->atLeast(1))
             ->method('where')
-            ->with(static function () {
-            })
             ->willReturn($mockObject);
 
         // Test the mock is invoked with a closure whe  apply is called
@@ -266,6 +275,7 @@ class QueryFiltersTest extends TestCase
         });
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_query_filters_distinct_is_invoked_when_builder_distinct_is_called()
     {
         $query = Builder::new()->select(['*'])->distinct(['name']);
@@ -276,15 +286,16 @@ class QueryFiltersTest extends TestCase
         $builder = $this->createMock(QueryBuilder::class);
 
         $builder->expects($this->once())
-                ->method('distinct')
-                ->with('name')
-                ->willReturn($builder);
+            ->method('distinct')
+            ->with('name')
+            ->willReturn($builder);
 
         $filter = CreateQueryFilters($query->getQuery());
 
         $filter->apply($builder);
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_query_builder_distinct_is_called_without_parameter_case_filter_builder_distinct_is_called_without_parameter()
     {
         $query = Builder::new()->select(['*'])->distinct(['name']);
@@ -295,12 +306,20 @@ class QueryFiltersTest extends TestCase
         $builder = $this->createMock(QueryBuilder::class);
 
         $builder->expects($this->once())
-                ->method('distinct')
-                ->willReturn($builder);
+            ->method('distinct')
+            ->willReturn($builder);
 
         $filter = CreateQueryFilters($query->getQuery());
 
         $filter->apply($builder);
+    }
 
+
+
+    public function test_query_filters_handle_not_null_query_as_array_to_and_query()
+    {
+        $filters = CreateQueryFilters(['and' => [['sin', '!=', null], ['is_active', '=', true]]]);
+
+        $this->assertEquals($filters->apply(new Person)->toSql(), 'select * from "persons" where "sin" is not null and "is_active" = ?');
     }
 }

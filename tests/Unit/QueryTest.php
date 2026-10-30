@@ -19,10 +19,12 @@ use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\LazyCollection;
+use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;
 use PHPUnit\Framework\MockObject\MockObject;
 
 class QueryTest extends TestCase
 {
+    #[AllowMockObjectsWithoutExpectations]
     public function test_query_from_builder()
     {
         /**
@@ -47,6 +49,7 @@ class QueryTest extends TestCase
         Query::new()->and('name', 'Armani')->and('tags', 'Shoes')->getResult();
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_query_get_iterator_calls_builder_cursor_method_and_collection_get_iterator_method()
     {
         /**
@@ -81,6 +84,7 @@ class QueryTest extends TestCase
         $this->assertInstanceOf(\Traversable::class, $result);
     }
 
+    #[AllowMockObjectsWithoutExpectations]
     public function test_query_get_iterator_calls_builder_cursor_method_and_collection_get_array_method()
     {
         /**
